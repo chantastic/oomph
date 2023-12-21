@@ -8,7 +8,7 @@ defmodule Oomph.Accounts.UserNotifier do
     email =
       new()
       |> to(recipient)
-      |> from({"Oomph", "contact@example.com"})
+      |> from({"chantastic", "hi@chan.dev"})
       |> subject(subject)
       |> text_body(body)
 
