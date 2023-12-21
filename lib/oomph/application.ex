@@ -7,6 +7,8 @@ defmodule Oomph.Application do
 
   @impl true
   def start(_type, _args) do
+    Oomph.Release.migrate()
+
     children = [
       OomphWeb.Telemetry,
       Oomph.Repo,

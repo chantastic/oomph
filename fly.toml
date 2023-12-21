@@ -9,10 +9,8 @@ kill_signal = "SIGTERM"
 
 [build]
 
-[deploy]
-  release_command = "/app/bin/migrate"
-
 [env]
+  DATABASE_PATH = "/mnt/oomph/oomph.db"
   PHX_HOST = "oomph.fly.dev"
   PORT = "8080"
 
@@ -32,3 +30,7 @@ kill_signal = "SIGTERM"
   cpu_kind = "shared"
   cpus = 1
   memory_mb = 2048
+
+[mounts]
+  source="oomph"
+  destination="/mnt/oomph"
