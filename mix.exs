@@ -52,7 +52,9 @@ defmodule Oomph.MixProject do
       {:jason, "~> 1.2"},
       {:dns_cluster, "~> 0.1.1"},
       {:plug_cowboy, "~> 2.5"},
-      {:kaffy, "~> 0.10.0"}
+      {:kaffy, "~> 0.10.0"},
+      {:sentry, "~> 10.1.0"},
+      {:hackney, "~> 1.8"}
     ]
   end
 
