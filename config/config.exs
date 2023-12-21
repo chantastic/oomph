@@ -61,6 +61,21 @@ config :logger, :console,
 # Use Jason for JSON parsing in Phoenix
 config :phoenix, :json_library, Jason
 
+config :kaffy,
+  otp_app: :oomph,
+  ecto_repo: Oomph.Repo,
+  router: OomphWeb.Router,
+  hide_dashboard: true,
+  admin_title: "Oomph Admin",
+  # admin_logo: [
+  #   url: "https://example.com/img/logo.png",
+  #   style: "width:200px;height:66px;"
+  # ],
+  # admin_logo_mini: "/images/logo-mini.png",
+  home_page: [schema: [:accounts, :user]],
+  enable_context_dashboards: true,
+  admin_footer: "Kaffy &copy; 2023"
+
 # Import environment specific config. This must remain at the bottom
 # of this file so it overrides the configuration defined above.
 import_config "#{config_env()}.exs"

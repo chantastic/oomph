@@ -1,5 +1,6 @@
 defmodule OomphWeb.Router do
   use OomphWeb, :router
+  use Kaffy.Routes, scope: "/admin"#, pipe_through: [:kaffy_browser]
 
   import OomphWeb.UserAuth
 
