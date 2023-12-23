@@ -7,9 +7,9 @@
   <.input field={f[:dependent_name]} type="text" label="Dependent name" />
   <.input field={f[:ruccurance_schedule]} type="number" label="Ruccurance schedule" />
   <%= if (@author.id) do %>
-    <.input field={f[:author]} value={@author.id} type="hidden" />
+    <.input field={f[:author_id]} value={@author.id} type="hidden" />
   <% else %>
-    <.input field={f[:author]} type="hidden" />
+    <.input field={f[:author_id]} type="hidden" />
   <% end %>
   <:actions>
     <.button>Save Weekly recurring dependent task</.button>
