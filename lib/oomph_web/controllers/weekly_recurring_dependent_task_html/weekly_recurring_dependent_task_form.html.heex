@@ -1,0 +1,12 @@
+<.simple_form :let={f} for={@changeset} action={@action}>
+  <.error :if={@changeset.action}>
+    Oops, something went wrong! Please check the errors below.
+  </.error>
+  <.input field={f[:title]} type="text" label="Title" />
+  <.input field={f[:description]} type="text" label="Description" />
+  <.input field={f[:dependent_name]} type="text" label="Dependent name" />
+  <.input field={f[:ruccurance_schedule]} type="number" label="Ruccurance schedule" />
+  <:actions>
+    <.button>Save Weekly recurring dependent task</.button>
+  </:actions>
+</.simple_form>

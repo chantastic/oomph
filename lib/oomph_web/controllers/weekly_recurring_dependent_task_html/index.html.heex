@@ -1,0 +1,26 @@
+<.header>
+  Listing Weekly recurring dependent tasks
+  <:actions>
+    <.link href={~p"/weekly_recurring_dependent_tasks/new"}>
+      <.button>New Weekly recurring dependent task</.button>
+    </.link>
+  </:actions>
+</.header>
+
+<.table id="weekly_recurring_dependent_tasks" rows={@weekly_recurring_dependent_tasks} row_click={&JS.navigate(~p"/weekly_recurring_dependent_tasks/#{&1}")}>
+  <:col :let={weekly_recurring_dependent_task} label="Title"><%= weekly_recurring_dependent_task.title %></:col>
+  <:col :let={weekly_recurring_dependent_task} label="Description"><%= weekly_recurring_dependent_task.description %></:col>
+  <:col :let={weekly_recurring_dependent_task} label="Dependent name"><%= weekly_recurring_dependent_task.dependent_name %></:col>
+  <:col :let={weekly_recurring_dependent_task} label="Ruccurance schedule"><%= weekly_recurring_dependent_task.ruccurance_schedule %></:col>
+  <:action :let={weekly_recurring_dependent_task}>
+    <div class="sr-only">
+      <.link navigate={~p"/weekly_recurring_dependent_tasks/#{weekly_recurring_dependent_task}"}>Show</.link>
+    </div>
+    <.link navigate={~p"/weekly_recurring_dependent_tasks/#{weekly_recurring_dependent_task}/edit"}>Edit</.link>
+  </:action>
+  <:action :let={weekly_recurring_dependent_task}>
+    <.link href={~p"/weekly_recurring_dependent_tasks/#{weekly_recurring_dependent_task}"} method="delete" data-confirm="Are you sure?">
+      Delete
+    </.link>
+  </:action>
+</.table>

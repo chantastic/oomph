@@ -1,0 +1,18 @@
+<.header>
+  Weekly recurring dependent task <%= @weekly_recurring_dependent_task.id %>
+  <:subtitle>This is a weekly_recurring_dependent_task record from your database.</:subtitle>
+  <:actions>
+    <.link href={~p"/weekly_recurring_dependent_tasks/#{@weekly_recurring_dependent_task}/edit"}>
+      <.button>Edit weekly_recurring_dependent_task</.button>
+    </.link>
+  </:actions>
+</.header>
+
+<.list>
+  <:item title="Title"><%= @weekly_recurring_dependent_task.title %></:item>
+  <:item title="Description"><%= @weekly_recurring_dependent_task.description %></:item>
+  <:item title="Dependent name"><%= @weekly_recurring_dependent_task.dependent_name %></:item>
+  <:item title="Ruccurance schedule"><%= @weekly_recurring_dependent_task.ruccurance_schedule %></:item>
+</.list>
+
+<.back navigate={~p"/weekly_recurring_dependent_tasks"}>Back to weekly_recurring_dependent_tasks</.back>
