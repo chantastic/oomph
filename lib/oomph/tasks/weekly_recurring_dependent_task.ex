@@ -15,7 +15,7 @@ defmodule Oomph.Tasks.WeeklyRecurringDependentTask do
   @doc false
   def changeset(weekly_recurring_dependent_task, attrs) do
     weekly_recurring_dependent_task
-    |> cast(attrs, [:title, :description, :dependent_name, :ruccurance_schedule])
-    |> validate_required([:title, :description, :dependent_name, :ruccurance_schedule])
+    |> cast(attrs, [:title, :description, :dependent_name, :author, :ruccurance_schedule])
+    |> validate_required([:title, :description, :dependent_name, :author, :ruccurance_schedule])
   end
 end

@@ -12,7 +12,14 @@
   <:item title="Title"><%= @weekly_recurring_dependent_task.title %></:item>
   <:item title="Description"><%= @weekly_recurring_dependent_task.description %></:item>
   <:item title="Dependent name"><%= @weekly_recurring_dependent_task.dependent_name %></:item>
-  <:item title="Ruccurance schedule"><%= @weekly_recurring_dependent_task.ruccurance_schedule %></:item>
+  <:item title="Ruccurance schedule">
+    <%= @weekly_recurring_dependent_task.ruccurance_schedule %>
+  </:item>
+  <:item title="Author">
+    <%= @weekly_recurring_dependent_task.author %>
+  </:item>
 </.list>
 
-<.back navigate={~p"/weekly_recurring_dependent_tasks"}>Back to weekly_recurring_dependent_tasks</.back>
+<.back navigate={~p"/weekly_recurring_dependent_tasks"}>
+  Back to weekly_recurring_dependent_tasks
+</.back>

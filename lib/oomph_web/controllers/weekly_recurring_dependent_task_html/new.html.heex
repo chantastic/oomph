@@ -1,8 +1,16 @@
 <.header>
   New Weekly recurring dependent task
-  <:subtitle>Use this form to manage weekly_recurring_dependent_task records in your database.</:subtitle>
+  <:subtitle>
+    Use this form to manage weekly_recurring_dependent_task records in your database.
+  </:subtitle>
 </.header>
 
-<.weekly_recurring_dependent_task_form changeset={@changeset} action={~p"/weekly_recurring_dependent_tasks"} />
+<.weekly_recurring_dependent_task_form
+  changeset={@changeset}
+  action={~p"/weekly_recurring_dependent_tasks"}
+  author={@conn.assigns.current_user}
+/>
 
-<.back navigate={~p"/weekly_recurring_dependent_tasks"}>Back to weekly_recurring_dependent_tasks</.back>
+<.back navigate={~p"/weekly_recurring_dependent_tasks"}>
+  Back to weekly_recurring_dependent_tasks
+</.back>
