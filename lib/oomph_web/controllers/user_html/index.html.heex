@@ -1,0 +1,23 @@
+<.header>
+  Listing Dependent users
+  <:actions>
+    <.link href={~p"/dependent_users/new"}>
+      <.button>New User</.button>
+    </.link>
+  </:actions>
+</.header>
+
+<.table id="dependent_users" rows={@dependent_users} row_click={&JS.navigate(~p"/dependent_users/#{&1}")}>
+  <:col :let={user} label="Name"><%= user.name %></:col>
+  <:action :let={user}>
+    <div class="sr-only">
+      <.link navigate={~p"/dependent_users/#{user}"}>Show</.link>
+    </div>
+    <.link navigate={~p"/dependent_users/#{user}/edit"}>Edit</.link>
+  </:action>
+  <:action :let={user}>
+    <.link href={~p"/dependent_users/#{user}"} method="delete" data-confirm="Are you sure?">
+      Delete
+    </.link>
+  </:action>
+</.table>

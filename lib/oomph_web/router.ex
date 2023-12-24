@@ -71,6 +71,7 @@ defmodule OomphWeb.Router do
       live "/users/settings/confirm_email/:token", UserSettingsLive, :confirm_email
 
       resources "/weekly_recurring_dependent_tasks", WeeklyRecurringDependentTaskController
+      resources "/dependent_users", UserController
     end
   end
 
