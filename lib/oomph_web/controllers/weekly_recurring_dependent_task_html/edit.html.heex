@@ -9,6 +9,7 @@
   changeset={@changeset}
   action={~p"/weekly_recurring_dependent_tasks/#{@weekly_recurring_dependent_task}"}
   author={@conn.assigns.current_user}
+  dependent_users={@dependent_users |> Enum.map(fn %{id: id, name: name} -> {name, id} end)}
 />
 
 <.back navigate={~p"/weekly_recurring_dependent_tasks"}>

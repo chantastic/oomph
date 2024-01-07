@@ -3,7 +3,8 @@ defmodule OomphWeb.WeeklyRecurringDependentTaskController do
 
   alias Oomph.Tasks
   alias Oomph.Tasks.WeeklyRecurringDependentTask
-  alias Oomph.Accounts.User
+  alias Oomph.Accounts
+  alias Oomph.Dependents
   alias Oomph.Repo
 
   def index(conn, _params) do
@@ -30,21 +31,26 @@ defmodule OomphWeb.WeeklyRecurringDependentTaskController do
 
   def show(conn, %{"id" => id}) do
     weekly_recurring_dependent_task = Tasks.get_weekly_recurring_dependent_task!(id)
-    author = Repo.get!(User, weekly_recurring_dependent_task.author_id)
+    author = Repo.get!(Accounts.User, weekly_recurring_dependent_task.author_id)
+    dependent_users = Repo.all(Dependents.User)
+    # dependents = Repo.all()
 
     render(conn, :show,
       weekly_recurring_dependent_task: weekly_recurring_dependent_task,
-      author: author
+      author: author,
+      dependent_users: dependent_users
     )
   end
 
   def edit(conn, %{"id" => id}) do
     weekly_recurring_dependent_task = Tasks.get_weekly_recurring_dependent_task!(id)
     changeset = Tasks.change_weekly_recurring_dependent_task(weekly_recurring_dependent_task)
+    dependent_users = Repo.all(Dependents.User)
 
     render(conn, :edit,
       weekly_recurring_dependent_task: weekly_recurring_dependent_task,
-      changeset: changeset
+      changeset: changeset,
+      dependent_users: dependent_users
     )
   end
 
