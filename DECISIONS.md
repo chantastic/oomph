@@ -1,0 +1,9 @@
+- Prefer flat data, composed by join tables
+- The individual user is the administer of the "org". Assignees are like "members"
+- Everything is a filter
+  - Any task can be completed on any day
+  - Schedules and assignees are a way of drawing and filtering views/forms
+- Prefer url structures like /week, /day
+  - Provide filtering data (assignee and date/range) as query parameters
+  - This should allow for easy "view as" or "view on"
+- Use `cron` for scheduling logic
