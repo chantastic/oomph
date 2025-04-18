@@ -15,6 +15,8 @@ import { createFileRoute } from '@tanstack/react-router'
 import { Route as rootRoute } from './routes/__root'
 import { Route as AppImport } from './routes/_app'
 import { Route as IndexImport } from './routes/index'
+import { Route as TasksIndexImport } from './routes/tasks/index'
+import { Route as TasksNewImport } from './routes/tasks/new'
 import { Route as AppAuthImport } from './routes/_app/_auth'
 import { Route as AppLoginLayoutImport } from './routes/_app/login/_layout'
 import { Route as AppLoginLayoutIndexImport } from './routes/_app/login/_layout.index'
@@ -48,6 +50,16 @@ const IndexRoute = IndexImport.update({
 const AppLoginRoute = AppLoginImport.update({
   path: '/login',
   getParentRoute: () => AppRoute,
+} as any)
+
+const TasksIndexRoute = TasksIndexImport.update({
+  path: '/tasks/',
+  getParentRoute: () => rootRoute,
+} as any)
+
+const TasksNewRoute = TasksNewImport.update({
+  path: '/tasks/new',
+  getParentRoute: () => rootRoute,
 } as any)
 
 const AppAuthRoute = AppAuthImport.update({
@@ -145,6 +157,20 @@ declare module '@tanstack/react-router' {
       fullPath: ''
       preLoaderRoute: typeof AppAuthImport
       parentRoute: typeof AppImport
+    }
+    '/tasks/new': {
+      id: '/tasks/new'
+      path: '/tasks/new'
+      fullPath: '/tasks/new'
+      preLoaderRoute: typeof TasksNewImport
+      parentRoute: typeof rootRoute
+    }
+    '/tasks/': {
+      id: '/tasks/'
+      path: '/tasks'
+      fullPath: '/tasks'
+      preLoaderRoute: typeof TasksIndexImport
+      parentRoute: typeof rootRoute
     }
     '/_app/login': {
       id: '/_app/login'
@@ -269,6 +295,8 @@ export const routeTree = rootRoute.addChildren({
       }),
     }),
   }),
+  TasksNewRoute,
+  TasksIndexRoute,
 })
 
 /* prettier-ignore-end */
@@ -280,7 +308,9 @@ export const routeTree = rootRoute.addChildren({
       "filePath": "__root.tsx",
       "children": [
         "/",
-        "/_app"
+        "/_app",
+        "/tasks/new",
+        "/tasks/"
       ]
     },
     "/": {
@@ -300,6 +330,12 @@ export const routeTree = rootRoute.addChildren({
         "/_app/_auth/dashboard",
         "/_app/_auth/onboarding"
       ]
+    },
+    "/tasks/new": {
+      "filePath": "tasks/new.tsx"
+    },
+    "/tasks/": {
+      "filePath": "tasks/index.tsx"
     },
     "/_app/login": {
       "filePath": "_app/login",

@@ -83,6 +83,9 @@ const schema = defineSchema({
   })
     .index("userId", ["userId"])
     .index("stripeId", ["stripeId"]),
+  tasks: defineTable({
+    title: v.string(),
+  }),
 });
 
 export default schema;
