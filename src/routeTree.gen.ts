@@ -17,7 +17,9 @@ import { Route as AppImport } from './routes/_app'
 import { Route as IndexImport } from './routes/index'
 import { Route as TasksIndexImport } from './routes/tasks/index'
 import { Route as DayIndexImport } from './routes/day/index'
+import { Route as AssigneesIndexImport } from './routes/assignees/index'
 import { Route as TasksNewImport } from './routes/tasks/new'
+import { Route as AssigneesNewImport } from './routes/assignees/new'
 import { Route as AppAuthImport } from './routes/_app/_auth'
 import { Route as AppLoginLayoutImport } from './routes/_app/login/_layout'
 import { Route as AppLoginLayoutIndexImport } from './routes/_app/login/_layout.index'
@@ -63,8 +65,18 @@ const DayIndexRoute = DayIndexImport.update({
   getParentRoute: () => rootRoute,
 } as any)
 
+const AssigneesIndexRoute = AssigneesIndexImport.update({
+  path: '/assignees/',
+  getParentRoute: () => rootRoute,
+} as any)
+
 const TasksNewRoute = TasksNewImport.update({
   path: '/tasks/new',
+  getParentRoute: () => rootRoute,
+} as any)
+
+const AssigneesNewRoute = AssigneesNewImport.update({
+  path: '/assignees/new',
   getParentRoute: () => rootRoute,
 } as any)
 
@@ -164,11 +176,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppAuthImport
       parentRoute: typeof AppImport
     }
+    '/assignees/new': {
+      id: '/assignees/new'
+      path: '/assignees/new'
+      fullPath: '/assignees/new'
+      preLoaderRoute: typeof AssigneesNewImport
+      parentRoute: typeof rootRoute
+    }
     '/tasks/new': {
       id: '/tasks/new'
       path: '/tasks/new'
       fullPath: '/tasks/new'
       preLoaderRoute: typeof TasksNewImport
+      parentRoute: typeof rootRoute
+    }
+    '/assignees/': {
+      id: '/assignees/'
+      path: '/assignees'
+      fullPath: '/assignees'
+      preLoaderRoute: typeof AssigneesIndexImport
       parentRoute: typeof rootRoute
     }
     '/day/': {
@@ -308,7 +334,9 @@ export const routeTree = rootRoute.addChildren({
       }),
     }),
   }),
+  AssigneesNewRoute,
   TasksNewRoute,
+  AssigneesIndexRoute,
   DayIndexRoute,
   TasksIndexRoute,
 })
@@ -323,7 +351,9 @@ export const routeTree = rootRoute.addChildren({
       "children": [
         "/",
         "/_app",
+        "/assignees/new",
         "/tasks/new",
+        "/assignees/",
         "/day/",
         "/tasks/"
       ]
@@ -346,8 +376,14 @@ export const routeTree = rootRoute.addChildren({
         "/_app/_auth/onboarding"
       ]
     },
+    "/assignees/new": {
+      "filePath": "assignees/new.tsx"
+    },
     "/tasks/new": {
       "filePath": "tasks/new.tsx"
+    },
+    "/assignees/": {
+      "filePath": "assignees/index.tsx"
     },
     "/day/": {
       "filePath": "day/index.tsx"

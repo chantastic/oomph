@@ -89,6 +89,9 @@ const schema = defineSchema({
   task_completions: defineTable({
     taskId: v.id("tasks"),
   }),
+  assignees: defineTable({
+    name: v.string(),
+  }),
 });
 
 export default schema;
