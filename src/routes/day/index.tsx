@@ -4,28 +4,39 @@ import { api } from "../../../convex/_generated/api";
 
 export const Route = createFileRoute("/day/")({
   component: () => {
-    const tasks = useQuery(api.tasks.list);
+    const scheduledTasks = useQuery(
+      api.assignee_task_schedules.getTasksForToday,
+    );
+
+    if (scheduledTasks === undefined) {
+      return <div>Loading...</div>;
+    }
 
     return (
       <div className="p-4 max-w-2xl mx-auto">
-        <h1 className="text-2xl font-bold mb-6">Available Tasks</h1>
+        <h1 className="text-2xl font-bold mb-6">Today's Tasks</h1>
 
         <div className="space-y-4">
-          {tasks?.map((task) => (
+          {scheduledTasks.map((schedule) => (
             <div
-              key={task._id}
+              key={schedule._id}
               className="p-4 bg-white rounded-lg shadow flex justify-between items-center"
             >
               <div>
-                <p className="text-lg">{task.title}</p>
+                <p className="text-lg">{schedule.task.title}</p>
                 <p className="text-sm text-gray-500">
-                  Created: {new Date(task._creationTime).toLocaleDateString()}
+                  Assigned to: {schedule.assignee.name}
+                </p>
+                <p className="text-sm text-gray-500">
+                  Schedule: {schedule.cronSchedule}
                 </p>
               </div>
             </div>
           ))}
-          {tasks?.length === 0 && (
-            <p className="text-center text-gray-500">No tasks available yet.</p>
+          {scheduledTasks.length === 0 && (
+            <p className="text-center text-gray-500">
+              No tasks scheduled for today.
+            </p>
           )}
         </div>
       </div>
