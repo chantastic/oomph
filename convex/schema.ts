@@ -92,9 +92,9 @@ const schema = defineSchema({
   assignees: defineTable({
     name: v.string(),
   }),
-  asignee_task_cron: defineTable({
-    assigneeId: v.id("assignee"),
-    taskId: v.id("task"),
+  assignee_task_schedules: defineTable({
+    assigneeId: v.id("assignees"),
+    taskId: v.id("tasks"),
     cronSchedule: v.string(),
   }).index("by_assignee", ["assigneeId"]),
 });
