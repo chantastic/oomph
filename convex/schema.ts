@@ -92,6 +92,11 @@ const schema = defineSchema({
   assignees: defineTable({
     name: v.string(),
   }),
+  asignee_task_cron: defineTable({
+    assigneeId: v.id("assignee"),
+    taskId: v.id("task"),
+    cronSchedule: v.string(),
+  }).index("by_assignee", ["assigneeId"]),
 });
 
 export default schema;
