@@ -16,6 +16,7 @@ import { Route as rootRoute } from './routes/__root'
 import { Route as AppImport } from './routes/_app'
 import { Route as IndexImport } from './routes/index'
 import { Route as TasksIndexImport } from './routes/tasks/index'
+import { Route as DayIndexImport } from './routes/day/index'
 import { Route as TasksNewImport } from './routes/tasks/new'
 import { Route as AppAuthImport } from './routes/_app/_auth'
 import { Route as AppLoginLayoutImport } from './routes/_app/login/_layout'
@@ -54,6 +55,11 @@ const AppLoginRoute = AppLoginImport.update({
 
 const TasksIndexRoute = TasksIndexImport.update({
   path: '/tasks/',
+  getParentRoute: () => rootRoute,
+} as any)
+
+const DayIndexRoute = DayIndexImport.update({
+  path: '/day/',
   getParentRoute: () => rootRoute,
 } as any)
 
@@ -163,6 +169,13 @@ declare module '@tanstack/react-router' {
       path: '/tasks/new'
       fullPath: '/tasks/new'
       preLoaderRoute: typeof TasksNewImport
+      parentRoute: typeof rootRoute
+    }
+    '/day/': {
+      id: '/day/'
+      path: '/day'
+      fullPath: '/day'
+      preLoaderRoute: typeof DayIndexImport
       parentRoute: typeof rootRoute
     }
     '/tasks/': {
@@ -296,6 +309,7 @@ export const routeTree = rootRoute.addChildren({
     }),
   }),
   TasksNewRoute,
+  DayIndexRoute,
   TasksIndexRoute,
 })
 
@@ -310,6 +324,7 @@ export const routeTree = rootRoute.addChildren({
         "/",
         "/_app",
         "/tasks/new",
+        "/day/",
         "/tasks/"
       ]
     },
@@ -333,6 +348,9 @@ export const routeTree = rootRoute.addChildren({
     },
     "/tasks/new": {
       "filePath": "tasks/new.tsx"
+    },
+    "/day/": {
+      "filePath": "day/index.tsx"
     },
     "/tasks/": {
       "filePath": "tasks/index.tsx"
