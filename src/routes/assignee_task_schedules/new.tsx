@@ -32,12 +32,22 @@ export const Route = createFileRoute("/assignee_task_schedules/new")({
     const handleSubmit = async (e: React.FormEvent) => {
       e.preventDefault();
       if (selectedAssignee && selectedTask && cronSchedule.trim()) {
-        await createAssigneeTaskSchedule({
-          assigneeId: selectedAssignee,
-          taskId: selectedTask,
-          cronSchedule: cronSchedule.trim(),
-        });
-        navigate({ to: "/assignee_task_schedules" });
+        try {
+          await createAssigneeTaskSchedule({
+            assigneeId: selectedAssignee,
+            taskId: selectedTask,
+            cronSchedule: cronSchedule.trim(),
+          });
+          navigate({ to: "/assignee_task_schedules" });
+        } catch (error) {
+          if (error instanceof Error) {
+            alert(
+              "You cannot schedule the same task for the same assignee twice",
+            );
+          } else {
+            alert("An unexpected error occurred");
+          }
+        }
       }
     };
 

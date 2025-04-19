@@ -100,18 +100,6 @@ function WeekView() {
     return <div>Loading completions...</div>;
   }
 
-  // Filter duplicate schedules per assignee-task
-  const uniqueSchedules = useMemo(() => {
-    const map = new Map<string, (typeof scheduledTasks)[number]>();
-    for (const s of scheduledTasks) {
-      const key = `${s.assignee._id}-${s.task._id}`;
-      if (!map.has(key)) {
-        map.set(key, s);
-      }
-    }
-    return Array.from(map.values());
-  }, [scheduledTasks]);
-
   return (
     <div className="p-4 max-w-7xl mx-auto">
       <h1 className="text-2xl font-bold mb-6">Week View</h1>
@@ -132,7 +120,7 @@ function WeekView() {
           </div>
 
           {/* Task rows */}
-          {uniqueSchedules.map((schedule) => (
+          {scheduledTasks.map((schedule) => (
             <div
               key={schedule._id}
               className="grid grid-cols-[200px_repeat(7,1fr)] gap-2 mb-2"
@@ -191,7 +179,7 @@ function WeekView() {
             </div>
           ))}
 
-          {uniqueSchedules.length === 0 && (
+          {scheduledTasks.length === 0 && (
             <p className="text-center text-gray-500 py-8">
               No scheduled tasks yet.
             </p>

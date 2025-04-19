@@ -67,6 +67,15 @@ export const create = mutation({
       throw new Error("Task not found");
     }
 
+    // Prevent duplicate assignee-task schedule
+    const existingForAssignee = await ctx.db
+      .query("assignee_task_schedules")
+      .withIndex("by_assignee", (q) => q.eq("assigneeId", args.assigneeId))
+      .collect();
+    if (existingForAssignee.some((s) => s.taskId === args.taskId)) {
+      throw new Error("Schedule already exists for this assignee and task");
+    }
+
     // Create the schedule relationship
     const id = await ctx.db.insert("assignee_task_schedules", {
       assigneeId: args.assigneeId,
