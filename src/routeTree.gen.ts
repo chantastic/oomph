@@ -15,6 +15,7 @@ import { createFileRoute } from '@tanstack/react-router'
 import { Route as rootRoute } from './routes/__root'
 import { Route as AppImport } from './routes/_app'
 import { Route as IndexImport } from './routes/index'
+import { Route as WeekIndexImport } from './routes/week/index'
 import { Route as TasksIndexImport } from './routes/tasks/index'
 import { Route as DayIndexImport } from './routes/day/index'
 import { Route as AssigneesIndexImport } from './routes/assignees/index'
@@ -55,6 +56,11 @@ const IndexRoute = IndexImport.update({
 const AppLoginRoute = AppLoginImport.update({
   path: '/login',
   getParentRoute: () => AppRoute,
+} as any)
+
+const WeekIndexRoute = WeekIndexImport.update({
+  path: '/week/',
+  getParentRoute: () => rootRoute,
 } as any)
 
 const TasksIndexRoute = TasksIndexImport.update({
@@ -239,6 +245,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof TasksIndexImport
       parentRoute: typeof rootRoute
     }
+    '/week/': {
+      id: '/week/'
+      path: '/week'
+      fullPath: '/week'
+      preLoaderRoute: typeof WeekIndexImport
+      parentRoute: typeof rootRoute
+    }
     '/_app/login': {
       id: '/_app/login'
       path: '/login'
@@ -369,6 +382,7 @@ export const routeTree = rootRoute.addChildren({
   AssigneesIndexRoute,
   DayIndexRoute,
   TasksIndexRoute,
+  WeekIndexRoute,
 })
 
 /* prettier-ignore-end */
@@ -387,7 +401,8 @@ export const routeTree = rootRoute.addChildren({
         "/assignee_task_schedules/",
         "/assignees/",
         "/day/",
-        "/tasks/"
+        "/tasks/",
+        "/week/"
       ]
     },
     "/": {
@@ -428,6 +443,9 @@ export const routeTree = rootRoute.addChildren({
     },
     "/tasks/": {
       "filePath": "tasks/index.tsx"
+    },
+    "/week/": {
+      "filePath": "week/index.tsx"
     },
     "/_app/login": {
       "filePath": "_app/login",

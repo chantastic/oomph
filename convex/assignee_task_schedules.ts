@@ -78,40 +78,49 @@ export const create = mutation({
   },
 });
 
+function normalizeDayOfWeek(day: number): number {
+  // Convert both 0-6 and 1-7 formats to 0-6 (JavaScript format)
+  if (day === 7) return 0; // Sunday as 7 becomes 0
+  return day;
+}
+
 function parseField(field: string, isDayOfWeek: boolean = false): number[] {
   if (field === "*") return [-1]; // -1 represents wildcard
 
   const values: number[] = [];
   const parts = field.split(",");
 
+  console.log(`Parsing field "${field}"`, {
+    isDayOfWeek,
+    parts,
+  });
+
   for (const part of parts) {
     if (part.includes("-")) {
       const [start, end] = part.split("-").map((n) => {
         const num = parseInt(n);
-        // Convert cron day numbers (1-7) to JS day numbers (0-6)
-        if (isDayOfWeek) {
-          // In cron: 1=Monday, 7=Sunday
-          // In JS: 0=Sunday, 1=Monday
-          // So 7 should become 0
-          return num === 7 ? 0 : num;
-        }
-        return num;
+        return isDayOfWeek ? normalizeDayOfWeek(num) : num;
       });
-      for (let i = start; i <= end; i++) {
-        values.push(i);
+      // For ranges, we need to handle the case where the range crosses Sunday
+      if (isDayOfWeek && start > end) {
+        // Example: 5-2 means Fri,Sat,Sun,Mon,Tue
+        for (let i = start; i <= 6; i++) values.push(i);
+        for (let i = 0; i <= end; i++) values.push(i);
+      } else {
+        for (let i = start; i <= end; i++) {
+          values.push(isDayOfWeek ? normalizeDayOfWeek(i) : i);
+        }
       }
     } else {
       const num = parseInt(part);
-      if (isDayOfWeek) {
-        // Same conversion as above
-        values.push(num === 7 ? 0 : num);
-      } else {
-        values.push(num);
-      }
+      values.push(isDayOfWeek ? normalizeDayOfWeek(num) : num);
     }
   }
 
-  console.log(`Parsed field "${field}" (isDayOfWeek=${isDayOfWeek}):`, values);
+  console.log(
+    `Final parsed values for "${field}" (isDayOfWeek=${isDayOfWeek}):`,
+    values,
+  );
   return values;
 }
 
@@ -157,16 +166,27 @@ export const getTasksForToday = query({
     const schedules = await ctx.db.query("assignee_task_schedules").collect();
 
     const now = new Date();
-    // JavaScript days are 0-6 (Sunday-Saturday)
-    const currentDayOfWeek = now.getDay();
-    const currentDayOfMonth = now.getDate();
-    const currentMonth = now.getMonth() + 1; // JavaScript months are 0-based
+    // Get the date in UTC to avoid timezone issues
+    const utcNow = new Date(now.getTime() + now.getTimezoneOffset() * 60000);
+    const currentDayOfWeek = utcNow.getUTCDay(); // 0-6, Sunday-Saturday
+    const currentDayOfMonth = utcNow.getUTCDate();
+    const currentMonth = utcNow.getUTCMonth() + 1; // JavaScript months are 0-based
 
     console.log("Current date:", {
       dayOfWeek: currentDayOfWeek,
+      dayName: [
+        "Sunday",
+        "Monday",
+        "Tuesday",
+        "Wednesday",
+        "Thursday",
+        "Friday",
+        "Saturday",
+      ][currentDayOfWeek],
       dayOfMonth: currentDayOfMonth,
       month: currentMonth,
-      fullDate: now.toISOString(),
+      localDate: now.toISOString(),
+      utcDate: utcNow.toISOString(),
     });
 
     // Filter schedules that match today's date
@@ -212,6 +232,8 @@ export const getTasksForToday = query({
           dayOfMonthMatches,
           dayOfWeekMatches,
           finalResult,
+          currentDayOfWeek,
+          validDaysOfWeek,
         });
 
         return finalResult;
