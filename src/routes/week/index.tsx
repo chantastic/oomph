@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useQuery } from "convex/react";
+import { useQuery, useMutation } from "convex/react";
 import { api } from "../../../convex/_generated/api";
 import { useMemo } from "react";
 
@@ -46,6 +46,39 @@ export const Route = createFileRoute("/week/")({
 
 function WeekView() {
   const scheduledTasks = useQuery(api.assignee_task_schedules.list);
+  // Compute week start (Sunday) and date range for completions
+  const today = new Date();
+  const currentDow = today.getDay();
+  const sunday = new Date(today);
+  sunday.setDate(today.getDate() - currentDow);
+  const weekStart = new Date(
+    sunday.getFullYear(),
+    sunday.getMonth(),
+    sunday.getDate(),
+  );
+  const dayMs = 24 * 60 * 60 * 1000;
+  const weekStartEpoch = weekStart.getTime();
+  const weekEndEpoch = weekStartEpoch + 6 * dayMs;
+
+  // Fetch completions for this week
+  const completions = useQuery(api.taskCompletions.getCompletions, {
+    start: weekStartEpoch,
+    end: weekEndEpoch,
+  });
+  const createCompletion = useMutation(api.taskCompletions.createCompletion);
+  const deleteCompletion = useMutation(api.taskCompletions.deleteCompletion);
+
+  // Map completions by taskId, assigneeId, and day
+  const completionMap = useMemo(() => {
+    const map = new Map();
+    if (completions) {
+      for (const c of completions) {
+        const key = `${c.taskId}-${c.assigneeId}-${c.completedAt}`;
+        map.set(key, c);
+      }
+    }
+    return map;
+  }, [completions]);
 
   const days = useMemo(
     () => [
@@ -63,6 +96,21 @@ function WeekView() {
   if (scheduledTasks === undefined) {
     return <div>Loading...</div>;
   }
+  if (completions === undefined) {
+    return <div>Loading completions...</div>;
+  }
+
+  // Filter duplicate schedules per assignee-task
+  const uniqueSchedules = useMemo(() => {
+    const map = new Map<string, (typeof scheduledTasks)[number]>();
+    for (const s of scheduledTasks) {
+      const key = `${s.assignee._id}-${s.task._id}`;
+      if (!map.has(key)) {
+        map.set(key, s);
+      }
+    }
+    return Array.from(map.values());
+  }, [scheduledTasks]);
 
   return (
     <div className="p-4 max-w-7xl mx-auto">
@@ -84,7 +132,7 @@ function WeekView() {
           </div>
 
           {/* Task rows */}
-          {scheduledTasks.map((schedule) => (
+          {uniqueSchedules.map((schedule) => (
             <div
               key={schedule._id}
               className="grid grid-cols-[200px_repeat(7,1fr)] gap-2 mb-2"
@@ -103,23 +151,47 @@ function WeekView() {
                   schedule.cronSchedule,
                   day.value,
                 );
+                // Calculate date for this cell
+                const dateStart = weekStartEpoch + day.value * dayMs;
+                const key = `${schedule.task._id}-${schedule.assignee._id}-${dateStart}`;
+                const completion = completionMap.get(key);
+                const isCompleted = Boolean(completion);
+                // Determine cell styles and label
+                let bgClass = "bg-gray-50 text-gray-400";
+                let label = "—";
+                if (isCompleted) {
+                  bgClass = "bg-green-100 text-green-800";
+                  label = "Completed";
+                } else if (isScheduled) {
+                  bgClass = "bg-blue-100 text-blue-800";
+                  label = "Scheduled";
+                }
                 return (
                   <div
                     key={day.value}
-                    className={`min-h-[60px] rounded p-2 flex items-center justify-center ${
-                      isScheduled
-                        ? "bg-blue-100 text-blue-800"
-                        : "bg-gray-50 text-gray-400"
-                    }`}
+                    className={`min-h-[60px] rounded p-2 flex items-center justify-center ${bgClass} cursor-pointer hover:opacity-80`}
+                    onClick={() => {
+                      if (!isCompleted) {
+                        createCompletion({
+                          taskId: schedule.task._id,
+                          assigneeId: schedule.assignee._id,
+                          completedAt: dateStart,
+                        });
+                      } else {
+                        deleteCompletion({
+                          completionId: completion._id,
+                        });
+                      }
+                    }}
                   >
-                    {isScheduled ? "Scheduled" : "—"}
+                    {label}
                   </div>
                 );
               })}
             </div>
           ))}
 
-          {scheduledTasks.length === 0 && (
+          {uniqueSchedules.length === 0 && (
             <p className="text-center text-gray-500 py-8">
               No scheduled tasks yet.
             </p>
