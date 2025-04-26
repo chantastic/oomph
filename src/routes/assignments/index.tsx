@@ -63,7 +63,7 @@ function AssignmentList() {
                     {assignment.assignee.name}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                    {assignment.task.title}
+                    {assignment.title}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm font-mono text-gray-900">
                     {assignment.cronSchedule}

@@ -11,17 +11,12 @@ export const list = query({
       _id: v.id("assignments"),
       _creationTime: v.number(),
       assigneeId: v.id("assignees"),
-      taskId: v.id("tasks"),
       cronSchedule: v.string(),
+      title: v.string(),
       assignee: v.object({
         _id: v.id("assignees"),
         _creationTime: v.number(),
         name: v.string(),
-      }),
-      task: v.object({
-        _id: v.id("tasks"),
-        _creationTime: v.number(),
-        title: v.string(),
       }),
     }),
   ),
@@ -30,14 +25,12 @@ export const list = query({
     const assignmentsWithRelations = await Promise.all(
       assignments.map(async (assignment) => {
         const assignee = await ctx.db.get(assignment.assigneeId);
-        const task = await ctx.db.get(assignment.taskId);
-        if (!assignee || !task) {
+        if (!assignee) {
           throw new Error("Missing related data");
         }
         return {
           ...assignment,
           assignee,
-          task,
         };
       }),
     );
@@ -48,8 +41,8 @@ export const list = query({
 export const create = mutation({
   args: {
     assigneeId: v.id("assignees"),
-    taskId: v.id("tasks"),
     cronSchedule: v.string(),
+    title: v.string(),
   },
   returns: v.id("assignments"),
   handler: async (ctx, args) => {
@@ -57,21 +50,17 @@ export const create = mutation({
     if (!assignee) {
       throw new Error("Assignee not found");
     }
-    const task = await ctx.db.get(args.taskId);
-    if (!task) {
-      throw new Error("Task not found");
-    }
     const existingForAssignee = await ctx.db
       .query("assignments")
       .withIndex("by_assignee", (q) => q.eq("assigneeId", args.assigneeId))
       .collect();
-    if (existingForAssignee.some((s) => s.taskId === args.taskId)) {
-      throw new Error("Assignment already exists for this assignee and task");
+    if (existingForAssignee.some((s) => s.title === args.title)) {
+      throw new Error("Assignment already exists for this assignee and title");
     }
     const id = await ctx.db.insert("assignments", {
       assigneeId: args.assigneeId,
-      taskId: args.taskId,
       cronSchedule: args.cronSchedule,
+      title: args.title,
     });
     return id;
   },
@@ -126,17 +115,12 @@ export const getTasksForToday = query({
       _id: v.id("assignments"),
       _creationTime: v.number(),
       assigneeId: v.id("assignees"),
-      taskId: v.id("tasks"),
       cronSchedule: v.string(),
+      title: v.string(),
       assignee: v.object({
         _id: v.id("assignees"),
         _creationTime: v.number(),
         name: v.string(),
-      }),
-      task: v.object({
-        _id: v.id("tasks"),
-        _creationTime: v.number(),
-        title: v.string(),
       }),
     }),
   ),
@@ -180,17 +164,43 @@ export const getTasksForToday = query({
     const assignmentsWithRelations = await Promise.all(
       todayAssignments.map(async (assignment) => {
         const assignee = await ctx.db.get(assignment.assigneeId);
-        const task = await ctx.db.get(assignment.taskId);
-        if (!assignee || !task) {
+        if (!assignee) {
           throw new Error("Missing related data");
         }
         return {
           ...assignment,
           assignee,
-          task,
         };
       }),
     );
     return assignmentsWithRelations;
+  },
+});
+
+export const listUniqueTitles = query({
+  args: {},
+  returns: v.array(
+    v.object({
+      title: v.string(),
+      _creationTime: v.number(),
+    }),
+  ),
+  handler: async (ctx) => {
+    const assignments = await ctx.db
+      .query("assignments")
+      .order("desc")
+      .collect();
+    const seen = new Set<string>();
+    const uniqueTitles: Array<{ title: string; _creationTime: number }> = [];
+    for (const assignment of assignments) {
+      if (!seen.has(assignment.title)) {
+        seen.add(assignment.title);
+        uniqueTitles.push({
+          title: assignment.title,
+          _creationTime: assignment._creationTime,
+        });
+      }
+    }
+    return uniqueTitles;
   },
 });

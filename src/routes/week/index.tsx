@@ -132,7 +132,7 @@ function WeekView() {
             >
               {/* Task info */}
               <div className="pr-4">
-                <div className="font-medium">{schedule.task.title}</div>
+                <div className="font-medium">{schedule.title}</div>
                 <div className="text-sm text-gray-500">
                   {schedule.assignee.name}
                 </div>

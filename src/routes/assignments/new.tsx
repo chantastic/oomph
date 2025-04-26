@@ -18,23 +18,22 @@ export const Route = createFileRoute("/assignments/new")({
   component: () => {
     const navigate = useNavigate();
     const assignees = useQuery(api.assignees.list);
-    const tasks = useQuery(api.tasks.list);
     // @ts-ignore: assignments may not be in the generated API until convex dev is run
     const createAssignment = useMutation(api.assignments?.create);
 
     const [selectedAssignee, setSelectedAssignee] = useState<
       Id<"assignees"> | ""
     >("");
-    const [selectedTask, setSelectedTask] = useState<Id<"tasks"> | "">("");
+    const [title, setTitle] = useState("");
     const [cronSchedule, setCronSchedule] = useState("");
 
     const handleSubmit = async (e: React.FormEvent) => {
       e.preventDefault();
-      if (selectedAssignee && selectedTask && cronSchedule.trim()) {
+      if (selectedAssignee && title.trim() && cronSchedule.trim()) {
         try {
           await createAssignment({
             assigneeId: selectedAssignee,
-            taskId: selectedTask,
+            title: title.trim(),
             cronSchedule: cronSchedule.trim(),
           });
           navigate({ to: "/assignments" });
@@ -50,7 +49,7 @@ export const Route = createFileRoute("/assignments/new")({
       }
     };
 
-    if (assignees === undefined || tasks === undefined) {
+    if (assignees === undefined) {
       return <div>Loading...</div>;
     }
 
@@ -84,25 +83,20 @@ export const Route = createFileRoute("/assignments/new")({
           </div>
           <div>
             <label
-              htmlFor="task"
+              htmlFor="title"
               className="block text-sm font-medium text-gray-700"
             >
-              Task
+              Task Title
             </label>
-            <select
-              id="task"
-              value={selectedTask}
-              onChange={(e) => setSelectedTask(e.target.value as Id<"tasks">)}
+            <input
+              type="text"
+              id="title"
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+              placeholder="Enter task title"
               required
               className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2"
-            >
-              <option value="">Select Task</option>
-              {tasks.map((task) => (
-                <option key={task._id} value={task._id}>
-                  {task.title}
-                </option>
-              ))}
-            </select>
+            />
           </div>
           <div>
             <label

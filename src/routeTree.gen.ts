@@ -20,8 +20,8 @@ import { Route as TasksIndexImport } from './routes/tasks/index'
 import { Route as DayIndexImport } from './routes/day/index'
 import { Route as AssignmentsIndexImport } from './routes/assignments/index'
 import { Route as AssigneesIndexImport } from './routes/assignees/index'
-import { Route as TasksNewImport } from './routes/tasks/new'
 import { Route as AssignmentsNewImport } from './routes/assignments/new'
+import { Route as AssignmentsDocumentIdImport } from './routes/assignments/$documentId'
 import { Route as AssigneesNewImport } from './routes/assignees/new'
 import { Route as AppAuthImport } from './routes/_app/_auth'
 import { Route as AppLoginLayoutImport } from './routes/_app/login/_layout'
@@ -83,13 +83,13 @@ const AssigneesIndexRoute = AssigneesIndexImport.update({
   getParentRoute: () => rootRoute,
 } as any)
 
-const TasksNewRoute = TasksNewImport.update({
-  path: '/tasks/new',
+const AssignmentsNewRoute = AssignmentsNewImport.update({
+  path: '/assignments/new',
   getParentRoute: () => rootRoute,
 } as any)
 
-const AssignmentsNewRoute = AssignmentsNewImport.update({
-  path: '/assignments/new',
+const AssignmentsDocumentIdRoute = AssignmentsDocumentIdImport.update({
+  path: '/assignments/$documentId',
   getParentRoute: () => rootRoute,
 } as any)
 
@@ -201,18 +201,18 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AssigneesNewImport
       parentRoute: typeof rootRoute
     }
+    '/assignments/$documentId': {
+      id: '/assignments/$documentId'
+      path: '/assignments/$documentId'
+      fullPath: '/assignments/$documentId'
+      preLoaderRoute: typeof AssignmentsDocumentIdImport
+      parentRoute: typeof rootRoute
+    }
     '/assignments/new': {
       id: '/assignments/new'
       path: '/assignments/new'
       fullPath: '/assignments/new'
       preLoaderRoute: typeof AssignmentsNewImport
-      parentRoute: typeof rootRoute
-    }
-    '/tasks/new': {
-      id: '/tasks/new'
-      path: '/tasks/new'
-      fullPath: '/tasks/new'
-      preLoaderRoute: typeof TasksNewImport
       parentRoute: typeof rootRoute
     }
     '/assignees/': {
@@ -374,8 +374,8 @@ export const routeTree = rootRoute.addChildren({
     }),
   }),
   AssigneesNewRoute,
+  AssignmentsDocumentIdRoute,
   AssignmentsNewRoute,
-  TasksNewRoute,
   AssigneesIndexRoute,
   AssignmentsIndexRoute,
   DayIndexRoute,
@@ -394,8 +394,8 @@ export const routeTree = rootRoute.addChildren({
         "/",
         "/_app",
         "/assignees/new",
+        "/assignments/$documentId",
         "/assignments/new",
-        "/tasks/new",
         "/assignees/",
         "/assignments/",
         "/day/",
@@ -424,11 +424,11 @@ export const routeTree = rootRoute.addChildren({
     "/assignees/new": {
       "filePath": "assignees/new.tsx"
     },
+    "/assignments/$documentId": {
+      "filePath": "assignments/$documentId.tsx"
+    },
     "/assignments/new": {
       "filePath": "assignments/new.tsx"
-    },
-    "/tasks/new": {
-      "filePath": "tasks/new.tsx"
     },
     "/assignees/": {
       "filePath": "assignees/index.tsx"
