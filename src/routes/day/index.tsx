@@ -4,9 +4,8 @@ import { api } from "../../../convex/_generated/api";
 
 export const Route = createFileRoute("/day/")({
   component: () => {
-    const scheduledTasks = useQuery(
-      api.assignee_task_schedules.getTasksForToday,
-    );
+    // @ts-ignore: assignments may not be in the generated API until convex dev is run
+    const scheduledTasks = useQuery(api.assignments?.getTasksForToday);
 
     if (scheduledTasks === undefined) {
       return <div>Loading...</div>;
@@ -17,7 +16,7 @@ export const Route = createFileRoute("/day/")({
         <h1 className="text-2xl font-bold mb-6">Today's Tasks</h1>
 
         <div className="space-y-4">
-          {scheduledTasks.map((schedule) => (
+          {scheduledTasks.map((schedule: any) => (
             <div
               key={schedule._id}
               className="p-4 bg-white rounded-lg shadow flex justify-between items-center"

@@ -45,7 +45,8 @@ export const Route = createFileRoute("/week/")({
 });
 
 function WeekView() {
-  const scheduledTasks = useQuery(api.assignee_task_schedules.list);
+  // @ts-ignore: assignments may not be in the generated API until convex dev is run
+  const scheduledTasks = useQuery(api.assignments?.list);
   // Compute week start (Sunday) and date range for completions
   const today = new Date();
   const currentDow = today.getDay();
@@ -120,7 +121,7 @@ function WeekView() {
           </div>
 
           {/* Task rows */}
-          {scheduledTasks.map((schedule) => (
+          {scheduledTasks.map((schedule: any) => (
             <div
               key={schedule._id}
               className="grid grid-cols-[200px_repeat(7,1fr)] gap-2 mb-2"

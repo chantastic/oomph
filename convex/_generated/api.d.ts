@@ -15,8 +15,8 @@ import type {
   FunctionReference,
 } from "convex/server";
 import type * as app from "../app.js";
-import type * as assignee_task_schedules from "../assignee_task_schedules.js";
 import type * as assignees from "../assignees.js";
+import type * as assignments from "../assignments.js";
 import type * as auth from "../auth.js";
 import type * as email_index from "../email/index.js";
 import type * as email_templates_subscriptionEmail from "../email/templates/subscriptionEmail.js";
@@ -39,8 +39,8 @@ import type * as tasks from "../tasks.js";
  */
 declare const fullApi: ApiFromModules<{
   app: typeof app;
-  assignee_task_schedules: typeof assignee_task_schedules;
   assignees: typeof assignees;
+  assignments: typeof assignments;
   auth: typeof auth;
   "email/index": typeof email_index;
   "email/templates/subscriptionEmail": typeof email_templates_subscriptionEmail;

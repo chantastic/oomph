@@ -18,7 +18,7 @@ function Index() {
     { name: "/tasks", path: "/tasks" },
     { name: "/assignees", path: "/assignees" },
     { name: "/day", path: "/day" },
-    { name: "/assignee_task_schedules", path: "/assignee_task_schedules" },
+    { name: "/assignments", path: "/assignments" },
     { name: "/week", path: "/week" },
   ];
 

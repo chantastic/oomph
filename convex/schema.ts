@@ -96,7 +96,11 @@ const schema = defineSchema({
   assignees: defineTable({
     name: v.string(),
   }),
-  assignee_task_schedules: defineTable({
+  /*
+   * Assignments are the chore administrative model of the app.
+   * A User assigns tasks to an Assignee on a cronSchedule.
+   */
+  assignments: defineTable({
     assigneeId: v.id("assignees"),
     taskId: v.id("tasks"),
     cronSchedule: v.string(),

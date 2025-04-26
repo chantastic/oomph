@@ -18,11 +18,11 @@ import { Route as IndexImport } from './routes/index'
 import { Route as WeekIndexImport } from './routes/week/index'
 import { Route as TasksIndexImport } from './routes/tasks/index'
 import { Route as DayIndexImport } from './routes/day/index'
+import { Route as AssignmentsIndexImport } from './routes/assignments/index'
 import { Route as AssigneesIndexImport } from './routes/assignees/index'
-import { Route as AssigneetaskschedulesIndexImport } from './routes/assignee_task_schedules/index'
 import { Route as TasksNewImport } from './routes/tasks/new'
+import { Route as AssignmentsNewImport } from './routes/assignments/new'
 import { Route as AssigneesNewImport } from './routes/assignees/new'
-import { Route as AssigneetaskschedulesNewImport } from './routes/assignee_task_schedules/new'
 import { Route as AppAuthImport } from './routes/_app/_auth'
 import { Route as AppLoginLayoutImport } from './routes/_app/login/_layout'
 import { Route as AppLoginLayoutIndexImport } from './routes/_app/login/_layout.index'
@@ -73,30 +73,28 @@ const DayIndexRoute = DayIndexImport.update({
   getParentRoute: () => rootRoute,
 } as any)
 
+const AssignmentsIndexRoute = AssignmentsIndexImport.update({
+  path: '/assignments/',
+  getParentRoute: () => rootRoute,
+} as any)
+
 const AssigneesIndexRoute = AssigneesIndexImport.update({
   path: '/assignees/',
   getParentRoute: () => rootRoute,
 } as any)
-
-const AssigneetaskschedulesIndexRoute = AssigneetaskschedulesIndexImport.update(
-  {
-    path: '/assignee_task_schedules/',
-    getParentRoute: () => rootRoute,
-  } as any,
-)
 
 const TasksNewRoute = TasksNewImport.update({
   path: '/tasks/new',
   getParentRoute: () => rootRoute,
 } as any)
 
-const AssigneesNewRoute = AssigneesNewImport.update({
-  path: '/assignees/new',
+const AssignmentsNewRoute = AssignmentsNewImport.update({
+  path: '/assignments/new',
   getParentRoute: () => rootRoute,
 } as any)
 
-const AssigneetaskschedulesNewRoute = AssigneetaskschedulesNewImport.update({
-  path: '/assignee_task_schedules/new',
+const AssigneesNewRoute = AssigneesNewImport.update({
+  path: '/assignees/new',
   getParentRoute: () => rootRoute,
 } as any)
 
@@ -196,18 +194,18 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppAuthImport
       parentRoute: typeof AppImport
     }
-    '/assignee_task_schedules/new': {
-      id: '/assignee_task_schedules/new'
-      path: '/assignee_task_schedules/new'
-      fullPath: '/assignee_task_schedules/new'
-      preLoaderRoute: typeof AssigneetaskschedulesNewImport
-      parentRoute: typeof rootRoute
-    }
     '/assignees/new': {
       id: '/assignees/new'
       path: '/assignees/new'
       fullPath: '/assignees/new'
       preLoaderRoute: typeof AssigneesNewImport
+      parentRoute: typeof rootRoute
+    }
+    '/assignments/new': {
+      id: '/assignments/new'
+      path: '/assignments/new'
+      fullPath: '/assignments/new'
+      preLoaderRoute: typeof AssignmentsNewImport
       parentRoute: typeof rootRoute
     }
     '/tasks/new': {
@@ -217,18 +215,18 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof TasksNewImport
       parentRoute: typeof rootRoute
     }
-    '/assignee_task_schedules/': {
-      id: '/assignee_task_schedules/'
-      path: '/assignee_task_schedules'
-      fullPath: '/assignee_task_schedules'
-      preLoaderRoute: typeof AssigneetaskschedulesIndexImport
-      parentRoute: typeof rootRoute
-    }
     '/assignees/': {
       id: '/assignees/'
       path: '/assignees'
       fullPath: '/assignees'
       preLoaderRoute: typeof AssigneesIndexImport
+      parentRoute: typeof rootRoute
+    }
+    '/assignments/': {
+      id: '/assignments/'
+      path: '/assignments'
+      fullPath: '/assignments'
+      preLoaderRoute: typeof AssignmentsIndexImport
       parentRoute: typeof rootRoute
     }
     '/day/': {
@@ -375,11 +373,11 @@ export const routeTree = rootRoute.addChildren({
       }),
     }),
   }),
-  AssigneetaskschedulesNewRoute,
   AssigneesNewRoute,
+  AssignmentsNewRoute,
   TasksNewRoute,
-  AssigneetaskschedulesIndexRoute,
   AssigneesIndexRoute,
+  AssignmentsIndexRoute,
   DayIndexRoute,
   TasksIndexRoute,
   WeekIndexRoute,
@@ -395,11 +393,11 @@ export const routeTree = rootRoute.addChildren({
       "children": [
         "/",
         "/_app",
-        "/assignee_task_schedules/new",
         "/assignees/new",
+        "/assignments/new",
         "/tasks/new",
-        "/assignee_task_schedules/",
         "/assignees/",
+        "/assignments/",
         "/day/",
         "/tasks/",
         "/week/"
@@ -423,20 +421,20 @@ export const routeTree = rootRoute.addChildren({
         "/_app/_auth/onboarding"
       ]
     },
-    "/assignee_task_schedules/new": {
-      "filePath": "assignee_task_schedules/new.tsx"
-    },
     "/assignees/new": {
       "filePath": "assignees/new.tsx"
+    },
+    "/assignments/new": {
+      "filePath": "assignments/new.tsx"
     },
     "/tasks/new": {
       "filePath": "tasks/new.tsx"
     },
-    "/assignee_task_schedules/": {
-      "filePath": "assignee_task_schedules/index.tsx"
-    },
     "/assignees/": {
       "filePath": "assignees/index.tsx"
+    },
+    "/assignments/": {
+      "filePath": "assignments/index.tsx"
     },
     "/day/": {
       "filePath": "day/index.tsx"

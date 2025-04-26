@@ -14,14 +14,13 @@ interface Task {
   title: string;
 }
 
-export const Route = createFileRoute("/assignee_task_schedules/new")({
+export const Route = createFileRoute("/assignments/new")({
   component: () => {
     const navigate = useNavigate();
     const assignees = useQuery(api.assignees.list);
     const tasks = useQuery(api.tasks.list);
-    const createAssigneeTaskSchedule = useMutation(
-      api.assignee_task_schedules.create,
-    );
+    // @ts-ignore: assignments may not be in the generated API until convex dev is run
+    const createAssignment = useMutation(api.assignments?.create);
 
     const [selectedAssignee, setSelectedAssignee] = useState<
       Id<"assignees"> | ""
@@ -33,12 +32,12 @@ export const Route = createFileRoute("/assignee_task_schedules/new")({
       e.preventDefault();
       if (selectedAssignee && selectedTask && cronSchedule.trim()) {
         try {
-          await createAssigneeTaskSchedule({
+          await createAssignment({
             assigneeId: selectedAssignee,
             taskId: selectedTask,
             cronSchedule: cronSchedule.trim(),
           });
-          navigate({ to: "/assignee_task_schedules" });
+          navigate({ to: "/assignments" });
         } catch (error) {
           if (error instanceof Error) {
             alert(

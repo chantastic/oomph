@@ -3,14 +3,15 @@ import { useQuery } from "convex/react";
 import { api } from "../../../convex/_generated/api";
 import { formatRelative } from "date-fns";
 
-export const Route = createFileRoute("/assignee_task_schedules/")({
-  component: AssigneeTaskScheduleList,
+export const Route = createFileRoute("/assignments/")({
+  component: AssignmentList,
 });
 
-function AssigneeTaskScheduleList() {
-  const scheduledTasks = useQuery(api.assignee_task_schedules.list);
+function AssignmentList() {
+  // @ts-ignore: assignments may not be in the generated API until convex dev is run
+  const assignments = useQuery(api.assignments?.list);
 
-  if (scheduledTasks === undefined) {
+  if (assignments === undefined) {
     return <div>Loading...</div>;
   }
 
@@ -19,18 +20,18 @@ function AssigneeTaskScheduleList() {
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-2xl font-bold">Scheduled Tasks</h1>
         <Link
-          to="/assignee_task_schedules/new"
+          to="/assignments/new"
           className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
         >
           Schedule New Task
         </Link>
       </div>
 
-      {scheduledTasks.length === 0 ? (
+      {assignments.length === 0 ? (
         <div className="text-center py-8">
           <p className="text-gray-500">No scheduled tasks yet.</p>
           <Link
-            to="/assignee_task_schedules/new"
+            to="/assignments/new"
             className="text-blue-600 hover:underline mt-2 inline-block"
           >
             Create your first scheduled task
@@ -56,19 +57,19 @@ function AssigneeTaskScheduleList() {
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
-              {scheduledTasks.map((schedule) => (
-                <tr key={schedule._id} className="hover:bg-gray-50">
+              {assignments.map((assignment: any) => (
+                <tr key={assignment._id} className="hover:bg-gray-50">
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                    {schedule.assignee.name}
+                    {assignment.assignee.name}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                    {schedule.task.title}
+                    {assignment.task.title}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm font-mono text-gray-900">
-                    {schedule.cronSchedule}
+                    {assignment.cronSchedule}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    {formatRelative(schedule._creationTime, new Date())}
+                    {formatRelative(assignment._creationTime, new Date())}
                   </td>
                 </tr>
               ))}
