@@ -62,19 +62,23 @@ function WeekView() {
   const weekEndEpoch = weekStartEpoch + 6 * dayMs;
 
   // Fetch completions for this week
-  const completions = useQuery(api.taskCompletions.getCompletions, {
+  const completions = useQuery(api.assignmentCompletions.getCompletions, {
     start: weekStartEpoch,
     end: weekEndEpoch,
   });
-  const createCompletion = useMutation(api.taskCompletions.createCompletion);
-  const deleteCompletion = useMutation(api.taskCompletions.deleteCompletion);
+  const createCompletion = useMutation(
+    api.assignmentCompletions.createCompletion,
+  );
+  const deleteCompletion = useMutation(
+    api.assignmentCompletions.deleteCompletion,
+  );
 
-  // Map completions by taskId, assigneeId, and day
+  // Map completions by assignmentId and day
   const completionMap = useMemo(() => {
     const map = new Map();
     if (completions) {
       for (const c of completions) {
-        const key = `${c.taskId}-${c.assigneeId}-${c.completedAt}`;
+        const key = `${c.assignmentId}-${c.completedAt}`;
         map.set(key, c);
       }
     }
@@ -142,7 +146,7 @@ function WeekView() {
                 );
                 // Calculate date for this cell
                 const dateStart = weekStartEpoch + day.value * dayMs;
-                const key = `${schedule.task._id}-${schedule.assignee._id}-${dateStart}`;
+                const key = `${schedule._id}-${dateStart}`;
                 const completion = completionMap.get(key);
                 const isCompleted = Boolean(completion);
                 // Determine cell styles and label
@@ -162,8 +166,7 @@ function WeekView() {
                     onClick={() => {
                       if (!isCompleted) {
                         createCompletion({
-                          taskId: schedule.task._id,
-                          assigneeId: schedule.assignee._id,
+                          assignmentId: schedule._id,
                           completedAt: dateStart,
                         });
                       } else {

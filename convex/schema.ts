@@ -86,13 +86,12 @@ const schema = defineSchema({
   tasks: defineTable({
     title: v.string(),
   }),
-  task_completions: defineTable({
-    taskId: v.id("tasks"),
-    assigneeId: v.id("assignees"),
+  assignment_completions: defineTable({
+    assignmentId: v.id("assignments"),
     completedAt: v.number(),
   })
     .index("by_completedAt", ["completedAt"])
-    .index("by_assignee_completedAt", ["assigneeId", "completedAt"]),
+    .index("by_assignment_completedAt", ["assignmentId", "completedAt"]),
   assignees: defineTable({
     name: v.string(),
   }),

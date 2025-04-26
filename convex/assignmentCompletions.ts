@@ -3,15 +3,13 @@ import { v } from "convex/values";
 
 export const createCompletion = mutation({
   args: {
-    taskId: v.id("tasks"),
-    assigneeId: v.id("assignees"),
+    assignmentId: v.id("assignments"),
     completedAt: v.number(),
   },
-  returns: v.id("task_completions"),
+  returns: v.id("assignment_completions"),
   handler: async (ctx, args) => {
-    const completionId = await ctx.db.insert("task_completions", {
-      taskId: args.taskId,
-      assigneeId: args.assigneeId,
+    const completionId = await ctx.db.insert("assignment_completions", {
+      assignmentId: args.assignmentId,
       completedAt: args.completedAt,
     });
     return completionId;
@@ -20,7 +18,7 @@ export const createCompletion = mutation({
 
 export const deleteCompletion = mutation({
   args: {
-    completionId: v.id("task_completions"),
+    completionId: v.id("assignment_completions"),
   },
   returns: v.null(),
   handler: async (ctx, args) => {
@@ -36,24 +34,21 @@ export const getCompletions = query({
   },
   returns: v.array(
     v.object({
-      _id: v.id("task_completions"),
-      taskId: v.id("tasks"),
-      assigneeId: v.id("assignees"),
+      _id: v.id("assignment_completions"),
+      assignmentId: v.id("assignments"),
       completedAt: v.number(),
     }),
   ),
   handler: async (ctx, args) => {
     const rows = await ctx.db
-      .query("task_completions")
+      .query("assignment_completions")
       .withIndex("by_completedAt", (q) =>
         q.gte("completedAt", args.start).lte("completedAt", args.end),
       )
       .collect();
-    // Map to include only fields in the validator
     return rows.map((row) => ({
       _id: row._id,
-      taskId: row.taskId,
-      assigneeId: row.assigneeId,
+      assignmentId: row.assignmentId,
       completedAt: row.completedAt,
     }));
   },

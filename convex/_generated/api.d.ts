@@ -16,6 +16,7 @@ import type {
 } from "convex/server";
 import type * as app from "../app.js";
 import type * as assignees from "../assignees.js";
+import type * as assignmentCompletions from "../assignmentCompletions.js";
 import type * as assignments from "../assignments.js";
 import type * as auth from "../auth.js";
 import type * as email_index from "../email/index.js";
@@ -26,7 +27,6 @@ import type * as init from "../init.js";
 import type * as otp_ResendOTP from "../otp/ResendOTP.js";
 import type * as otp_VerificationCodeEmail from "../otp/VerificationCodeEmail.js";
 import type * as stripe from "../stripe.js";
-import type * as taskCompletions from "../taskCompletions.js";
 import type * as tasks from "../tasks.js";
 
 /**
@@ -40,6 +40,7 @@ import type * as tasks from "../tasks.js";
 declare const fullApi: ApiFromModules<{
   app: typeof app;
   assignees: typeof assignees;
+  assignmentCompletions: typeof assignmentCompletions;
   assignments: typeof assignments;
   auth: typeof auth;
   "email/index": typeof email_index;
@@ -50,7 +51,6 @@ declare const fullApi: ApiFromModules<{
   "otp/ResendOTP": typeof otp_ResendOTP;
   "otp/VerificationCodeEmail": typeof otp_VerificationCodeEmail;
   stripe: typeof stripe;
-  taskCompletions: typeof taskCompletions;
   tasks: typeof tasks;
 }>;
 export declare const api: FilterApi<

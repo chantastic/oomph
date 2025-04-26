@@ -5,7 +5,6 @@ import { Button } from "../../ui/button";
 
 function TasksIndex() {
   const tasks = useQuery(api.tasks.list);
-  const createCompletion = useMutation(api.taskCompletions.createCompletion);
 
   return (
     <div className="max-w-2xl mx-auto p-4">
@@ -30,9 +29,6 @@ function TasksIndex() {
                 Created: {new Date(task._creationTime).toLocaleDateString()}
               </p>
             </div>
-            <Button onClick={() => createCompletion({ taskId: task._id })}>
-              Complete
-            </Button>
           </div>
         ))}
         {tasks?.length === 0 && (
