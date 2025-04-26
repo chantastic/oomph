@@ -17,7 +17,6 @@ function Index() {
   const resources = [
     { name: "/tasks", path: "/tasks" },
     { name: "/assignees", path: "/assignees" },
-    { name: "/day", path: "/day" },
     { name: "/assignments", path: "/assignments" },
     { name: "/week", path: "/week" },
   ];
