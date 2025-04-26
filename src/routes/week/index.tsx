@@ -2,6 +2,16 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useQuery, useMutation } from "convex/react";
 import { api } from "../../../convex/_generated/api";
 import { useMemo } from "react";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from "../../ui/dialog";
+import { useState } from "react";
+import { cn } from "../../utils/misc";
+import { Id } from "../../../convex/_generated/dataModel";
 
 // Helper function to check if a cron schedule includes a specific day of week
 function isDayScheduled(cronSchedule: string, dayOfWeek: number): boolean {
@@ -98,6 +108,49 @@ function WeekView() {
     [],
   );
 
+  const [open, setOpen] = useState(false);
+  const [selectedAssignee, setSelectedAssignee] = useState<
+    Id<"assignees"> | ""
+  >("");
+  const [title, setTitle] = useState("");
+  const [selectedDays, setSelectedDays] = useState<number[]>([]);
+  const createAssignment = useMutation(api.assignments?.create);
+  const assignees = useQuery(api.assignees.list);
+  const [submitting, setSubmitting] = useState(false);
+
+  // Helper to build cron string from selected days
+  function buildCron(days: number[]): string {
+    if (days.length === 0) return "* * * * *";
+    return `* * * * ${days.sort().join(",")}`;
+  }
+
+  function handleDayToggle(day: number) {
+    setSelectedDays((prev) =>
+      prev.includes(day) ? prev.filter((d) => d !== day) : [...prev, day],
+    );
+  }
+
+  async function handleSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    if (!selectedAssignee || !title.trim() || selectedDays.length === 0) return;
+    setSubmitting(true);
+    try {
+      await createAssignment({
+        assigneeId: selectedAssignee as Id<"assignees">,
+        title: title.trim(),
+        cronSchedule: buildCron(selectedDays),
+      });
+      setOpen(false);
+      setSelectedAssignee("");
+      setTitle("");
+      setSelectedDays([]);
+    } catch (error) {
+      alert("Failed to create assignment");
+    } finally {
+      setSubmitting(false);
+    }
+  }
+
   if (scheduledTasks === undefined) {
     return <div>Loading...</div>;
   }
@@ -108,7 +161,102 @@ function WeekView() {
   return (
     <div className="p-4 max-w-7xl mx-auto">
       <h1 className="text-2xl font-bold mb-6">Week View</h1>
-
+      <div className="mb-4 flex items-center justify-between">
+        <button
+          className="px-3 py-1 rounded bg-blue-600 text-white text-lg hover:bg-blue-700 transition"
+          onClick={() => setOpen(true)}
+        >
+          +
+        </button>
+      </div>
+      <Dialog open={open} onOpenChange={setOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>New Assignment</DialogTitle>
+            <DialogDescription>
+              Create a new recurring assignment for an assignee.
+            </DialogDescription>
+          </DialogHeader>
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <div>
+              <label className="block text-sm font-medium mb-1">Assignee</label>
+              <select
+                value={selectedAssignee}
+                onChange={(e) =>
+                  setSelectedAssignee(e.target.value as Id<"assignees">)
+                }
+                required
+                className="w-full border border-gray-300 rounded p-2"
+              >
+                <option value="">Select Assignee</option>
+                {assignees?.map((a: any) => (
+                  <option key={a._id} value={a._id}>
+                    {a.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div>
+              <label className="block text-sm font-medium mb-1">Title</label>
+              <input
+                type="text"
+                value={title}
+                onChange={(e) => setTitle(e.target.value)}
+                required
+                className="w-full border border-gray-300 rounded p-2"
+                placeholder="Enter task title"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium mb-1">Weekdays</label>
+              <div className="flex gap-2 mb-1">
+                {["Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"].map(
+                  (label, idx) => (
+                    <button
+                      type="button"
+                      key={idx}
+                      className={cn(
+                        "px-2 py-1 rounded border",
+                        selectedDays.includes(idx)
+                          ? "bg-blue-600 text-white border-blue-600"
+                          : "bg-white text-gray-700 border-gray-300 hover:bg-gray-100",
+                      )}
+                      onClick={() => handleDayToggle(idx)}
+                    >
+                      {label}
+                    </button>
+                  ),
+                )}
+              </div>
+              <div className="text-xs text-gray-500">
+                Selected:{" "}
+                {selectedDays.length > 0
+                  ? selectedDays
+                      .map((d) => ["Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"][d])
+                      .join(", ")
+                  : "None"}
+                <br />
+                Cron:{" "}
+                <span className="font-mono">{buildCron(selectedDays)}</span>
+              </div>
+            </div>
+            <div className="flex justify-end">
+              <button
+                type="submit"
+                className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 disabled:opacity-50"
+                disabled={
+                  submitting ||
+                  !selectedAssignee ||
+                  !title.trim() ||
+                  selectedDays.length === 0
+                }
+              >
+                {submitting ? "Creating..." : "Create Assignment"}
+              </button>
+            </div>
+          </form>
+        </DialogContent>
+      </Dialog>
       <div className="overflow-x-auto">
         <div className="min-w-max">
           {/* Header row with days */}
