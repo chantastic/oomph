@@ -86,6 +86,10 @@ const schema = defineSchema({
   tasks: defineTable({
     title: v.string(),
   }),
+  /*
+   * Assignments Completions are the core reporting model of the app.
+   * They log the date a datetime an assignment was completed.
+   */
   assignment_completions: defineTable({
     assignmentId: v.id("assignments"),
     completedAt: v.number(),
@@ -96,7 +100,7 @@ const schema = defineSchema({
     name: v.string(),
   }),
   /*
-   * Assignments are the chore administrative model of the app.
+   * Assignments are the core interactive model of the app.
    * A User assigns tasks to an Assignee on a cronSchedule.
    */
   assignments: defineTable({
