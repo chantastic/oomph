@@ -257,87 +257,99 @@ function WeekView() {
           </form>
         </DialogContent>
       </Dialog>
-      <div className="overflow-x-auto">
-        <div className="min-w-max">
-          {/* Header row with days */}
-          <div className="grid grid-cols-[200px_repeat(7,1fr)] gap-2 mb-4">
-            <div className="font-semibold">Task / Day</div>
-            {days.map((day) => (
+      {scheduledTasks.length === 0 ? (
+        <div className="flex flex-col items-center justify-center py-24 text-center border border-dashed border-gray-300 rounded-lg bg-gray-50">
+          <h2 className="text-xl font-semibold mb-2 text-gray-700">
+            No assignments yet
+          </h2>
+          <p className="mb-6 text-gray-500 max-w-md">
+            Add your first assignment to start tracking weekly tasks for your
+            team or yourself.
+          </p>
+          <button
+            className="px-5 py-2 rounded bg-blue-600 text-white text-base font-medium hover:bg-blue-700 transition"
+            onClick={() => setOpen(true)}
+          >
+            Add Assignment
+          </button>
+        </div>
+      ) : (
+        <div className="overflow-x-auto">
+          <div className="min-w-max">
+            {/* Header row with days */}
+            <div className="grid grid-cols-[200px_repeat(7,1fr)] gap-2 mb-4">
+              <div className="font-semibold">Task / Day</div>
+              {days.map((day) => (
+                <div
+                  key={day.value}
+                  className="font-semibold text-center min-w-[120px]"
+                >
+                  {day.name}
+                </div>
+              ))}
+            </div>
+
+            {/* Task rows */}
+            {scheduledTasks.map((schedule: any) => (
               <div
-                key={day.value}
-                className="font-semibold text-center min-w-[120px]"
+                key={schedule._id}
+                className="grid grid-cols-[200px_repeat(7,1fr)] gap-2 mb-2"
               >
-                {day.name}
+                {/* Task info */}
+                <div className="pr-4">
+                  <div className="font-medium">{schedule.title}</div>
+                  <div className="text-sm text-gray-500">
+                    {schedule.assignee.name}
+                  </div>
+                </div>
+
+                {/* Day cells */}
+                {days.map((day) => {
+                  const isScheduled = isDayScheduled(
+                    schedule.cronSchedule,
+                    day.value,
+                  );
+                  // Calculate date for this cell
+                  const dateStart = weekStartEpoch + day.value * dayMs;
+                  const key = `${schedule._id}-${dateStart}`;
+                  const completion = completionMap.get(key);
+                  const isCompleted = Boolean(completion);
+                  // Determine cell styles and label
+                  let bgClass = "bg-gray-50 text-gray-400";
+                  let label = "—";
+                  if (isCompleted) {
+                    bgClass = "bg-green-100 text-green-800";
+                    label = "Completed";
+                  } else if (isScheduled) {
+                    bgClass = "bg-blue-100 text-blue-800";
+                    label = "Scheduled";
+                  }
+                  return (
+                    <div
+                      key={day.value}
+                      className={`min-h-[60px] rounded p-2 flex items-center justify-center ${bgClass} cursor-pointer hover:opacity-80`}
+                      onClick={() => {
+                        if (!isCompleted) {
+                          createCompletion({
+                            assignmentId: schedule._id,
+                            completedAt: dateStart,
+                          });
+                        } else {
+                          deleteCompletion({
+                            completionId: completion._id,
+                          });
+                        }
+                      }}
+                    >
+                      {label}
+                    </div>
+                  );
+                })}
               </div>
             ))}
           </div>
-
-          {/* Task rows */}
-          {scheduledTasks.map((schedule: any) => (
-            <div
-              key={schedule._id}
-              className="grid grid-cols-[200px_repeat(7,1fr)] gap-2 mb-2"
-            >
-              {/* Task info */}
-              <div className="pr-4">
-                <div className="font-medium">{schedule.title}</div>
-                <div className="text-sm text-gray-500">
-                  {schedule.assignee.name}
-                </div>
-              </div>
-
-              {/* Day cells */}
-              {days.map((day) => {
-                const isScheduled = isDayScheduled(
-                  schedule.cronSchedule,
-                  day.value,
-                );
-                // Calculate date for this cell
-                const dateStart = weekStartEpoch + day.value * dayMs;
-                const key = `${schedule._id}-${dateStart}`;
-                const completion = completionMap.get(key);
-                const isCompleted = Boolean(completion);
-                // Determine cell styles and label
-                let bgClass = "bg-gray-50 text-gray-400";
-                let label = "—";
-                if (isCompleted) {
-                  bgClass = "bg-green-100 text-green-800";
-                  label = "Completed";
-                } else if (isScheduled) {
-                  bgClass = "bg-blue-100 text-blue-800";
-                  label = "Scheduled";
-                }
-                return (
-                  <div
-                    key={day.value}
-                    className={`min-h-[60px] rounded p-2 flex items-center justify-center ${bgClass} cursor-pointer hover:opacity-80`}
-                    onClick={() => {
-                      if (!isCompleted) {
-                        createCompletion({
-                          assignmentId: schedule._id,
-                          completedAt: dateStart,
-                        });
-                      } else {
-                        deleteCompletion({
-                          completionId: completion._id,
-                        });
-                      }
-                    }}
-                  >
-                    {label}
-                  </div>
-                );
-              })}
-            </div>
-          ))}
-
-          {scheduledTasks.length === 0 && (
-            <p className="text-center text-gray-500 py-8">
-              No scheduled tasks yet.
-            </p>
-          )}
         </div>
-      </div>
+      )}
     </div>
   );
 }
