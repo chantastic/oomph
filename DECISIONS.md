@@ -7,3 +7,11 @@
   - Provide filtering data (assignee and date/range) as query parameters
   - This should allow for easy "view as" or "view on"
 - Use `cron` for scheduling logic
+- Use `/week` as the core administrative and reporting view (for now)
+- Use `Assignment` as the core logical administrative value, previously `user_task_schedule`
+
+Next:
+
+- Add `User` concept: login, restricted records (Assignees), etc.
+- Figure out auth. Why doesn't it work? Stay with Convex Auth?
+- Rock would like to some type of "locking" (like the row/column turns green) when days and/or assignments are completed

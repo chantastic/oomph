@@ -6,15 +6,25 @@ import { useState } from "react";
 export const Route = createFileRoute("/assignees/new")({
   component: () => {
     const [name, setName] = useState("");
+    const [error, setError] = useState<string | null>(null);
     const createAssignee = useMutation(api.assignees.create);
     const navigate = useNavigate();
 
     const handleSubmit = async (e: React.FormEvent) => {
       e.preventDefault();
       if (name.trim()) {
-        await createAssignee({ name });
-        setName("");
-        navigate({ to: "/assignees" });
+        try {
+          await createAssignee({ name });
+          setName("");
+          setError(null);
+          navigate({ to: "/assignees" });
+        } catch (err: any) {
+          if (err?.message?.includes("Not authenticated")) {
+            setError("You must be logged in to create an assignee.");
+          } else {
+            setError("An unexpected error occurred.");
+          }
+        }
       }
     };
 
@@ -37,6 +47,7 @@ export const Route = createFileRoute("/assignees/new")({
               className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2"
             />
           </div>
+          {error && <div className="text-red-600 mb-2">{error}</div>}
           <button
             type="submit"
             className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"

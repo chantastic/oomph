@@ -98,7 +98,8 @@ const schema = defineSchema({
     .index("by_assignment_completedAt", ["assignmentId", "completedAt"]),
   assignees: defineTable({
     name: v.string(),
-  }),
+    userId: v.id("users"),
+  }).index("by_userId", ["userId"]),
   /*
    * Assignments are the core interactive model of the app.
    * A User assigns tasks to an Assignee on a cronSchedule.

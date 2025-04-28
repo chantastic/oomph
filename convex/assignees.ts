@@ -1,5 +1,6 @@
 import { query, mutation } from "./_generated/server";
 import { v } from "convex/values";
+import { auth } from "./auth";
 
 export const list = query({
   args: {},
@@ -8,10 +9,17 @@ export const list = query({
       _id: v.id("assignees"),
       _creationTime: v.number(),
       name: v.string(),
+      userId: v.id("users"),
     }),
   ),
   handler: async (ctx) => {
-    return await ctx.db.query("assignees").order("desc").collect();
+    const userId = await auth.getUserId(ctx);
+    if (!userId) throw new Error("Not authenticated");
+    return await ctx.db
+      .query("assignees")
+      .withIndex("by_userId", (q) => q.eq("userId", userId))
+      .order("desc")
+      .collect();
   },
 });
 
@@ -21,8 +29,11 @@ export const create = mutation({
   },
   returns: v.id("assignees"),
   handler: async (ctx, args) => {
+    const userId = await auth.getUserId(ctx);
+    if (!userId) throw new Error("Not authenticated");
     const assigneeId = await ctx.db.insert("assignees", {
       name: args.name,
+      userId,
     });
     return assigneeId;
   },
