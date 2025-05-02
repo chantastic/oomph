@@ -1,10 +1,17 @@
 import { useQuery } from "convex/react";
 import { api } from "../../../convex/_generated/api";
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { getCurrentUser } from "@/utils/auth";
 
 function TasksIndex() {
+  // TODO: Should we use TanStack Query here?
+  // eg, src/routes/_app/_auth/dashboard/_layout.tsx
+  const user = getCurrentUser();
   const uniqueTitles = useQuery(api.assignments.listUniqueTitles);
-  const assignments = useQuery(api.assignments.list);
+  const assignments = useQuery(
+    api.assignments.list,
+    user?._id ? { userId: user._id } : "skip",
+  );
 
   // Map title to first assignmentId for linking
   const titleToId: Record<string, string> = {};

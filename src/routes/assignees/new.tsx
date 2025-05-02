@@ -2,6 +2,7 @@ import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useMutation } from "convex/react";
 import { api } from "../../../convex/_generated/api";
 import { useState } from "react";
+import { getCurrentUser } from "@/utils/auth";
 
 export const Route = createFileRoute("/assignees/new")({
   component: () => {
@@ -9,12 +10,14 @@ export const Route = createFileRoute("/assignees/new")({
     const [error, setError] = useState<string | null>(null);
     const createAssignee = useMutation(api.assignees.create);
     const navigate = useNavigate();
+    const user = getCurrentUser();
 
     const handleSubmit = async (e: React.FormEvent) => {
       e.preventDefault();
+      if (!user?._id) return;
       if (name.trim()) {
         try {
-          await createAssignee({ name });
+          await createAssignee({ name, userId: user._id });
           setName("");
           setError(null);
           navigate({ to: "/assignees" });
@@ -27,6 +30,10 @@ export const Route = createFileRoute("/assignees/new")({
         }
       }
     };
+
+    if (!user) {
+      return <div>Loading user...</div>;
+    }
 
     return (
       <div className="p-4 max-w-2xl mx-auto">

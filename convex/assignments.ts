@@ -5,7 +5,9 @@ import { v } from "convex/values";
 import { isValidCron } from "cron-validator";
 
 export const list = query({
-  args: {},
+  args: {
+    userId: v.id("users"),
+  },
   returns: v.array(
     v.object({
       _id: v.id("assignments"),
@@ -20,8 +22,32 @@ export const list = query({
       }),
     }),
   ),
-  handler: async (ctx) => {
-    const assignments = await ctx.db.query("assignments").collect();
+  handler: async (ctx, args) => {
+    // Get all assignees that belong to this user
+    const userAssignees = await ctx.db
+      .query("user_assignees")
+      .withIndex("by_user", (q) => q.eq("userId", args.userId))
+      .collect();
+
+    // If no relationships exist, return empty array
+    if (userAssignees.length === 0) {
+      return [];
+    }
+
+    // Get all assignee IDs that this user has access to
+    const assigneeIds = userAssignees.map((ua) => ua.assigneeId);
+
+    // Get all assignments for these assignees
+    const assignments = await Promise.all(
+      assigneeIds.map((assigneeId) =>
+        ctx.db
+          .query("assignments")
+          .withIndex("by_assignee", (q) => q.eq("assigneeId", assigneeId))
+          .collect(),
+      ),
+    ).then((results) => results.flat());
+
+    // Add assignee details to each assignment
     const assignmentsWithRelations = await Promise.all(
       assignments.map(async (assignment) => {
         const assignee = await ctx.db.get(assignment.assigneeId);

@@ -3,6 +3,7 @@ import { useMutation, useQuery } from "convex/react";
 import { api } from "../../../convex/_generated/api";
 import { useState } from "react";
 import { Id } from "../../../convex/_generated/dataModel";
+import { getCurrentUser } from "@/utils/auth";
 
 interface Assignee {
   _id: Id<"assignees">;
@@ -17,7 +18,11 @@ interface Task {
 export const Route = createFileRoute("/assignments/new")({
   component: () => {
     const navigate = useNavigate();
-    const assignees = useQuery(api.assignees.list);
+    const user = getCurrentUser();
+    const assignees = useQuery(
+      api.assignees.list,
+      user?._id ? { userId: user._id } : "skip",
+    );
     // @ts-ignore: assignments may not be in the generated API until convex dev is run
     const createAssignment = useMutation(api.assignments?.create);
 
@@ -48,6 +53,10 @@ export const Route = createFileRoute("/assignments/new")({
         }
       }
     };
+
+    if (!user) {
+      return <div>Loading user...</div>;
+    }
 
     if (assignees === undefined) {
       return <div>Loading...</div>;
@@ -103,26 +112,23 @@ export const Route = createFileRoute("/assignments/new")({
               htmlFor="cronSchedule"
               className="block text-sm font-medium text-gray-700"
             >
-              Cron Schedule
+              Schedule (cron format)
             </label>
             <input
               type="text"
               id="cronSchedule"
               value={cronSchedule}
               onChange={(e) => setCronSchedule(e.target.value)}
-              placeholder="*/5 * * * *"
+              placeholder="* * * * *"
               required
               className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2"
             />
-            <p className="mt-1 text-sm text-gray-500">
-              Use cron syntax (e.g. "*/5 * * * *" for every 5 minutes)
-            </p>
           </div>
           <button
             type="submit"
             className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
           >
-            Schedule Task
+            Create Assignment
           </button>
         </form>
       </div>

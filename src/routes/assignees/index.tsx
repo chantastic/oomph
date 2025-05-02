@@ -1,10 +1,19 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "convex/react";
 import { api } from "../../../convex/_generated/api";
+import { getCurrentUser } from "../../utils/auth";
 
 export const Route = createFileRoute("/assignees/")({
   component: () => {
-    const assignees = useQuery(api.assignees.list);
+    const user = getCurrentUser();
+    const assignees = useQuery(
+      api.assignees.list,
+      user?._id ? { userId: user._id } : "skip",
+    );
+
+    if (!user) {
+      return <div>Loading user...</div>;
+    }
 
     return (
       <div className="p-4 max-w-2xl mx-auto">
