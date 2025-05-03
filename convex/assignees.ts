@@ -28,16 +28,15 @@ export const list = query({
 
     // Get all assignees that this user has access to
     const assigneeIds = userAssignees.map((ua) => ua.assigneeId);
-    const assignees = [];
+    const assignees = await Promise.all(
+      assigneeIds.map(async (assigneeId) => {
+        const assignee = await ctx.db.get(assigneeId);
+        return assignee || null; // Return null for non-existent assignees
+      })
+    );
 
-    for (const assigneeId of assigneeIds) {
-      const assignee = await ctx.db.get(assigneeId);
-      if (assignee) {
-        assignees.push(assignee);
-      }
-    }
-
-    return assignees;
+    // Filter out any null values
+    return assignees.filter((assignee) => assignee !== null);
   },
 });
 
