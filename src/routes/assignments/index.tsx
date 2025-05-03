@@ -9,8 +9,6 @@ export const Route = createFileRoute("/assignments/")({
 });
 
 function AssignmentList() {
-  // TODO: Should we use TanStack Query here?
-  // eg, src/routes/_app/_auth/dashboard/_layout.tsx
   const user = getCurrentUser();
 
   // @ts-expect-error: assignments may not be in the generated API until convex dev is run
