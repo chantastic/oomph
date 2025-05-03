@@ -19,6 +19,7 @@ export const list = query({
         _id: v.id("assignees"),
         _creationTime: v.number(),
         name: v.string(),
+        userId: v.id("users"),
       }),
     }),
   ),
