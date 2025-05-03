@@ -202,31 +202,3 @@ export const getTasksForToday = query({
     return assignmentsWithRelations;
   },
 });
-
-export const listUniqueTitles = query({
-  args: {},
-  returns: v.array(
-    v.object({
-      title: v.string(),
-      _creationTime: v.number(),
-    }),
-  ),
-  handler: async (ctx) => {
-    const assignments = await ctx.db
-      .query("assignments")
-      .order("desc")
-      .collect();
-    const seen = new Set<string>();
-    const uniqueTitles: Array<{ title: string; _creationTime: number }> = [];
-    for (const assignment of assignments) {
-      if (!seen.has(assignment.title)) {
-        seen.add(assignment.title);
-        uniqueTitles.push({
-          title: assignment.title,
-          _creationTime: assignment._creationTime,
-        });
-      }
-    }
-    return uniqueTitles;
-  },
-});

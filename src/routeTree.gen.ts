@@ -16,7 +16,6 @@ import { Route as rootRoute } from './routes/__root'
 import { Route as AppImport } from './routes/_app'
 import { Route as IndexImport } from './routes/index'
 import { Route as WeekIndexImport } from './routes/week/index'
-import { Route as TasksIndexImport } from './routes/tasks/index'
 import { Route as AssignmentsIndexImport } from './routes/assignments/index'
 import { Route as AssigneesIndexImport } from './routes/assignees/index'
 import { Route as AssignmentsNewImport } from './routes/assignments/new'
@@ -59,11 +58,6 @@ const AppLoginRoute = AppLoginImport.update({
 
 const WeekIndexRoute = WeekIndexImport.update({
   path: '/week/',
-  getParentRoute: () => rootRoute,
-} as any)
-
-const TasksIndexRoute = TasksIndexImport.update({
-  path: '/tasks/',
   getParentRoute: () => rootRoute,
 } as any)
 
@@ -223,13 +217,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AssignmentsIndexImport
       parentRoute: typeof rootRoute
     }
-    '/tasks/': {
-      id: '/tasks/'
-      path: '/tasks'
-      fullPath: '/tasks'
-      preLoaderRoute: typeof TasksIndexImport
-      parentRoute: typeof rootRoute
-    }
     '/week/': {
       id: '/week/'
       path: '/week'
@@ -365,7 +352,6 @@ export const routeTree = rootRoute.addChildren({
   AssignmentsNewRoute,
   AssigneesIndexRoute,
   AssignmentsIndexRoute,
-  TasksIndexRoute,
   WeekIndexRoute,
 })
 
@@ -384,7 +370,6 @@ export const routeTree = rootRoute.addChildren({
         "/assignments/new",
         "/assignees/",
         "/assignments/",
-        "/tasks/",
         "/week/"
       ]
     },
@@ -420,9 +405,6 @@ export const routeTree = rootRoute.addChildren({
     },
     "/assignments/": {
       "filePath": "assignments/index.tsx"
-    },
-    "/tasks/": {
-      "filePath": "tasks/index.tsx"
     },
     "/week/": {
       "filePath": "week/index.tsx"
