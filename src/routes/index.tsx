@@ -15,7 +15,6 @@ function Index() {
   const { isLoading, isAuthenticated } = useConvexAuth();
 
   const resources = [
-    { name: "/tasks", path: "/tasks" },
     { name: "/assignees", path: "/assignees" },
     { name: "/assignments", path: "/assignments" },
     { name: "/week", path: "/week" },

@@ -2,14 +2,20 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "convex/react";
 import { api } from "../../../convex/_generated/api";
 import { formatRelative } from "date-fns";
+import { getCurrentUser } from "@/utils/auth";
 
 export const Route = createFileRoute("/assignments/")({
   component: AssignmentList,
 });
 
 function AssignmentList() {
-  // @ts-ignore: assignments may not be in the generated API until convex dev is run
-  const assignments = useQuery(api.assignments?.list);
+  const user = getCurrentUser();
+
+  // @ts-expect-error: assignments may not be in the generated API until convex dev is run
+  const assignments = useQuery(
+    api.assignments?.list,
+    user?._id ? { userId: user._id } : "skip",
+  );
 
   if (assignments === undefined) {
     return <div>Loading...</div>;

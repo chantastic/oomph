@@ -11,7 +11,13 @@ import {
 } from "../../ui/dialog";
 import { useState } from "react";
 import { cn } from "../../utils/misc";
-import { Id } from "../../../convex/_generated/dataModel";
+import { Doc, Id } from "../../../convex/_generated/dataModel";
+import { getCurrentUser } from "@/utils/auth";
+
+type Assignee = Doc<"assignees">;
+type Assignment = Doc<"assignments"> & {
+  assignee: Assignee;
+};
 
 // Helper function to check if a cron schedule includes a specific day of week
 function isDayScheduled(cronSchedule: string, dayOfWeek: number): boolean {
@@ -55,8 +61,13 @@ export const Route = createFileRoute("/week/")({
 });
 
 function WeekView() {
-  // @ts-ignore: assignments may not be in the generated API until convex dev is run
-  const scheduledTasks = useQuery(api.assignments?.list);
+  const user = getCurrentUser();
+
+  // @ts-expect-error: assignments may not be in the generated API until convex dev is run
+  const scheduledTasks = useQuery(
+    api.assignments?.list,
+    user?._id ? { userId: user._id } : "skip",
+  );
   // Compute week start (Sunday) and date range for completions
   const today = new Date();
   const currentDow = today.getDay();
@@ -115,7 +126,10 @@ function WeekView() {
   const [title, setTitle] = useState("");
   const [selectedDays, setSelectedDays] = useState<number[]>([]);
   const createAssignment = useMutation(api.assignments?.create);
-  const assignees = useQuery(api.assignees.list);
+  const assignees = useQuery(
+    api.assignees.list,
+    user?._id ? { userId: user._id } : "skip",
+  );
   const [submitting, setSubmitting] = useState(false);
 
   // Helper to build cron string from selected days
@@ -136,7 +150,7 @@ function WeekView() {
     setSubmitting(true);
     try {
       await createAssignment({
-        assigneeId: selectedAssignee as Id<"assignees">,
+        assigneeId: selectedAssignee,
         title: title.trim(),
         cronSchedule: buildCron(selectedDays),
       });
@@ -189,9 +203,9 @@ function WeekView() {
                 className="w-full border border-gray-300 rounded p-2"
               >
                 <option value="">Select Assignee</option>
-                {assignees?.map((a: any) => (
-                  <option key={a._id} value={a._id}>
-                    {a.name}
+                {assignees?.map((assignee) => (
+                  <option key={assignee._id} value={assignee._id}>
+                    {assignee.name}
                   </option>
                 ))}
               </select>
@@ -290,7 +304,7 @@ function WeekView() {
             </div>
 
             {/* Task rows */}
-            {scheduledTasks.map((schedule: any) => (
+            {scheduledTasks.map((schedule: Assignment) => (
               <div
                 key={schedule._id}
                 className="grid grid-cols-[200px_repeat(7,1fr)] gap-2 mb-2"

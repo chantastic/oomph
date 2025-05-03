@@ -101,6 +101,17 @@ const schema = defineSchema({
     userId: v.id("users"),
   }).index("by_userId", ["userId"]),
   /*
+   * user_assignees is a join table that establishes which users have access to which assignees.
+   * This enables future support for many-to-many relationships between users and assignees.
+   */
+  user_assignees: defineTable({
+    userId: v.id("users"),
+    assigneeId: v.id("assignees"),
+  })
+    .index("by_user", ["userId"])
+    .index("by_assignee", ["assigneeId"])
+    .index("by_user_and_assignee", ["userId", "assigneeId"]),
+  /*
    * Assignments are the core interactive model of the app.
    * A User assigns tasks to an Assignee on a cronSchedule.
    */

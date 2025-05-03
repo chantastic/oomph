@@ -1,6 +1,7 @@
 import { createFileRoute, useParams } from "@tanstack/react-router";
 import { useQuery } from "convex/react";
 import { api } from "../../../convex/_generated/api";
+import { getCurrentUser } from "@/utils/auth";
 
 export const Route = createFileRoute("/assignments/$documentId")({
   component: AssignmentShow,
@@ -8,7 +9,12 @@ export const Route = createFileRoute("/assignments/$documentId")({
 
 function AssignmentShow() {
   const { documentId } = useParams({ from: "/assignments/$documentId" });
-  const assignments = useQuery(api.assignments.list);
+
+  const user = getCurrentUser();
+  const assignments = useQuery(
+    api.assignments?.list,
+    user?._id ? { userId: user._id } : "skip",
+  );
 
   if (!documentId) {
     return <div className="p-4">No assignment id provided.</div>;
