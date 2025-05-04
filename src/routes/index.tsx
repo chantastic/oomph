@@ -12,7 +12,7 @@ export const Route = createFileRoute("/")({
 });
 
 function Index() {
-  const { isLoading, isAuthenticated } = useConvexAuth();
+  const { isAuthenticated } = useConvexAuth();
 
   const resources = [
     { name: "/assignees", path: "/assignees" },

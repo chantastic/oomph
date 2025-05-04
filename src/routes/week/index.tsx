@@ -63,7 +63,7 @@ export const Route = createFileRoute("/week/")({
 function WeekView() {
   const user = getCurrentUser();
 
-  // @ts-expect-error: assignments may not be in the generated API until convex dev is run
+  // assignments may not be in the generated API until convex dev is run
   const scheduledTasks = useQuery(
     api.assignments?.list,
     user?._id ? { userId: user._id } : "skip",

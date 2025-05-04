@@ -124,11 +124,7 @@ function parseField(field: string, isDayOfWeek: boolean = false): number[] {
   return values;
 }
 
-function matchesField(
-  cronValues: number[],
-  currentValue: number,
-  fieldName: string,
-): boolean {
+function matchesField(cronValues: number[], currentValue: number): boolean {
   if (cronValues.includes(-1)) {
     return true;
   }
@@ -168,16 +164,14 @@ export const getTasksForToday = query({
         const validMonths = parseField(month);
         const validDaysOfMonth = parseField(dayMonth);
         const validDaysOfWeek = parseField(dayWeek, true);
-        const monthMatches = matchesField(validMonths, currentMonth, "Month");
+        const monthMatches = matchesField(validMonths, currentMonth);
         const dayOfMonthMatches = matchesField(
           validDaysOfMonth,
           currentDayOfMonth,
-          "DayOfMonth",
         );
         const dayOfWeekMatches = matchesField(
           validDaysOfWeek,
           currentDayOfWeek,
-          "DayOfWeek",
         );
         const isDayOfWeekWildcard = validDaysOfWeek.includes(-1);
         const finalResult =

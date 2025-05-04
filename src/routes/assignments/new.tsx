@@ -5,16 +5,6 @@ import { useState } from "react";
 import { Id } from "../../../convex/_generated/dataModel";
 import { getCurrentUser } from "@/utils/auth";
 
-interface Assignee {
-  _id: Id<"assignees">;
-  name: string;
-}
-
-interface Task {
-  _id: Id<"tasks">;
-  title: string;
-}
-
 export const Route = createFileRoute("/assignments/new")({
   component: () => {
     const navigate = useNavigate();
