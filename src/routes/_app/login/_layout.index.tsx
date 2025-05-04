@@ -166,13 +166,23 @@ function LoginForm({ onSubmit }: { onSubmit: (email: string) => void }) {
 
 function VerifyForm({ email }: { email: string }) {
   const { signIn } = useAuthActions();
+  const [error, setError] = useState<string | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const form = useForm({
     validatorAdapter: zodValidator(),
     defaultValues: {
       code: "",
     },
     onSubmit: async ({ value }) => {
-      await signIn("resend-otp", { email, code: value.code });
+      setError(null);
+      setIsSubmitting(true);
+      try {
+        await signIn("resend-otp", { email, code: value.code });
+      } catch (err: any) {
+        setError(err?.message || "Failed to sign in. Please try again.");
+      } finally {
+        setIsSubmitting(false);
+      }
     },
   });
   return (
@@ -204,43 +214,34 @@ function VerifyForm({ email }: { email: string }) {
                 .string()
                 .min(8, "Code must be at least 8 characters."),
             }}
-            children={(field) => {
-              return (
-                <Input
-                  placeholder="Code"
-                  value={field.state.value}
-                  onBlur={field.handleBlur}
-                  onChange={(e) => field.handleChange(e.target.value)}
-                  className={`bg-transparent ${
-                    field.state.meta?.errors.length > 0 &&
-                    "border-destructive focus-visible:ring-destructive"
-                  }`}
-                />
-              );
-            }}
+            children={(field) => (
+              <Input
+                placeholder="Code"
+                value={field.state.value}
+                onBlur={field.handleBlur}
+                onChange={(e) => field.handleChange(e.target.value)}
+                className={`bg-transparent ${field.state.meta?.errors.length > 0 && "border-destructive focus-visible:ring-destructive"}`}
+                disabled={isSubmitting}
+              />
+            )}
           />
         </div>
-
         <div className="flex flex-col">
           {form.state.fieldMeta.code?.errors.length > 0 && (
             <span className="mb-2 text-sm text-destructive dark:text-destructive-foreground">
               {form.state.fieldMeta.code?.errors.join(" ")}
             </span>
           )}
-          {/*
-          {!authEmail && authError && (
+          {error && (
             <span className="mb-2 text-sm text-destructive dark:text-destructive-foreground">
-              {authError.message}
+              {error}
             </span>
           )}
-          */}
         </div>
-
-        <Button type="submit" className="w-full">
-          Continue
+        <Button type="submit" className="w-full" disabled={isSubmitting}>
+          {isSubmitting ? <Loader2 className="animate-spin" /> : "Continue"}
         </Button>
       </form>
-
       {/* Request New Code. */}
       <div className="flex w-full flex-col">
         <p className="text-center text-sm font-normal text-primary/60">
@@ -250,6 +251,7 @@ function VerifyForm({ email }: { email: string }) {
           onClick={() => signIn("resend-otp", { email })}
           variant="ghost"
           className="w-full hover:bg-transparent"
+          disabled={isSubmitting}
         >
           Request New Code
         </Button>

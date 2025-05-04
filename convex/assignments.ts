@@ -5,9 +5,7 @@ import { v } from "convex/values";
 import { isValidCron } from "cron-validator";
 
 export const list = query({
-  args: {
-    userId: v.id("users"),
-  },
+  args: {},
   returns: v.array(
     v.object({
       _id: v.id("assignments"),
@@ -19,36 +17,12 @@ export const list = query({
         _id: v.id("assignees"),
         _creationTime: v.number(),
         name: v.string(),
-        userId: v.id("users"),
+        userId: v.optional(v.id("users")),
       }),
     }),
   ),
-  handler: async (ctx, args) => {
-    // Get all assignees that belong to this user
-    const userAssignees = await ctx.db
-      .query("user_assignees")
-      .withIndex("by_user", (q) => q.eq("userId", args.userId))
-      .collect();
-
-    // If no relationships exist, return empty array
-    if (userAssignees.length === 0) {
-      return [];
-    }
-
-    // Get all assignee IDs that this user has access to
-    const assigneeIds = userAssignees.map((ua) => ua.assigneeId);
-
-    // Get all assignments for these assignees
-    const assignments = await Promise.all(
-      assigneeIds.map((assigneeId) =>
-        ctx.db
-          .query("assignments")
-          .withIndex("by_assignee", (q) => q.eq("assigneeId", assigneeId))
-          .collect(),
-      ),
-    ).then((results) => results.flat());
-
-    // Add assignee details to each assignment
+  handler: async (ctx) => {
+    const assignments = await ctx.db.query("assignments").collect();
     const assignmentsWithRelations = await Promise.all(
       assignments.map(async (assignment) => {
         const assignee = await ctx.db.get(assignment.assigneeId);
@@ -144,6 +118,7 @@ export const getTasksForToday = query({
         _id: v.id("assignees"),
         _creationTime: v.number(),
         name: v.string(),
+        userId: v.optional(v.id("users")),
       }),
     }),
   ),
@@ -184,6 +159,190 @@ export const getTasksForToday = query({
     });
     const assignmentsWithRelations = await Promise.all(
       todayAssignments.map(async (assignment) => {
+        const assignee = await ctx.db.get(assignment.assigneeId);
+        if (!assignee) {
+          throw new Error("Missing related data");
+        }
+        return {
+          ...assignment,
+          assignee,
+        };
+      }),
+    );
+    return assignmentsWithRelations;
+  },
+});
+
+export const listUniqueTitles = query({
+  args: {},
+  returns: v.array(
+    v.object({
+      title: v.string(),
+      _creationTime: v.number(),
+    }),
+  ),
+  handler: async (ctx) => {
+    const assignments = await ctx.db
+      .query("assignments")
+      .order("desc")
+      .collect();
+    const seen = new Set<string>();
+    const uniqueTitles: Array<{ title: string; _creationTime: number }> = [];
+    for (const assignment of assignments) {
+      if (!seen.has(assignment.title)) {
+        seen.add(assignment.title);
+        uniqueTitles.push({
+          title: assignment.title,
+          _creationTime: assignment._creationTime,
+        });
+      }
+    }
+    return uniqueTitles;
+  },
+});
+
+export const listByAssignee = query({
+  args: { assigneeId: v.id("assignees") },
+  returns: v.array(
+    v.object({
+      _id: v.id("assignments"),
+      _creationTime: v.number(),
+      assigneeId: v.id("assignees"),
+      cronSchedule: v.string(),
+      title: v.string(),
+      assignee: v.object({
+        _id: v.id("assignees"),
+        _creationTime: v.number(),
+        name: v.string(),
+        userId: v.optional(v.id("users")),
+      }),
+    }),
+  ),
+  handler: async (ctx, args) => {
+    const assignments = await ctx.db
+      .query("assignments")
+      .withIndex("by_assignee", (q) => q.eq("assigneeId", args.assigneeId))
+      .collect();
+    const assignmentsWithRelations = await Promise.all(
+      assignments.map(async (assignment) => {
+        const assignee = await ctx.db.get(assignment.assigneeId);
+        if (!assignee) {
+          throw new Error("Missing related data");
+        }
+        return {
+          ...assignment,
+          assignee,
+        };
+      }),
+    );
+    return assignmentsWithRelations;
+  },
+});
+
+export const listForAssigneeWeekView = query({
+  args: {
+    assigneeId: v.id("assignees"),
+    start: v.number(),
+    end: v.number(),
+  },
+  returns: v.array(
+    v.object({
+      _id: v.id("assignments"),
+      _creationTime: v.number(),
+      assigneeId: v.id("assignees"),
+      cronSchedule: v.string(),
+      title: v.string(),
+      assignee: v.object({
+        _id: v.id("assignees"),
+        _creationTime: v.number(),
+        name: v.string(),
+        userId: v.optional(v.id("users")),
+      }),
+    }),
+  ),
+  handler: async (ctx, args) => {
+    // Only return assignments for the given assignee
+    const assignments = await ctx.db
+      .query("assignments")
+      .withIndex("by_assignee", (q) => q.eq("assigneeId", args.assigneeId))
+      .collect();
+    // (Optional: could filter by week if assignments had a date, but cronSchedule is used for recurrence)
+    const assignmentsWithRelations = await Promise.all(
+      assignments.map(async (assignment) => {
+        const assignee = await ctx.db.get(assignment.assigneeId);
+        if (!assignee) {
+          throw new Error("Missing related data");
+        }
+        return {
+          ...assignment,
+          assignee,
+        };
+      }),
+    );
+    return assignmentsWithRelations;
+  },
+});
+
+export const listForAssigneeDayView = query({
+  args: {
+    assigneeId: v.id("assignees"),
+    dayEpoch: v.number(), // ms since epoch, start of day
+  },
+  returns: v.array(
+    v.object({
+      _id: v.id("assignments"),
+      _creationTime: v.number(),
+      assigneeId: v.id("assignees"),
+      cronSchedule: v.string(),
+      title: v.string(),
+      assignee: v.object({
+        _id: v.id("assignees"),
+        _creationTime: v.number(),
+        name: v.string(),
+        userId: v.optional(v.id("users")),
+      }),
+    }),
+  ),
+  handler: async (ctx, args) => {
+    const assignments = await ctx.db
+      .query("assignments")
+      .withIndex("by_assignee", (q) => q.eq("assigneeId", args.assigneeId))
+      .collect();
+    // Determine the day of week for the given dayEpoch (0=Sunday)
+    const date = new Date(args.dayEpoch);
+    const dayOfWeek = date.getDay();
+    // Filter assignments by cronSchedule for this day
+    function isDayScheduled(cronSchedule: string, dayOfWeek: number): boolean {
+      try {
+        const [, , , , dayField] = cronSchedule.split(" ");
+        if (dayField === "*") return true;
+        const days = dayField.split(",").flatMap((part: string) => {
+          if (part.includes("-")) {
+            const [start, end] = part.split("-").map(Number);
+            if (start > end) {
+              const range = [];
+              for (let i = start; i <= 6; i++) range.push(i);
+              for (let i = 0; i <= end; i++) range.push(i);
+              return range;
+            }
+            return Array.from(
+              { length: end - start + 1 },
+              (_, i) => start + i,
+            ).map((d) => (d === 7 ? 0 : d));
+          }
+          const day = Number(part);
+          return [day === 7 ? 0 : day];
+        });
+        return days.includes(dayOfWeek);
+      } catch (e) {
+        return false;
+      }
+    }
+    const filtered = assignments.filter((a) =>
+      isDayScheduled(a.cronSchedule, dayOfWeek),
+    );
+    const assignmentsWithRelations = await Promise.all(
+      filtered.map(async (assignment) => {
         const assignee = await ctx.db.get(assignment.assigneeId);
         if (!assignee) {
           throw new Error("Missing related data");

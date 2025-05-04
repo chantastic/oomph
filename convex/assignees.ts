@@ -63,3 +63,19 @@ export const create = mutation({
     return assigneeId;
   },
 });
+
+export const getById = query({
+  args: { assigneeId: v.id("assignees") },
+  returns: v.optional(
+    v.object({
+      _id: v.id("assignees"),
+      _creationTime: v.number(),
+      name: v.string(),
+      userId: v.id("users"),
+    }),
+  ),
+  handler: async (ctx, { assigneeId }) => {
+    const assignee = await ctx.db.get(assigneeId);
+    return assignee === null ? undefined : assignee;
+  },
+});

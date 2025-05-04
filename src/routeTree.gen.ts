@@ -21,7 +21,10 @@ import { Route as AssigneesIndexImport } from './routes/assignees/index'
 import { Route as AssignmentsNewImport } from './routes/assignments/new'
 import { Route as AssignmentsDocumentIdImport } from './routes/assignments/$documentId'
 import { Route as AssigneesNewImport } from './routes/assignees/new'
+import { Route as AssigneeLayoutImport } from './routes/assignee/_layout'
 import { Route as AppAuthImport } from './routes/_app/_auth'
+import { Route as AssigneeAssigneeidIndexImport } from './routes/assignee/$assignee_id/index'
+import { Route as AssigneeAssigneeidWeekImport } from './routes/assignee/$assignee_id/week'
 import { Route as AppLoginLayoutImport } from './routes/_app/login/_layout'
 import { Route as AppLoginLayoutIndexImport } from './routes/_app/login/_layout.index'
 import { Route as AppAuthOnboardingLayoutImport } from './routes/_app/_auth/onboarding/_layout'
@@ -35,11 +38,17 @@ import { Route as AppAuthDashboardLayoutSettingsBillingImport } from './routes/_
 
 // Create Virtual Routes
 
+const AssigneeImport = createFileRoute('/assignee')()
 const AppLoginImport = createFileRoute('/_app/login')()
 const AppAuthOnboardingImport = createFileRoute('/_app/_auth/onboarding')()
 const AppAuthDashboardImport = createFileRoute('/_app/_auth/dashboard')()
 
 // Create/Update Routes
+
+const AssigneeRoute = AssigneeImport.update({
+  path: '/assignee',
+  getParentRoute: () => rootRoute,
+} as any)
 
 const AppRoute = AppImport.update({
   id: '/_app',
@@ -86,6 +95,11 @@ const AssigneesNewRoute = AssigneesNewImport.update({
   getParentRoute: () => rootRoute,
 } as any)
 
+const AssigneeLayoutRoute = AssigneeLayoutImport.update({
+  id: '/_layout',
+  getParentRoute: () => AssigneeRoute,
+} as any)
+
 const AppAuthRoute = AppAuthImport.update({
   id: '/_auth',
   getParentRoute: () => AppRoute,
@@ -99,6 +113,16 @@ const AppAuthOnboardingRoute = AppAuthOnboardingImport.update({
 const AppAuthDashboardRoute = AppAuthDashboardImport.update({
   path: '/dashboard',
   getParentRoute: () => AppAuthRoute,
+} as any)
+
+const AssigneeAssigneeidIndexRoute = AssigneeAssigneeidIndexImport.update({
+  path: '/$assignee_id/',
+  getParentRoute: () => AssigneeRoute,
+} as any)
+
+const AssigneeAssigneeidWeekRoute = AssigneeAssigneeidWeekImport.update({
+  path: '/$assignee_id/week',
+  getParentRoute: () => AssigneeRoute,
 } as any)
 
 const AppLoginLayoutRoute = AppLoginLayoutImport.update({
@@ -182,6 +206,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppAuthImport
       parentRoute: typeof AppImport
     }
+    '/assignee': {
+      id: '/assignee'
+      path: '/assignee'
+      fullPath: '/assignee'
+      preLoaderRoute: typeof AssigneeImport
+      parentRoute: typeof rootRoute
+    }
+    '/assignee/_layout': {
+      id: '/assignee/_layout'
+      path: '/assignee'
+      fullPath: '/assignee'
+      preLoaderRoute: typeof AssigneeLayoutImport
+      parentRoute: typeof AssigneeRoute
+    }
     '/assignees/new': {
       id: '/assignees/new'
       path: '/assignees/new'
@@ -237,6 +275,20 @@ declare module '@tanstack/react-router' {
       fullPath: '/login'
       preLoaderRoute: typeof AppLoginLayoutImport
       parentRoute: typeof AppLoginRoute
+    }
+    '/assignee/$assignee_id/week': {
+      id: '/assignee/$assignee_id/week'
+      path: '/$assignee_id/week'
+      fullPath: '/assignee/$assignee_id/week'
+      preLoaderRoute: typeof AssigneeAssigneeidWeekImport
+      parentRoute: typeof AssigneeImport
+    }
+    '/assignee/$assignee_id/': {
+      id: '/assignee/$assignee_id/'
+      path: '/$assignee_id'
+      fullPath: '/assignee/$assignee_id'
+      preLoaderRoute: typeof AssigneeAssigneeidIndexImport
+      parentRoute: typeof AssigneeImport
     }
     '/_app/_auth/dashboard': {
       id: '/_app/_auth/dashboard'
@@ -347,6 +399,10 @@ export const routeTree = rootRoute.addChildren({
       }),
     }),
   }),
+  AssigneeRoute: AssigneeRoute.addChildren({
+    AssigneeAssigneeidWeekRoute,
+    AssigneeAssigneeidIndexRoute,
+  }),
   AssigneesNewRoute,
   AssignmentsDocumentIdRoute,
   AssignmentsNewRoute,
@@ -365,6 +421,7 @@ export const routeTree = rootRoute.addChildren({
       "children": [
         "/",
         "/_app",
+        "/assignee",
         "/assignees/new",
         "/assignments/$documentId",
         "/assignments/new",
@@ -390,6 +447,18 @@ export const routeTree = rootRoute.addChildren({
         "/_app/_auth/dashboard",
         "/_app/_auth/onboarding"
       ]
+    },
+    "/assignee": {
+      "filePath": "assignee",
+      "children": [
+        "/assignee/_layout",
+        "/assignee/$assignee_id/week",
+        "/assignee/$assignee_id/"
+      ]
+    },
+    "/assignee/_layout": {
+      "filePath": "assignee/_layout.tsx",
+      "parent": "/assignee"
     },
     "/assignees/new": {
       "filePath": "assignees/new.tsx"
@@ -422,6 +491,14 @@ export const routeTree = rootRoute.addChildren({
       "children": [
         "/_app/login/_layout/"
       ]
+    },
+    "/assignee/$assignee_id/week": {
+      "filePath": "assignee/$assignee_id/week.tsx",
+      "parent": "/assignee"
+    },
+    "/assignee/$assignee_id/": {
+      "filePath": "assignee/$assignee_id/index.tsx",
+      "parent": "/assignee"
     },
     "/_app/_auth/dashboard": {
       "filePath": "_app/_auth/dashboard",
