@@ -24,6 +24,7 @@ import { Route as AssigneesNewImport } from './routes/assignees/new'
 import { Route as AssigneeLayoutImport } from './routes/assignee/_layout'
 import { Route as AppAuthImport } from './routes/_app/_auth'
 import { Route as AssigneeAssigneeidIndexImport } from './routes/assignee/$assignee_id/index'
+import { Route as WeekAssigneeAssigneeidImport } from './routes/week/assignee/$assignee_id'
 import { Route as AssigneeAssigneeidWeekImport } from './routes/assignee/$assignee_id/week'
 import { Route as AppLoginLayoutImport } from './routes/_app/login/_layout'
 import { Route as AppLoginLayoutIndexImport } from './routes/_app/login/_layout.index'
@@ -118,6 +119,11 @@ const AppAuthDashboardRoute = AppAuthDashboardImport.update({
 const AssigneeAssigneeidIndexRoute = AssigneeAssigneeidIndexImport.update({
   path: '/$assignee_id/',
   getParentRoute: () => AssigneeRoute,
+} as any)
+
+const WeekAssigneeAssigneeidRoute = WeekAssigneeAssigneeidImport.update({
+  path: '/week/assignee/$assignee_id',
+  getParentRoute: () => rootRoute,
 } as any)
 
 const AssigneeAssigneeidWeekRoute = AssigneeAssigneeidWeekImport.update({
@@ -283,6 +289,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AssigneeAssigneeidWeekImport
       parentRoute: typeof AssigneeImport
     }
+    '/week/assignee/$assignee_id': {
+      id: '/week/assignee/$assignee_id'
+      path: '/week/assignee/$assignee_id'
+      fullPath: '/week/assignee/$assignee_id'
+      preLoaderRoute: typeof WeekAssigneeAssigneeidImport
+      parentRoute: typeof rootRoute
+    }
     '/assignee/$assignee_id/': {
       id: '/assignee/$assignee_id/'
       path: '/$assignee_id'
@@ -409,6 +422,7 @@ export const routeTree = rootRoute.addChildren({
   AssigneesIndexRoute,
   AssignmentsIndexRoute,
   WeekIndexRoute,
+  WeekAssigneeAssigneeidRoute,
 })
 
 /* prettier-ignore-end */
@@ -427,7 +441,8 @@ export const routeTree = rootRoute.addChildren({
         "/assignments/new",
         "/assignees/",
         "/assignments/",
-        "/week/"
+        "/week/",
+        "/week/assignee/$assignee_id"
       ]
     },
     "/": {
@@ -495,6 +510,9 @@ export const routeTree = rootRoute.addChildren({
     "/assignee/$assignee_id/week": {
       "filePath": "assignee/$assignee_id/week.tsx",
       "parent": "/assignee"
+    },
+    "/week/assignee/$assignee_id": {
+      "filePath": "week/assignee/$assignee_id.tsx"
     },
     "/assignee/$assignee_id/": {
       "filePath": "assignee/$assignee_id/index.tsx",

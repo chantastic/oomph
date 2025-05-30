@@ -34,7 +34,7 @@ export const Route = createFileRoute("/assignees/")({
             >
               <div>
                 <Link
-                  to="/assignee/$assignee_id"
+                  to="/week/assignee/$assignee_id"
                   params={{ assignee_id: assignee._id }}
                   className="text-lg text-blue-600 hover:text-blue-800 hover:underline font-medium"
                 >
