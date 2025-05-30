@@ -98,7 +98,7 @@ const schema = defineSchema({
     .index("by_assignment_completedAt", ["assignmentId", "completedAt"]),
   assignees: defineTable({
     name: v.string(),
-    userId: v.id("users"),
+    userId: v.optional(v.id("users")),
   }).index("by_userId", ["userId"]),
   /*
    * user_assignees is a join table that establishes which users have access to which assignees.

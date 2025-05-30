@@ -1,6 +1,5 @@
 import { query, mutation } from "./_generated/server";
 import { v } from "convex/values";
-import { auth } from "./auth";
 
 export const list = query({
   args: {
@@ -11,7 +10,7 @@ export const list = query({
       _id: v.id("assignees"),
       _creationTime: v.number(),
       name: v.string(),
-      userId: v.id("users"),
+      userId: v.optional(v.id("users")),
     }),
   ),
   handler: async (ctx, args) => {
@@ -32,7 +31,7 @@ export const list = query({
       assigneeIds.map(async (assigneeId) => {
         const assignee = await ctx.db.get(assigneeId);
         return assignee || null; // Return null for non-existent assignees
-      })
+      }),
     );
 
     // Filter out any null values
@@ -47,11 +46,9 @@ export const create = mutation({
   },
   returns: v.id("assignees"),
   handler: async (ctx, args) => {
-    const userId = await auth.getUserId(ctx);
-    if (!userId) throw new Error("Not authenticated");
     const assigneeId = await ctx.db.insert("assignees", {
       name: args.name,
-      userId,
+      // userId is optional now, so we don't need to provide it
     });
 
     // Create the user-assignee relationship
@@ -71,7 +68,7 @@ export const getById = query({
       _id: v.id("assignees"),
       _creationTime: v.number(),
       name: v.string(),
-      userId: v.id("users"),
+      userId: v.optional(v.id("users")),
     }),
   ),
   handler: async (ctx, { assigneeId }) => {
