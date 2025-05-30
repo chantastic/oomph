@@ -33,7 +33,13 @@ export const Route = createFileRoute("/assignees/")({
               className="p-4 bg-white rounded-lg shadow flex justify-between items-center"
             >
               <div>
-                <p className="text-lg">{assignee.name}</p>
+                <Link
+                  to="/assignee/$assignee_id"
+                  params={{ assignee_id: assignee._id }}
+                  className="text-lg text-blue-600 hover:text-blue-800 hover:underline font-medium"
+                >
+                  {assignee.name}
+                </Link>
                 <p className="text-sm text-gray-500">
                   Created:{" "}
                   {new Date(assignee._creationTime).toLocaleDateString()}
