@@ -15,12 +15,6 @@ import { createFileRoute } from '@tanstack/react-router'
 import { Route as rootRoute } from './routes/__root'
 import { Route as AppImport } from './routes/_app'
 import { Route as IndexImport } from './routes/index'
-import { Route as WeekIndexImport } from './routes/week/index'
-import { Route as AssignmentsIndexImport } from './routes/assignments/index'
-import { Route as AssigneesIndexImport } from './routes/assignees/index'
-import { Route as AssignmentsNewImport } from './routes/assignments/new'
-import { Route as AssignmentsDocumentIdImport } from './routes/assignments/$documentId'
-import { Route as AssigneesNewImport } from './routes/assignees/new'
 import { Route as AssigneeLayoutImport } from './routes/assignee/_layout'
 import { Route as AppAuthImport } from './routes/_app/_auth'
 import { Route as AssigneeAssigneeidIndexImport } from './routes/assignee/$assignee_id/index'
@@ -64,36 +58,6 @@ const IndexRoute = IndexImport.update({
 const AppLoginRoute = AppLoginImport.update({
   path: '/login',
   getParentRoute: () => AppRoute,
-} as any)
-
-const WeekIndexRoute = WeekIndexImport.update({
-  path: '/week/',
-  getParentRoute: () => rootRoute,
-} as any)
-
-const AssignmentsIndexRoute = AssignmentsIndexImport.update({
-  path: '/assignments/',
-  getParentRoute: () => rootRoute,
-} as any)
-
-const AssigneesIndexRoute = AssigneesIndexImport.update({
-  path: '/assignees/',
-  getParentRoute: () => rootRoute,
-} as any)
-
-const AssignmentsNewRoute = AssignmentsNewImport.update({
-  path: '/assignments/new',
-  getParentRoute: () => rootRoute,
-} as any)
-
-const AssignmentsDocumentIdRoute = AssignmentsDocumentIdImport.update({
-  path: '/assignments/$documentId',
-  getParentRoute: () => rootRoute,
-} as any)
-
-const AssigneesNewRoute = AssigneesNewImport.update({
-  path: '/assignees/new',
-  getParentRoute: () => rootRoute,
 } as any)
 
 const AssigneeLayoutRoute = AssigneeLayoutImport.update({
@@ -225,48 +189,6 @@ declare module '@tanstack/react-router' {
       fullPath: '/assignee'
       preLoaderRoute: typeof AssigneeLayoutImport
       parentRoute: typeof AssigneeRoute
-    }
-    '/assignees/new': {
-      id: '/assignees/new'
-      path: '/assignees/new'
-      fullPath: '/assignees/new'
-      preLoaderRoute: typeof AssigneesNewImport
-      parentRoute: typeof rootRoute
-    }
-    '/assignments/$documentId': {
-      id: '/assignments/$documentId'
-      path: '/assignments/$documentId'
-      fullPath: '/assignments/$documentId'
-      preLoaderRoute: typeof AssignmentsDocumentIdImport
-      parentRoute: typeof rootRoute
-    }
-    '/assignments/new': {
-      id: '/assignments/new'
-      path: '/assignments/new'
-      fullPath: '/assignments/new'
-      preLoaderRoute: typeof AssignmentsNewImport
-      parentRoute: typeof rootRoute
-    }
-    '/assignees/': {
-      id: '/assignees/'
-      path: '/assignees'
-      fullPath: '/assignees'
-      preLoaderRoute: typeof AssigneesIndexImport
-      parentRoute: typeof rootRoute
-    }
-    '/assignments/': {
-      id: '/assignments/'
-      path: '/assignments'
-      fullPath: '/assignments'
-      preLoaderRoute: typeof AssignmentsIndexImport
-      parentRoute: typeof rootRoute
-    }
-    '/week/': {
-      id: '/week/'
-      path: '/week'
-      fullPath: '/week'
-      preLoaderRoute: typeof WeekIndexImport
-      parentRoute: typeof rootRoute
     }
     '/_app/login': {
       id: '/_app/login'
@@ -416,12 +338,6 @@ export const routeTree = rootRoute.addChildren({
     AssigneeAssigneeidWeekRoute,
     AssigneeAssigneeidIndexRoute,
   }),
-  AssigneesNewRoute,
-  AssignmentsDocumentIdRoute,
-  AssignmentsNewRoute,
-  AssigneesIndexRoute,
-  AssignmentsIndexRoute,
-  WeekIndexRoute,
   WeekAssigneeAssigneeidRoute,
 })
 
@@ -436,12 +352,6 @@ export const routeTree = rootRoute.addChildren({
         "/",
         "/_app",
         "/assignee",
-        "/assignees/new",
-        "/assignments/$documentId",
-        "/assignments/new",
-        "/assignees/",
-        "/assignments/",
-        "/week/",
         "/week/assignee/$assignee_id"
       ]
     },
@@ -474,24 +384,6 @@ export const routeTree = rootRoute.addChildren({
     "/assignee/_layout": {
       "filePath": "assignee/_layout.tsx",
       "parent": "/assignee"
-    },
-    "/assignees/new": {
-      "filePath": "assignees/new.tsx"
-    },
-    "/assignments/$documentId": {
-      "filePath": "assignments/$documentId.tsx"
-    },
-    "/assignments/new": {
-      "filePath": "assignments/new.tsx"
-    },
-    "/assignees/": {
-      "filePath": "assignees/index.tsx"
-    },
-    "/assignments/": {
-      "filePath": "assignments/index.tsx"
-    },
-    "/week/": {
-      "filePath": "week/index.tsx"
     },
     "/_app/login": {
       "filePath": "_app/login",

@@ -39,6 +39,23 @@ export const list = query({
   },
 });
 
+// New function to list all assignees without authentication
+export const listAll = query({
+  args: {},
+  returns: v.array(
+    v.object({
+      _id: v.id("assignees"),
+      _creationTime: v.number(),
+      name: v.string(),
+      userId: v.optional(v.id("users")),
+    }),
+  ),
+  handler: async (ctx) => {
+    const assignees = await ctx.db.query("assignees").collect();
+    return assignees;
+  },
+});
+
 export const create = mutation({
   args: {
     name: v.string(),
@@ -55,6 +72,22 @@ export const create = mutation({
     await ctx.db.insert("user_assignees", {
       userId: args.userId,
       assigneeId: assigneeId,
+    });
+
+    return assigneeId;
+  },
+});
+
+// New function to create assignees without authentication
+export const createSimple = mutation({
+  args: {
+    name: v.string(),
+  },
+  returns: v.id("assignees"),
+  handler: async (ctx, args) => {
+    const assigneeId = await ctx.db.insert("assignees", {
+      name: args.name,
+      // No userId needed for simple creation
     });
 
     return assigneeId;
