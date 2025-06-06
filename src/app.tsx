@@ -7,8 +7,7 @@ import { router } from "@/router";
 import { ConvexAuthProvider } from "@convex-dev/auth/react";
 import "@/i18n";
 
-const convexUrl =
-  import.meta.env.VITE_CONVEX_URL || "https://brazen-snake-307.convex.cloud";
+const convexUrl = import.meta.env.VITE_CONVEX_URL;
 const convex = new ConvexReactClient(convexUrl);
 
 const convexQueryClient = new ConvexQueryClient(convex);
