@@ -8,6 +8,8 @@ import { ConvexAuthProvider } from "@convex-dev/auth/react";
 import "@/i18n";
 
 // Convex client
+console.log("VITE_CONVEX_URL:", import.meta.env.VITE_CONVEX_URL);
+console.log("All env vars:", import.meta.env);
 const convex = new ConvexReactClient(import.meta.env.VITE_CONVEX_URL as string);
 
 const convexQueryClient = new ConvexQueryClient(convex);
