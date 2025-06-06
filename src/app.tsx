@@ -14,14 +14,16 @@ console.log("All env vars:", import.meta.env);
 console.log("NODE_ENV:", import.meta.env.NODE_ENV);
 console.log("MODE:", import.meta.env.MODE);
 
-// For now, let's see what we get from build-time injection
-const convexUrl =
-  import.meta.env.VITE_CONVEX_URL || "https://brazen-snake-307.convex.cloud";
-console.log("📡 Using Convex URL:", convexUrl);
-
-if (!import.meta.env.VITE_CONVEX_URL) {
-  console.error("❌ VITE_CONVEX_URL is not set! Using dev URL as fallback.");
+// Environment-only approach like your authkit pattern
+function getConvexUrl() {
+  if (!import.meta.env.VITE_CONVEX_URL) {
+    throw new Error("VITE_CONVEX_URL not set");
+  }
+  return import.meta.env.VITE_CONVEX_URL;
 }
+
+const convexUrl = getConvexUrl();
+console.log("📡 Using Convex URL:", convexUrl);
 
 const convex = new ConvexReactClient(convexUrl);
 
