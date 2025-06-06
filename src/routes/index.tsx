@@ -1,6 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { Logo } from "../ui/logo";
-import { cn } from "@/utils/misc";
 import { buttonVariants } from "@/ui/button-util";
 import { ThemeSwitcherHome } from "@/ui/theme-switcher";
 import { useConvexAuth } from "@convex-dev/react-query";
@@ -197,7 +196,7 @@ function Index() {
                       No assignees available yet.
                     </p>
                     <button
-                      onClick={() => setOpen(true)}
+                      onClick={() => setIsModalOpen(true)}
                       className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 font-medium"
                     >
                       Create Your First Assignee

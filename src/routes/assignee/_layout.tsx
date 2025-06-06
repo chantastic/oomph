@@ -14,8 +14,9 @@ export const Route = createFileRoute("/assignee/_layout")({
 
 function AssigneeLayout() {
   const { assignee_id } = useParams({ from: "/assignee/$assignee_id" });
-  const assignee = useQuery(api.assignees.list, undefined)?.find(
-    (a) => a._id === assignee_id,
+  const assignee = useQuery(
+    api.assignees.getById,
+    assignee_id ? { assigneeId: assignee_id } : "skip",
   );
 
   return (
