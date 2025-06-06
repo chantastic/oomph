@@ -3,10 +3,3 @@ name = "oomph"
 pages_build_output_dir = "./dist"
 compatibility_flags = ["nodejs_compat"]
 compatibility_date = "2024-11-13"
-
-[build]
-command = "npm run build"
-
-[build.environment_variables]
-# This ensures build-time environment variables are available
-VITE_CONVEX_URL = "$VITE_CONVEX_URL"
