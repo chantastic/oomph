@@ -14,6 +14,7 @@ import type {
   FunctionReference,
 } from "convex/server";
 import type * as assignees from "../assignees.js";
+import type * as assignments from "../assignments.js";
 
 /**
  * A utility for referencing Convex functions in your app's API.
@@ -25,6 +26,7 @@ import type * as assignees from "../assignees.js";
  */
 declare const fullApi: ApiFromModules<{
   assignees: typeof assignees;
+  assignments: typeof assignments;
 }>;
 export declare const api: FilterApi<
   typeof fullApi,

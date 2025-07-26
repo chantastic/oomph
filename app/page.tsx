@@ -15,6 +15,7 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import Link from "next/link";
 
 function AddAssigneeDialog() {
   const [name, setName] = useState("");
@@ -90,9 +91,12 @@ export default function Home() {
         
         <div className="space-y-4">
           {assignees?.map(({ _id, name }) => (
-            <div key={_id} className="p-4 border rounded-lg">
-              {name}
-            </div>
+            <Link key={_id} href={`/assignee/${_id}`}>
+              <div className="p-4 border rounded-lg hover:bg-gray-50 transition-colors cursor-pointer">
+                <h3 className="font-medium">{name}</h3>
+                <p className="text-sm text-muted-foreground">Click to view assignments</p>
+              </div>
+            </Link>
           ))}
           {assignees?.length === 0 && (
             <div className="text-center text-muted-foreground py-8">
