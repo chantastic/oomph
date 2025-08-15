@@ -1,7 +1,7 @@
 "use client";
 
 import { useParams } from "next/navigation";
-import { useQuery } from "convex/react";
+import { useQuery, useMutation } from "convex/react";
 import { api } from "../../../convex/_generated/api";
 import { Id } from "../../../convex/_generated/dataModel";
 import Link from "next/link";
@@ -15,6 +15,20 @@ export default function AssigneePage() {
   
   const assignee = useQuery(api.assignments.getAssignee, { assigneeId });
   const assignments = useQuery(api.assignments.getByAssignee, { assigneeId });
+  const today = new Date();
+  const startOfDay = new Date(today);
+  startOfDay.setHours(0, 0, 0, 0);
+  const endOfDay = new Date(today);
+  endOfDay.setHours(23, 59, 59, 999);
+  const completions = useQuery(api.assignments.getCompletionsForAssigneeBetween, {
+    assigneeId,
+    startMs: startOfDay.getTime(),
+    endMs: endOfDay.getTime(),
+  });
+
+  const createCompletion = useMutation(api.assignments.createCompletion);
+  const deleteCompletion = useMutation(api.assignments.deleteCompletion);
+  const deleteCompletionById = useMutation(api.assignments.deleteCompletionById);
 
   if (!assignee) {
     return (
@@ -80,14 +94,51 @@ export default function AssigneePage() {
                   );
                   return todaysAssignments.length > 0 ? (
                     <div className="space-y-4">
-                      {todaysAssignments.map((assignment) => (
-                        <div key={assignment._id} className="p-4 border rounded-lg">
-                          <h3 className="font-medium mb-2">{assignment.title}</h3>
-                          <p className="text-sm text-muted-foreground">
-                            Schedule: {assignment.cronSchedule}
-                          </p>
-                        </div>
-                      ))}
+                      {todaysAssignments.map((assignment) => {
+                        const matchingCompletion = completions
+                          ? completions.find(
+                              (c) => c.assignmentId.toString() === assignment._id.toString()
+                            )
+                          : undefined;
+                        const completed = !!matchingCompletion;
+                        return (
+                          <div
+                            key={assignment._id}
+                            className={`p-4 border rounded-lg cursor-pointer ${
+                              completed ? "bg-green-50" : "bg-white"
+                            }`}
+                            onClick={async () => {
+                              try {
+                                const startOfDayTs = startOfDay.getTime();
+                                if (completed) {
+                                  if (matchingCompletion && matchingCompletion._id) {
+                                    await deleteCompletionById({
+                                      completionId: matchingCompletion._id,
+                                    });
+                                  } else {
+                                    await deleteCompletion({
+                                      assignmentId: assignment._id,
+                                      completedAt: startOfDayTs,
+                                    });
+                                  }
+                                } else {
+                                  await createCompletion({
+                                    assignmentId: assignment._id,
+                                    completedAt: startOfDayTs,
+                                  });
+                                }
+                              } catch (err) {
+                                console.error("Failed to toggle completion", err);
+                              }
+                            }}
+                          >
+                            <h3 className="font-medium mb-2">{assignment.title}</h3>
+                            <p className="text-sm text-muted-foreground">
+                              Schedule: {assignment.cronSchedule}
+                            </p>
+                          </div>
+                        );
+                      })}
                     </div>
                   ) : (
                     <div className="text-center text-muted-foreground py-8">

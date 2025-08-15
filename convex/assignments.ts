@@ -60,3 +60,50 @@ export const getCompletionsForAssigneeBetween = query({
     return filtered;
   },
 });
+
+export const createCompletion = mutation({
+  args: {
+    assignmentId: v.id("assignments"),
+    completedAt: v.number(),
+  },
+  handler: async (ctx, args) => {
+    return await ctx.db.insert("assignment_completions", {
+      assignmentId: args.assignmentId,
+      completedAt: args.completedAt,
+    });
+  },
+});
+
+export const deleteCompletion = mutation({
+  args: {
+    assignmentId: v.id("assignments"),
+    completedAt: v.number(),
+  },
+  handler: async (ctx, args) => {
+    // Find completions that match the assignmentId and exact completedAt timestamp
+    const matches = await ctx.db
+      .query("assignment_completions")
+      .withIndex("by_assignment_completedAt", (q) =>
+        q.eq("assignmentId", args.assignmentId).eq("completedAt", args.completedAt)
+      )
+      .collect();
+
+    for (const m of matches) {
+      await ctx.db.delete(m._id);
+    }
+
+    return { deleted: matches.length };
+  },
+});
+
+export const deleteCompletionById = mutation({
+  args: {
+    completionId: v.id("assignment_completions"),
+  },
+  handler: async (ctx, args) => {
+    // Delete the completion document by its id. Callers should ensure they
+    // only delete completions they are authorized to remove.
+    await ctx.db.delete(args.completionId);
+    return { deleted: 1 };
+  },
+});

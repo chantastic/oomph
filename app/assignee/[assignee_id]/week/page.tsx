@@ -1,7 +1,7 @@
 "use client";
 
 import { useParams } from "next/navigation";
-import { useQuery } from "convex/react";
+import { useQuery, useMutation } from "convex/react";
 import { api } from "../../../../convex/_generated/api";
 import { Id } from "../../../../convex/_generated/dataModel";
 import Link from "next/link";
@@ -43,6 +43,10 @@ export default function WeekViewPage() {
       endMs: endOfWeek.getTime(),
     }
   );
+
+  const createCompletion = useMutation(api.assignments.createCompletion);
+  const deleteCompletion = useMutation(api.assignments.deleteCompletion);
+  const deleteCompletionById = useMutation(api.assignments.deleteCompletionById);
 
   // Helper function to get day name
   const getDayName = (date: Date) => {
@@ -186,13 +190,13 @@ export default function WeekViewPage() {
                               date
                             );
                             // find if completion exists for that assignment on that date
-                            let completed = false;
+                            let matchingCompletion: any = undefined;
                             if (completions) {
                               const startOfDay = new Date(date);
                               startOfDay.setHours(0, 0, 0, 0);
                               const endOfDay = new Date(date);
                               endOfDay.setHours(23, 59, 59, 999);
-                              completed = completions.some(
+                              matchingCompletion = completions.find(
                                 (c) =>
                                   c.assignmentId.toString() ===
                                     assignment._id.toString() &&
@@ -200,10 +204,40 @@ export default function WeekViewPage() {
                                   c.completedAt <= endOfDay.getTime()
                               );
                             }
+                            const completed = !!matchingCompletion;
                             return (
                               <td
                                 key={idx}
                                 className="border px-3 py-2 text-center align-top h-14 leading-tight"
+                                onClick={async () => {
+                                  if (!visible) return;
+                                  try {
+                                    const startOfDay = new Date(date);
+                                    startOfDay.setHours(0, 0, 0, 0);
+                                    if (completed) {
+                                      // Delete the specific completion by id
+                                      if (matchingCompletion && matchingCompletion._id) {
+                                        await deleteCompletionById({
+                                          completionId: matchingCompletion._id,
+                                        });
+                                      } else {
+                                        // Fallback to older deletion API if id not available
+                                        await deleteCompletion({
+                                          assignmentId: assignment._id,
+                                          completedAt: startOfDay.getTime(),
+                                        });
+                                      }
+                                    } else {
+                                      // Create completion for this specific day cell
+                                      await createCompletion({
+                                        assignmentId: assignment._id,
+                                        completedAt: startOfDay.getTime(),
+                                      });
+                                    }
+                                  } catch (err) {
+                                    console.error("Failed to toggle completion", err);
+                                  }
+                                }}
                               >
                                 {visible ? (
                                   <div className="leading-tight">
