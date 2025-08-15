@@ -7,6 +7,7 @@ import { Id } from "../../../convex/_generated/dataModel";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { AddAssignmentForm } from "@/components/add-assignment-form";
+import { shouldShowAssignmentOnDate } from "@/lib/utils";
 
 export default function AssigneePage() {
   const params = useParams();
@@ -38,8 +39,22 @@ export default function AssigneePage() {
               </Button>
             </Link>
           </div>
-          <h1 className="text-3xl font-bold mb-2">{assignee.name}</h1>
-          <p className="text-muted-foreground">Assignee Details</p>
+          <div className="flex items-center justify-between mb-4">
+            <div>
+              <h1 className="text-3xl font-bold mb-2">{assignee.name}</h1>
+              <p className="text-muted-foreground">Day View</p>
+            </div>
+            <div className="flex gap-2">
+              <Button size="sm" disabled>
+                Day View
+              </Button>
+              <Link href={`/assignee/${assigneeId}/week`}>
+                <Button variant="outline" size="sm">
+                  Week View
+                </Button>
+              </Link>
+            </div>
+          </div>
         </div>
         
         <div className="space-y-6">
@@ -58,16 +73,28 @@ export default function AssigneePage() {
             
             <div className="mt-6">
               {assignments && assignments.length > 0 ? (
-                <div className="space-y-4">
-                  {assignments.map((assignment) => (
-                    <div key={assignment._id} className="p-4 border rounded-lg">
-                      <h3 className="font-medium mb-2">{assignment.title}</h3>
-                      <p className="text-sm text-muted-foreground">
-                        Schedule: {assignment.cronSchedule}
-                      </p>
+                (() => {
+                  const today = new Date();
+                  const todaysAssignments = assignments.filter(a =>
+                    shouldShowAssignmentOnDate(a.cronSchedule, today)
+                  );
+                  return todaysAssignments.length > 0 ? (
+                    <div className="space-y-4">
+                      {todaysAssignments.map((assignment) => (
+                        <div key={assignment._id} className="p-4 border rounded-lg">
+                          <h3 className="font-medium mb-2">{assignment.title}</h3>
+                          <p className="text-sm text-muted-foreground">
+                            Schedule: {assignment.cronSchedule}
+                          </p>
+                        </div>
+                      ))}
                     </div>
-                  ))}
-                </div>
+                  ) : (
+                    <div className="text-center text-muted-foreground py-8">
+                      No assignments scheduled for today.
+                    </div>
+                  );
+                })()
               ) : (
                 <div className="text-center text-muted-foreground py-8">
                   No assignments found for this assignee.
