@@ -6,6 +6,7 @@ import { api } from "../../../convex/_generated/api";
 import { Id } from "../../../convex/_generated/dataModel";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
+import { AddAssignmentForm } from "@/components/add-assignment-form";
 
 export default function AssigneePage() {
   const params = useParams();
@@ -43,23 +44,36 @@ export default function AssigneePage() {
         
         <div className="space-y-6">
           <div>
-            <h2 className="text-xl font-semibold mb-4">Assignments</h2>
-            {assignments && assignments.length > 0 ? (
-              <div className="space-y-4">
-                {assignments.map((assignment) => (
-                  <div key={assignment._id} className="p-4 border rounded-lg">
-                    <h3 className="font-medium mb-2">{assignment.title}</h3>
-                    <p className="text-sm text-muted-foreground">
-                      Schedule: {assignment.cronSchedule}
-                    </p>
-                  </div>
-                ))}
-              </div>
-            ) : (
-              <div className="text-center text-muted-foreground py-8">
-                No assignments found for this assignee.
-              </div>
-            )}
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-xl font-semibold">Assignments</h2>
+            </div>
+            
+            <AddAssignmentForm 
+              assigneeId={assigneeId} 
+              onSuccess={() => {
+                // This will trigger a re-fetch of assignments
+                // since Convex automatically updates the UI
+              }}
+            />
+            
+            <div className="mt-6">
+              {assignments && assignments.length > 0 ? (
+                <div className="space-y-4">
+                  {assignments.map((assignment) => (
+                    <div key={assignment._id} className="p-4 border rounded-lg">
+                      <h3 className="font-medium mb-2">{assignment.title}</h3>
+                      <p className="text-sm text-muted-foreground">
+                        Schedule: {assignment.cronSchedule}
+                      </p>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="text-center text-muted-foreground py-8">
+                  No assignments found for this assignee.
+                </div>
+              )}
+            </div>
           </div>
         </div>
       </div>
