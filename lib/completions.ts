@@ -1,10 +1,10 @@
 // Utilities for efficient completion lookups and toggling
-export function buildDayLookup(completions) {
+export function buildDayLookup(completions: any[]) {
   const map = new Map();
   for (const c of completions) {
     try {
       const assignmentId = c.assignmentId.toString();
-      const d = new Date(c.completedAt);
+      const d = new Date(c.time);
       d.setHours(0, 0, 0, 0);
       const key = `${assignmentId}-${d.getTime()}`;
       map.set(key, c);
@@ -15,7 +15,7 @@ export function buildDayLookup(completions) {
   return map;
 }
 
-export function buildAssignmentLookup(completions) {
+export function buildAssignmentLookup(completions: any[]) {
   const map = new Map();
   for (const c of completions) {
     try {
@@ -28,10 +28,10 @@ export function buildAssignmentLookup(completions) {
 }
 
 export async function toggleCompletion(
-  mutations,
-  assignmentId,
-  date,
-  matchingCompletion
+  mutations: any,
+  assignmentId: any,
+  date: any,
+  matchingCompletion: any
 ) {
   const { createCompletion, deleteCompletion, deleteCompletionById } = mutations;
   const startOfDay = new Date(date);
@@ -41,10 +41,10 @@ export async function toggleCompletion(
     if (matchingCompletion._id) {
       await deleteCompletionById({ completionId: matchingCompletion._id });
     } else {
-      await deleteCompletion({ assignmentId, completedAt: startOfDay.getTime() });
+      await deleteCompletion({ assignmentId, time: startOfDay.getTime() });
     }
   } else {
-    await createCompletion({ assignmentId, completedAt: startOfDay.getTime() });
+    await createCompletion({ assignmentId, time: startOfDay.getTime() });
   }
 }
 

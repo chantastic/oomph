@@ -5,7 +5,7 @@ export const getByAssignee = query({
   args: { assigneeId: v.id("assignees") },
   handler: async (ctx, args) => {
     return await ctx.db
-      .query("assignments")
+      .query("assignee_assignments")
       .withIndex("by_assignee", (q) => q.eq("assigneeId", args.assigneeId))
       .collect();
   },
@@ -25,7 +25,7 @@ export const create = mutation({
     cronSchedule: v.string(),
   },
   handler: async (ctx, args) => {
-    return await ctx.db.insert("assignments", {
+    return await ctx.db.insert("assignee_assignments", {
       assigneeId: args.assigneeId,
       title: args.title,
       cronSchedule: args.cronSchedule,
@@ -42,19 +42,19 @@ export const getCompletionsForAssigneeBetween = query({
   handler: async (ctx, args) => {
     // Get assignments for the assignee
     const assignments = await ctx.db
-      .query("assignments")
+      .query("assignee_assignments")
       .withIndex("by_assignee", (q) => q.eq("assigneeId", args.assigneeId))
       .collect();
 
     const assignmentIds = new Set(assignments.map((a) => a._id.toString()));
 
-    // Query completions in the time window using the `by_completedAt` index,
+    // Query completions in the time window using the `by_time` index,
     // then filter by assignmentId in-memory. This avoids fetching all
     // completions and is efficient when the time window is selective.
     const completionsInWindow = await ctx.db
       .query("assignment_completions")
-      .withIndex("by_completedAt", (q) =>
-        q.gte("completedAt", args.startMs).lte("completedAt", args.endMs)
+      .withIndex("by_time", (q) =>
+        q.gte("time", args.startMs).lte("time", args.endMs)
       )
       .collect();
 
@@ -68,28 +68,28 @@ export const getCompletionsForAssigneeBetween = query({
 
 export const createCompletion = mutation({
   args: {
-    assignmentId: v.id("assignments"),
-    completedAt: v.number(),
+    assignmentId: v.id("assignee_assignments"),
+    time: v.number(),
   },
   handler: async (ctx, args) => {
     return await ctx.db.insert("assignment_completions", {
       assignmentId: args.assignmentId,
-      completedAt: args.completedAt,
+      time: args.time,
     });
   },
 });
 
 export const deleteCompletion = mutation({
   args: {
-    assignmentId: v.id("assignments"),
-    completedAt: v.number(),
+    assignmentId: v.id("assignee_assignments"),
+    time: v.number(),
   },
   handler: async (ctx, args) => {
-    // Find completions that match the assignmentId and exact completedAt timestamp
+    // Find completions that match the assignmentId and exact time timestamp
     const matches = await ctx.db
       .query("assignment_completions")
-      .withIndex("by_assignment_completedAt", (q) =>
-        q.eq("assignmentId", args.assignmentId).eq("completedAt", args.completedAt)
+      .withIndex("by_assignment_time", (q) =>
+        q.eq("assignmentId", args.assignmentId).eq("time", args.time)
       )
       .collect();
 

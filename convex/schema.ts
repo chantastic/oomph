@@ -7,11 +7,11 @@ const schema = defineSchema({
    * They log the date a datetime an assignment was completed.
    */
   assignment_completions: defineTable({
-    assignmentId: v.id("assignments"),
-    completedAt: v.number(),
+    assignmentId: v.id("assignee_assignments"),
+    time: v.number(),
   })
-    .index("by_completedAt", ["completedAt"])
-    .index("by_assignment_completedAt", ["assignmentId", "completedAt"]),
+    .index("by_time", ["time"])
+    .index("by_assignment_time", ["assignmentId", "time"]),
   /*
    * Assignees are the people who are assigned to tasks.
    */
@@ -22,7 +22,7 @@ const schema = defineSchema({
    * Assignments are the core interactive model of the app.
    * A User assigns tasks to an Assignee on a cronSchedule.
    */
-  assignments: defineTable({
+  assignee_assignments: defineTable({
     assigneeId: v.id("assignees"),
     cronSchedule: v.string(),
     title: v.string(),
