@@ -1,6 +1,6 @@
 "use client";
 
-import { useParams } from "next/navigation";
+import { useParams, useSearchParams, useRouter } from "next/navigation";
 import { useQuery, useMutation } from "convex/react";
 import { api } from "../../../../convex/_generated/api";
 import { Id } from "../../../../convex/_generated/dataModel";
@@ -8,7 +8,8 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { AddAssignmentForm } from "@/components/add-assignment-form";
 import { getWeekDates, isToday, shouldShowAssignmentOnDate } from "@/lib/utils";
-import { useState } from "react";
+import { useMemo } from "react";
+import { buildDayLookup, toggleCompletion } from "@/lib/completions";
 
 export default function WeekViewPage() {
   const params = useParams();
@@ -17,7 +18,11 @@ export default function WeekViewPage() {
   const assignee = useQuery(api.assignments.getAssignee, { assigneeId });
   const assignments = useQuery(api.assignments.getByAssignee, { assigneeId });
 
-  const [currentWeekOffset, setCurrentWeekOffset] = useState(0);
+  // Read weekOffset from the URL search params so the date range is shareable.
+  const searchParams = useSearchParams();
+  const router = useRouter();
+  const rawWeekOffset = searchParams.get("weekOffset");
+  const currentWeekOffset = rawWeekOffset ? parseInt(rawWeekOffset, 10) : 0;
   const weekDates = getWeekDates(
     new Date(Date.now() + currentWeekOffset * 7 * 24 * 60 * 60 * 1000)
   );
@@ -43,6 +48,10 @@ export default function WeekViewPage() {
       endMs: endOfWeek.getTime(),
     }
   );
+
+  const dayLookup = useMemo(() => {
+    return completions ? buildDayLookup(completions) : new Map();
+  }, [completions]);
 
   const createCompletion = useMutation(api.assignments.createCompletion);
   const deleteCompletion = useMutation(api.assignments.deleteCompletion);
@@ -78,7 +87,7 @@ export default function WeekViewPage() {
             <div className="flex gap-2">
               <Link href={`/assignee/${assigneeId}`}>
                 <Button variant="outline" size="sm">
-                  Day View
+                  Today
                 </Button>
               </Link>
               <Button size="sm" disabled>
@@ -91,24 +100,32 @@ export default function WeekViewPage() {
 
             {/* Week Navigation */}
             <div className="flex gap-2">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => setCurrentWeekOffset(0)}
-              >
+              <Button variant="outline" size="sm" onClick={() => {
+                const params = new URLSearchParams(Array.from(searchParams.entries()));
+                params.set("weekOffset", "0");
+                router.replace(`?${params.toString()}`);
+              }}>
                 This Week
               </Button>
               <Button
                 variant="outline"
                 size="sm"
-                onClick={() => setCurrentWeekOffset((prev) => prev - 1)}
+                onClick={() => {
+                  const params = new URLSearchParams(Array.from(searchParams.entries()));
+                  params.set("weekOffset", String(currentWeekOffset - 1));
+                  router.replace(`?${params.toString()}`);
+                }}
               >
                 ←
               </Button>
               <Button
                 variant="outline"
                 size="sm"
-                onClick={() => setCurrentWeekOffset((prev) => prev + 1)}
+                onClick={() => {
+                  const params = new URLSearchParams(Array.from(searchParams.entries()));
+                  params.set("weekOffset", String(currentWeekOffset + 1));
+                  router.replace(`?${params.toString()}`);
+                }}
               >
                 →
               </Button>
@@ -194,15 +211,8 @@ export default function WeekViewPage() {
                             if (completions) {
                               const startOfDay = new Date(date);
                               startOfDay.setHours(0, 0, 0, 0);
-                              const endOfDay = new Date(date);
-                              endOfDay.setHours(23, 59, 59, 999);
-                              matchingCompletion = completions.find(
-                                (c) =>
-                                  c.assignmentId.toString() ===
-                                    assignment._id.toString() &&
-                                  c.completedAt >= startOfDay.getTime() &&
-                                  c.completedAt <= endOfDay.getTime()
-                              );
+                              const key = `${assignment._id.toString()}-${startOfDay.getTime()}`;
+                              matchingCompletion = dayLookup.get(key);
                             }
                             const completed = !!matchingCompletion;
                             return (
@@ -212,28 +222,12 @@ export default function WeekViewPage() {
                                 onClick={async () => {
                                   if (!visible) return;
                                   try {
-                                    const startOfDay = new Date(date);
-                                    startOfDay.setHours(0, 0, 0, 0);
-                                    if (completed) {
-                                      // Delete the specific completion by id
-                                      if (matchingCompletion && matchingCompletion._id) {
-                                        await deleteCompletionById({
-                                          completionId: matchingCompletion._id,
-                                        });
-                                      } else {
-                                        // Fallback to older deletion API if id not available
-                                        await deleteCompletion({
-                                          assignmentId: assignment._id,
-                                          completedAt: startOfDay.getTime(),
-                                        });
-                                      }
-                                    } else {
-                                      // Create completion for this specific day cell
-                                      await createCompletion({
-                                        assignmentId: assignment._id,
-                                        completedAt: startOfDay.getTime(),
-                                      });
-                                    }
+                                    await toggleCompletion(
+                                      { createCompletion, deleteCompletion, deleteCompletionById },
+                                      assignment._id,
+                                      date,
+                                      matchingCompletion
+                                    );
                                   } catch (err) {
                                     console.error("Failed to toggle completion", err);
                                   }

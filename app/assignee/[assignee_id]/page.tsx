@@ -2,6 +2,8 @@
 
 import { useParams } from "next/navigation";
 import { useQuery, useMutation } from "convex/react";
+import { useMemo } from "react";
+import { buildAssignmentLookup, toggleCompletion } from "@/lib/completions";
 import { api } from "../../../convex/_generated/api";
 import { Id } from "../../../convex/_generated/dataModel";
 import Link from "next/link";
@@ -30,6 +32,10 @@ export default function AssigneePage() {
   const deleteCompletion = useMutation(api.assignments.deleteCompletion);
   const deleteCompletionById = useMutation(api.assignments.deleteCompletionById);
 
+  const assignmentLookup = useMemo(() => {
+    return completions ? buildAssignmentLookup(completions) : new Map();
+  }, [completions]);
+
   if (!assignee) {
     return (
       <main className="flex min-h-screen flex-col items-center p-24">
@@ -56,11 +62,11 @@ export default function AssigneePage() {
           <div className="flex items-center justify-between mb-4">
             <div>
               <h1 className="text-3xl font-bold mb-2">{assignee.name}</h1>
-              <p className="text-muted-foreground">Day View</p>
+              <p className="text-muted-foreground">Today</p>
             </div>
             <div className="flex gap-2">
               <Button size="sm" disabled>
-                Day View
+                Today
               </Button>
               <Link href={`/assignee/${assigneeId}/week`}>
                 <Button variant="outline" size="sm">
@@ -95,11 +101,9 @@ export default function AssigneePage() {
                   return todaysAssignments.length > 0 ? (
                     <div className="space-y-4">
                       {todaysAssignments.map((assignment) => {
-                        const matchingCompletion = completions
-                          ? completions.find(
-                              (c) => c.assignmentId.toString() === assignment._id.toString()
-                            )
-                          : undefined;
+                        const matchingCompletion = assignmentLookup.get(
+                          assignment._id.toString()
+                        );
                         const completed = !!matchingCompletion;
                         return (
                           <div
@@ -109,24 +113,12 @@ export default function AssigneePage() {
                             }`}
                             onClick={async () => {
                               try {
-                                const startOfDayTs = startOfDay.getTime();
-                                if (completed) {
-                                  if (matchingCompletion && matchingCompletion._id) {
-                                    await deleteCompletionById({
-                                      completionId: matchingCompletion._id,
-                                    });
-                                  } else {
-                                    await deleteCompletion({
-                                      assignmentId: assignment._id,
-                                      completedAt: startOfDayTs,
-                                    });
-                                  }
-                                } else {
-                                  await createCompletion({
-                                    assignmentId: assignment._id,
-                                    completedAt: startOfDayTs,
-                                  });
-                                }
+                                await toggleCompletion(
+                                  { createCompletion, deleteCompletion, deleteCompletionById },
+                                  assignment._id,
+                                  startOfDay,
+                                  matchingCompletion
+                                );
                               } catch (err) {
                                 console.error("Failed to toggle completion", err);
                               }

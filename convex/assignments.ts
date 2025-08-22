@@ -48,15 +48,20 @@ export const getCompletionsForAssigneeBetween = query({
 
     const assignmentIds = new Set(assignments.map((a) => a._id.toString()));
 
-    // Query all completions and filter in-memory by time window and assignmentId.
-    // This avoids using index range builders directly and is acceptable for small datasets.
-    const allCompletions = await ctx.db.query("assignment_completions").collect();
-    const filtered = allCompletions.filter(
-      (c) =>
-        c.completedAt >= args.startMs &&
-        c.completedAt <= args.endMs &&
-        assignmentIds.has(c.assignmentId.toString())
+    // Query completions in the time window using the `by_completedAt` index,
+    // then filter by assignmentId in-memory. This avoids fetching all
+    // completions and is efficient when the time window is selective.
+    const completionsInWindow = await ctx.db
+      .query("assignment_completions")
+      .withIndex("by_completedAt", (q) =>
+        q.gte("completedAt", args.startMs).lte("completedAt", args.endMs)
+      )
+      .collect();
+
+    const filtered = completionsInWindow.filter((c) =>
+      assignmentIds.has(c.assignmentId.toString())
     );
+
     return filtered;
   },
 });
