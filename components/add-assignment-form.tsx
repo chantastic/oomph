@@ -1,6 +1,14 @@
 "use client";
 
 import { useState } from "react";
+import {
+  Dialog,
+  DialogTrigger,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from "@/components/ui/dialog";
 import { useMutation } from "convex/react";
 import { api } from "../convex/_generated/api";
 import { Id } from "../convex/_generated/dataModel";
@@ -16,15 +24,32 @@ interface AddAssignmentFormProps {
 
 export function AddAssignmentForm({ assigneeId, onSuccess }: AddAssignmentFormProps) {
   const [title, setTitle] = useState("");
-  const [cronSchedule, setCronSchedule] = useState("");
+  const [selectedDays, setSelectedDays] = useState<Set<number>>(new Set());
   const [isOpen, setIsOpen] = useState(false);
   
   const createAssignment = useMutation(api.assignments.create);
 
+  // Generate cron schedule from selected days
+  const generateCronSchedule = (days: Set<number>): string => {
+    if (days.size === 0) return "";
+    const sortedDays = Array.from(days).sort((a, b) => a - b);
+    return `0 1 * * ${sortedDays.join(",")}`;
+  };
+
+  const toggleDay = (day: number) => {
+    const newSelectedDays = new Set(selectedDays);
+    if (newSelectedDays.has(day)) {
+      newSelectedDays.delete(day);
+    } else {
+      newSelectedDays.add(day);
+    }
+    setSelectedDays(newSelectedDays);
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!title.trim() || !cronSchedule.trim()) {
+    if (!title.trim() || selectedDays.size === 0) {
       return;
     }
 
@@ -32,12 +57,12 @@ export function AddAssignmentForm({ assigneeId, onSuccess }: AddAssignmentFormPr
       await createAssignment({
         assigneeId,
         title: title.trim(),
-        cronSchedule: cronSchedule.trim(),
+        cronSchedule: generateCronSchedule(selectedDays),
       });
       
       // Reset form
       setTitle("");
-      setCronSchedule("");
+      setSelectedDays(new Set());
       setIsOpen(false);
       
       // Call success callback if provided
@@ -50,54 +75,83 @@ export function AddAssignmentForm({ assigneeId, onSuccess }: AddAssignmentFormPr
   };
 
   if (!isOpen) {
-    return (
-      <Button onClick={() => setIsOpen(true)} className="w-full">
-        + Add Assignment
-      </Button>
-    );
+    // Render the trigger when the dialog is closed via DialogTrigger
   }
+  const dayLabels = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+  const cronSchedule = generateCronSchedule(selectedDays);
 
   return (
-    <div className="p-4 border rounded-lg bg-muted/50">
-      <form onSubmit={handleSubmit} className="space-y-4">
-        <div>
-          <Label htmlFor="title">Assignment Title</Label>
-          <Input
-            id="title"
-            value={title}
-            onChange={(e) => setTitle(e.target.value)}
-            placeholder="Enter assignment title"
-            required
-          />
-        </div>
-        
-        <div>
-          <Label htmlFor="cronSchedule">Cron Schedule</Label>
-          <Input
-            id="cronSchedule"
-            value={cronSchedule}
-            onChange={(e) => setCronSchedule(e.target.value)}
-            placeholder="e.g., 0 9 * * 1 (every Monday at 9 AM)"
-            required
-          />
-          <p className="text-xs text-muted-foreground mt-1">
-            Use cron format: minute hour day month weekday
-          </p>
-        </div>
-        
-        <div className="flex gap-2">
-          <Button type="submit" className="flex-1">
-            Create Assignment
-          </Button>
-          <Button 
-            type="button" 
-            variant="outline" 
-            onClick={() => setIsOpen(false)}
-          >
-            Cancel
-          </Button>
-        </div>
-      </form>
-    </div>
+    <Dialog open={isOpen} onOpenChange={setIsOpen}>
+      <DialogTrigger asChild>
+        <Button className="w-full">+ Add Assignment</Button>
+      </DialogTrigger>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>Add Assignment</DialogTitle>
+          <DialogDescription>Create a recurring assignment for this assignee.</DialogDescription>
+        </DialogHeader>
+
+        <form onSubmit={handleSubmit} className="space-y-2">
+          <div>
+            <Label htmlFor="title" className="text-base font-medium mb-3 block">Assignment Title</Label>
+            <Input
+              id="title"
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+              placeholder="Enter assignment title"
+              required
+              className="h-11"
+            />
+          </div>
+
+          <div>
+            <Label className="text-base font-medium mb-3 block">Schedule</Label>
+            <div className="space-y-4">
+              <div className="flex gap-2 flex-wrap">
+                {dayLabels.map((label, index) => (
+                  <Button
+                    key={index}
+                    type="button"
+                    variant={selectedDays.has(index) ? "default" : "outline"}
+                    size="sm"
+                    onClick={() => toggleDay(index)}
+                    className="min-w-[3.5rem] h-9 text-sm font-medium"
+                  >
+                    {label}
+                  </Button>
+                ))}
+              </div>
+
+              {cronSchedule && (
+                <div className="p-3 bg-muted rounded text-sm font-mono border">
+                  {cronSchedule}
+                </div>
+              )}
+
+              <p className="text-sm text-muted-foreground">
+                Runs at 1 AM on selected days
+              </p>
+            </div>
+          </div>
+
+          <div className="flex gap-3 pt-2">
+            <Button type="submit" className="flex-1 h-11" disabled={selectedDays.size === 0}>
+              Create Assignment
+            </Button>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => {
+                setIsOpen(false);
+                setSelectedDays(new Set());
+              }}
+              className="h-11 px-6"
+            >
+              Cancel
+            </Button>
+          </div>
+        </form>
+      </DialogContent>
+    </Dialog>
   );
 }
