@@ -1,7 +1,12 @@
 "use client";
 
 import { useState } from "react";
-import { useQuery, useMutation } from "convex/react";
+import {
+  useQuery,
+  useMutation,
+  Authenticated,
+  Unauthenticated,
+} from "convex/react";
 import { api } from "../convex/_generated/api";
 import { Button } from "@/components/ui/button";
 import {
@@ -16,6 +21,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import Link from "next/link";
+import workosSignOut from "../actions/workos-sign-out";
 
 function AddAssigneeDialog() {
   const [name, setName] = useState("");
@@ -88,22 +94,32 @@ export default function Home() {
           <h1 className="text-3xl font-bold">Assignees</h1>
           <AddAssigneeDialog />
         </div>
-        
-        <div className="space-y-4">
-          {assignees?.map(({ _id, name }) => (
-            <Link key={_id} href={`/assignee/${_id}`}>
-              <div className="p-4 border rounded-lg hover:bg-gray-50 transition-colors cursor-pointer">
-                <h3 className="font-medium">{name}</h3>
-                <p className="text-sm text-muted-foreground">Click to view assignments</p>
+        <Unauthenticated>
+          <Link href="/sign-in">Sign in</Link>
+        </Unauthenticated>
+        <Authenticated>
+          <div className="space-y-4">
+            {assignees?.map(({ _id, name }) => (
+              <Link key={_id} href={`/assignee/${_id}`}>
+                <div className="p-4 border rounded-lg hover:bg-gray-50 transition-colors cursor-pointer">
+                  <h3 className="font-medium">{name}</h3>
+                  <p className="text-sm text-muted-foreground">
+                    Click to view assignments
+                  </p>
+                </div>
+              </Link>
+            ))}
+            {assignees?.length === 0 && (
+              <div className="text-center text-muted-foreground py-8">
+                No assignees yet. Add your first assignee using the button
+                above.
               </div>
-            </Link>
-          ))}
-          {assignees?.length === 0 && (
-            <div className="text-center text-muted-foreground py-8">
-              No assignees yet. Add your first assignee using the button above.
-            </div>
-          )}
-        </div>
+            )}
+          </div>
+          <form action={workosSignOut}>
+            <Button type="submit">Sign out</Button>
+          </form>
+        </Authenticated>
       </div>
     </main>
   );
