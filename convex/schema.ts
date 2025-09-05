@@ -1,5 +1,5 @@
-import { defineSchema, defineTable } from "convex/server";
-import { v } from "convex/values";
+import { defineSchema, defineTable } from "convex/server"
+import { v } from "convex/values"
 
 const schema = defineSchema({
   /*
@@ -27,6 +27,13 @@ const schema = defineSchema({
     cronSchedule: v.string(),
     title: v.string(),
   }).index("by_assignee", ["assigneeId"]),
-});
+  /*
+   * Users are authenticated via WorkOS and manage multiple assignees.
+   */
+  users: defineTable({
+    workosUserId: v.string(),
+    assigneeIds: v.array(v.id("assignees")),
+  }).index("by_workos_user", ["workosUserId"]),
+})
 
-export default schema;
+export default schema
