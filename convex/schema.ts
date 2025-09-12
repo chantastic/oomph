@@ -27,13 +27,16 @@ const schema = defineSchema({
     cronSchedule: v.string(),
     title: v.string(),
   }).index("by_assignee", ["assigneeId"]),
+
   /*
-   * Users are authenticated via WorkOS and manage multiple assignees.
+   * UserAssignee is the many-to-many relationship between users and assignees.
    */
-  users: defineTable({
-    workosUserId: v.string(),
-    assigneeIds: v.array(v.id("assignees")),
-  }).index("by_workos_user", ["workosUserId"]),
+  user_assignee: defineTable({
+    userId: v.string(),
+    assigneeId: v.id("assignees"),
+  })
+    .index("by_user", ["userId"])
+    .index("by_assignee", ["assigneeId"]),
 })
 
 export default schema

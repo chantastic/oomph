@@ -4,7 +4,21 @@ import { v } from "convex/values";
 export const get = query({
   args: {},
   handler: async (ctx) => {
-    return await ctx.db.query("assignees").collect();
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) {
+      return [];
+    }
+
+    const links = await ctx.db
+      .query("user_assignee")
+      .withIndex("by_user", (q) => q.eq("userId", identity.subject))
+      .collect();
+
+    const assignees = await Promise.all(
+      links.map((l) => ctx.db.get(l.assigneeId))
+    );
+
+    return assignees.filter(Boolean);
   },
 });
 
@@ -13,8 +27,20 @@ export const create = mutation({
     name: v.string(),
   },
   handler: async (ctx, args) => {
-    return await ctx.db.insert("assignees", {
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) {
+      throw new Error("Unauthenticated");
+    }
+
+    const assigneeId = await ctx.db.insert("assignees", {
       name: args.name,
     });
+
+    await ctx.db.insert("user_assignee", {
+      userId: identity.subject,
+      assigneeId,
+    });
+
+    return assigneeId;
   },
 });

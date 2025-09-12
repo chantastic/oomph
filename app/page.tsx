@@ -92,23 +92,27 @@ export default function Home() {
       <div className="w-full max-w-2xl">
         <div className="flex items-center justify-between mb-8">
           <h1 className="text-3xl font-bold">Assignees</h1>
-          <AddAssigneeDialog />
+          <Authenticated>
+            <AddAssigneeDialog />
+          </Authenticated>
         </div>
         <Unauthenticated>
           <Link href="/sign-in">Sign in</Link>
         </Unauthenticated>
         <Authenticated>
           <div className="space-y-4">
-            {assignees?.map(({ _id, name }) => (
-              <Link key={_id} href={`/assignee/${_id}`}>
-                <div className="p-4 border rounded-lg hover:bg-gray-50 transition-colors cursor-pointer">
-                  <h3 className="font-medium">{name}</h3>
-                  <p className="text-sm text-muted-foreground">
-                    Click to view assignments
-                  </p>
-                </div>
-              </Link>
-            ))}
+            {assignees?.map((assignee) => {
+              return (
+                <Link key={assignee?._id} href={`/assignee/${assignee?._id}`}>
+                  <div className="p-4 border rounded-lg hover:bg-gray-50 transition-colors cursor-pointer">
+                    <h3 className="font-medium">{assignee?.name}</h3>
+                    <p className="text-sm text-muted-foreground">
+                      Click to view assignments
+                    </p>
+                  </div>
+                </Link>
+              );
+            })}
             {assignees?.length === 0 && (
               <div className="text-center text-muted-foreground py-8">
                 No assignees yet. Add your first assignee using the button
