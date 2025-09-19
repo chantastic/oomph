@@ -9,6 +9,7 @@ import { Id } from "@/convex/_generated/dataModel";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { shouldShowAssignmentOnDate } from "@/lib/utils";
+import { motion, AnimatePresence } from "framer-motion";
 
 export default function AssigneePage() {
   const params = useParams();
@@ -67,60 +68,104 @@ export default function AssigneePage() {
                   const todaysAssignments = assignments.filter(a =>
                     shouldShowAssignmentOnDate(a.cronSchedule, today)
                   );
-                  return todaysAssignments.length > 0 ? (
+                  
+                  // Sort assignments: incomplete first, then completed
+                  const sortedAssignments = todaysAssignments.sort((a, b) => {
+                    const aCompleted = !!assignmentLookup.get(a._id.toString());
+                    const bCompleted = !!assignmentLookup.get(b._id.toString());
+                    
+                    // If one is completed and the other isn't, incomplete comes first
+                    if (aCompleted !== bCompleted) {
+                      return aCompleted ? 1 : -1;
+                    }
+                    
+                    // If both have the same completion status, maintain original order
+                    return 0;
+                  });
+                  
+                  return sortedAssignments.length > 0 ? (
                     <div className="space-y-4">
-                      {todaysAssignments.map((assignment) => {
-                        const matchingCompletion = assignmentLookup.get(
-                          assignment._id.toString()
-                        );
-                        const completed = !!matchingCompletion;
-                        return (
-                          <div
-                            key={assignment._id}
-                            className={`p-4 border rounded-lg cursor-pointer transition-colors ${
-                              completed 
-                                ? "bg-green-50 border-green-200 hover:bg-green-100" 
-                                : "bg-white border-gray-200 hover:bg-gray-50"
-                            }`}
-                            onClick={async () => {
-                              try {
-                                await toggleCompletion(
-                                  { createCompletion, deleteCompletion, deleteCompletionById },
-                                  assignment._id,
-                                  startOfDay,
-                                  matchingCompletion
-                                );
-                              } catch (err) {
-                                console.error("Failed to toggle completion", err);
-                              }
-                            }}
-                          >
-                            <div className="flex items-center justify-between">
-                              <div className="flex-1">
-                                <h3 className={`font-medium mb-2 ${
-                                  completed ? "text-green-800" : "text-gray-900"
-                                }`}>
-                                  {assignment.title}
-                                </h3>
-                                <p className="text-sm text-muted-foreground">
-                                  Schedule: {assignment.cronSchedule}
-                                </p>
+                      <AnimatePresence mode="popLayout">
+                        {sortedAssignments.map((assignment, index) => {
+                          const matchingCompletion = assignmentLookup.get(
+                            assignment._id.toString()
+                          );
+                          const completed = !!matchingCompletion;
+                          return (
+                            <motion.div
+                              key={assignment._id}
+                              layout
+                              initial={{ opacity: 0, y: 20 }}
+                              animate={{ opacity: 1, y: 0 }}
+                              exit={{ opacity: 0, y: -20 }}
+                              transition={{
+                                duration: 0.3,
+                                ease: "easeInOut",
+                                layout: { duration: 0.4, ease: "easeInOut" }
+                              }}
+                              className={`p-4 border rounded-lg cursor-pointer transition-colors ${
+                                completed 
+                                  ? "bg-green-50 border-green-200 hover:bg-green-100" 
+                                  : "bg-white border-gray-200 hover:bg-gray-50"
+                              }`}
+                              onClick={async () => {
+                                try {
+                                  await toggleCompletion(
+                                    { createCompletion, deleteCompletion, deleteCompletionById },
+                                    assignment._id,
+                                    startOfDay,
+                                    matchingCompletion
+                                  );
+                                } catch (err) {
+                                  console.error("Failed to toggle completion", err);
+                                }
+                              }}
+                              whileHover={{ scale: 1.02 }}
+                              whileTap={{ scale: 0.98 }}
+                            >
+                              <div className="flex items-center justify-between">
+                                <div className="flex-1">
+                                  <h3 className={`font-medium mb-2 ${
+                                    completed ? "text-green-800" : "text-gray-900"
+                                  }`}>
+                                    {assignment.title}
+                                  </h3>
+                                  <p className="text-sm text-muted-foreground">
+                                    Schedule: {assignment.cronSchedule}
+                                  </p>
+                                </div>
+                                <div className="ml-4">
+                                  <motion.div
+                                    initial={false}
+                                    animate={{
+                                      scale: completed ? 1 : 0.8,
+                                      rotate: completed ? 0 : 0
+                                    }}
+                                    transition={{ duration: 0.2, ease: "easeInOut" }}
+                                  >
+                                    {completed ? (
+                                      <div className="w-6 h-6 bg-green-500 rounded-full flex items-center justify-center">
+                                        <motion.svg 
+                                          className="w-4 h-4 text-white" 
+                                          fill="currentColor" 
+                                          viewBox="0 0 20 20"
+                                          initial={{ scale: 0 }}
+                                          animate={{ scale: 1 }}
+                                          transition={{ delay: 0.1, duration: 0.2 }}
+                                        >
+                                          <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                                        </motion.svg>
+                                      </div>
+                                    ) : (
+                                      <div className="w-6 h-6 border-2 border-gray-300 rounded-full"></div>
+                                    )}
+                                  </motion.div>
+                                </div>
                               </div>
-                              <div className="ml-4">
-                                {completed ? (
-                                  <div className="w-6 h-6 bg-green-500 rounded-full flex items-center justify-center">
-                                    <svg className="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 20 20">
-                                      <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                                    </svg>
-                                  </div>
-                                ) : (
-                                  <div className="w-6 h-6 border-2 border-gray-300 rounded-full"></div>
-                                )}
-                              </div>
-                            </div>
-                          </div>
-                        );
-                      })}
+                            </motion.div>
+                          );
+                        })}
+                      </AnimatePresence>
                     </div>
                   ) : (
                     <div className="text-center text-muted-foreground py-8">
