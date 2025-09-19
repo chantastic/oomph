@@ -8,6 +8,7 @@ import { api } from "@/convex/_generated/api";
 import { Id } from "@/convex/_generated/dataModel";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
+import { AddAssignmentForm } from "@/components/add-assignment-form";
 import { shouldShowAssignmentOnDate } from "@/lib/utils";
 
 export default function AssigneePage() {
@@ -51,15 +52,45 @@ export default function AssigneePage() {
     <main className="flex min-h-screen flex-col items-center p-24">
       <div className="w-full max-w-2xl">
         <div className="mb-8">
+          <div className="flex items-center gap-4 mb-4">
+            <Link href="/">
+              <Button variant="outline" size="sm">
+                ← Back to Assignees
+              </Button>
+            </Link>
+          </div>
           <div className="flex items-center justify-between mb-4">
             <div>
               <h1 className="text-3xl font-bold mb-2">{assignee.name}</h1>
+              <p className="text-muted-foreground">Today</p>
+            </div>
+            <div className="flex gap-2">
+              <Button size="sm" disabled>
+                Today
+              </Button>
+              <Link href={`/admin/assignee/${assigneeId}/week`}>
+                <Button variant="outline" size="sm">
+                  Week View
+                </Button>
+              </Link>
             </div>
           </div>
         </div>
         
         <div className="space-y-6">
           <div>
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-xl font-semibold">Assignments</h2>
+            </div>
+            
+            <AddAssignmentForm 
+              assigneeId={assigneeId} 
+              onSuccess={() => {
+                // This will trigger a re-fetch of assignments
+                // since Convex automatically updates the UI
+              }}
+            />
+            
             <div className="mt-6">
               {assignments && assignments.length > 0 ? (
                 (() => {
@@ -77,10 +108,8 @@ export default function AssigneePage() {
                         return (
                           <div
                             key={assignment._id}
-                            className={`p-4 border rounded-lg cursor-pointer transition-colors ${
-                              completed 
-                                ? "bg-green-50 border-green-200 hover:bg-green-100" 
-                                : "bg-white border-gray-200 hover:bg-gray-50"
+                            className={`p-4 border rounded-lg cursor-pointer ${
+                              completed ? "bg-green-50" : "bg-white"
                             }`}
                             onClick={async () => {
                               try {
@@ -95,46 +124,23 @@ export default function AssigneePage() {
                               }
                             }}
                           >
-                            <div className="flex items-center justify-between">
-                              <div className="flex-1">
-                                <h3 className={`font-medium mb-2 ${
-                                  completed ? "text-green-800" : "text-gray-900"
-                                }`}>
-                                  {assignment.title}
-                                </h3>
-                                <p className="text-sm text-muted-foreground">
-                                  Schedule: {assignment.cronSchedule}
-                                </p>
-                              </div>
-                              <div className="ml-4">
-                                {completed ? (
-                                  <div className="w-6 h-6 bg-green-500 rounded-full flex items-center justify-center">
-                                    <svg className="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 20 20">
-                                      <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                                    </svg>
-                                  </div>
-                                ) : (
-                                  <div className="w-6 h-6 border-2 border-gray-300 rounded-full"></div>
-                                )}
-                              </div>
-                            </div>
+                            <h3 className="font-medium mb-2">{assignment.title}</h3>
+                            <p className="text-sm text-muted-foreground">
+                              Schedule: {assignment.cronSchedule}
+                            </p>
                           </div>
                         );
                       })}
                     </div>
                   ) : (
                     <div className="text-center text-muted-foreground py-8">
-                      <div className="text-6xl mb-4">🎉</div>
-                      <h3 className="text-lg font-medium mb-2">No tasks for today!</h3>
-                      <p>Enjoy your free time or check back tomorrow for new assignments.</p>
+                      No assignments scheduled for today.
                     </div>
                   );
                 })()
               ) : (
                 <div className="text-center text-muted-foreground py-8">
-                  <div className="text-6xl mb-4">📝</div>
-                  <h3 className="text-lg font-medium mb-2">No assignments yet</h3>
-                  <p>Your tasks will appear here once they're assigned to you.</p>
+                  No assignments found for this assignee.
                 </div>
               )}
             </div>
@@ -143,4 +149,4 @@ export default function AssigneePage() {
       </div>
     </main>
   );
-}
+} 

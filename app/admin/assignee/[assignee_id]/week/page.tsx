@@ -2,8 +2,8 @@
 
 import { useParams, useSearchParams, useRouter } from "next/navigation";
 import { useQuery, useMutation } from "convex/react";
-import { api } from "../../../../convex/_generated/api";
-import { Id } from "../../../../convex/_generated/dataModel";
+import { api } from "@/convex/_generated/api";
+import { Id } from "@/convex/_generated/dataModel";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { AddAssignmentForm } from "@/components/add-assignment-form";
@@ -85,7 +85,7 @@ export default function WeekViewPage() {
               </Button>
             </Link>
             <div className="flex gap-2">
-              <Link href={`/assignee/${assigneeId}`}>
+              <Link href={`/admin/assignee/${assigneeId}`}>
                 <Button variant="outline" size="sm">
                   Today
                 </Button>

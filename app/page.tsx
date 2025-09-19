@@ -103,7 +103,7 @@ export default function Home() {
           <div className="space-y-4">
             {assignees?.map((assignee) => {
               return (
-                <Link key={assignee?._id} href={`/assignee/${assignee?._id}`}>
+                <Link key={assignee?._id} href={`/admin/assignee/${assignee?._id}`}>
                   <div className="p-4 border rounded-lg hover:bg-gray-50 transition-colors cursor-pointer">
                     <h3 className="font-medium">{assignee?.name}</h3>
                     <p className="text-sm text-muted-foreground">
