@@ -2,7 +2,7 @@
 
 import { useParams } from "next/navigation";
 import { useQuery, useMutation } from "convex/react";
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { buildAssignmentLookup, toggleCompletion } from "@/lib/completions";
 import { api } from "@/convex/_generated/api";
 import { Id } from "@/convex/_generated/dataModel";
@@ -36,6 +36,37 @@ export default function AssigneePage() {
     return completions ? buildAssignmentLookup(completions) : new Map();
   }, [completions]);
 
+  const [isSharing, setIsSharing] = useState(false);
+
+  const handleShare = async () => {
+    const assigneeUrl = `${window.location.origin}/assignee/${assigneeId}`;
+
+    try {
+      setIsSharing(true);
+      
+      // Try native Web Share API first (works on mobile devices)
+      if (navigator.share) {
+        await navigator.share({ url: assigneeUrl });
+      } else {
+        // Fallback: copy to clipboard
+        await navigator.clipboard.writeText(assigneeUrl);
+        alert('URL copied to clipboard!');
+      }
+    } catch (error) {
+      console.error('Error sharing:', error);
+      // Final fallback: copy to clipboard
+      try {
+        await navigator.clipboard.writeText(assigneeUrl);
+        alert('URL copied to clipboard!');
+      } catch (clipboardError) {
+        console.error('Clipboard not available:', clipboardError);
+        alert('Unable to share. Please copy the URL manually.');
+      }
+    } finally {
+      setIsSharing(false);
+    }
+  };
+
   if (!assignee) {
     return (
       <main className="flex min-h-screen flex-col items-center p-24">
@@ -65,6 +96,14 @@ export default function AssigneePage() {
               <p className="text-muted-foreground">Today</p>
             </div>
             <div className="flex gap-2">
+              <Button 
+                size="sm" 
+                variant="outline"
+                onClick={handleShare}
+                disabled={isSharing}
+              >
+                {isSharing ? 'Sharing...' : '📤 Share'}
+              </Button>
               <Button size="sm" disabled>
                 Today
               </Button>
