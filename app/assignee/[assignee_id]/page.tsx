@@ -49,19 +49,19 @@ export default function AssigneePage() {
   }
 
   return (
-    <main className="flex min-h-screen flex-col items-center p-24">
+    <main className="flex min-h-screen flex-col items-center p-4 sm:p-8 lg:p-24">
       <div className="w-full max-w-2xl">
-        <div className="mb-8">
+        <div className="mb-4 sm:mb-6 lg:mb-8">
           <div className="flex items-center justify-between mb-4">
             <div>
-              <h1 className="text-3xl font-bold mb-2">{assignee.name}</h1>
+              <h1 className="text-2xl sm:text-3xl font-bold mb-1 sm:mb-2">{assignee.name}</h1>
             </div>
           </div>
         </div>
         
-        <div className="space-y-6">
+        <div className="space-y-4 sm:space-y-6">
           <div>
-            <div className="mt-6">
+            <div className="mt-4 sm:mt-6">
               {assignments && assignments.length > 0 ? (
                 (() => {
                   const today = new Date();
@@ -84,7 +84,7 @@ export default function AssigneePage() {
                   });
                   
                   return sortedAssignments.length > 0 ? (
-                    <div className="space-y-4">
+                    <div className="space-y-3 sm:space-y-4">
                       <AnimatePresence mode="popLayout">
                         {sortedAssignments.map((assignment, index) => {
                           const matchingCompletion = assignmentLookup.get(
@@ -103,7 +103,7 @@ export default function AssigneePage() {
                                 ease: "easeInOut",
                                 layout: { duration: 0.4, ease: "easeInOut" }
                               }}
-                              className={`p-4 border rounded-lg cursor-pointer transition-colors ${
+                              className={`p-3 sm:p-4 border rounded-lg cursor-pointer transition-colors ${
                                 completed 
                                   ? "bg-green-50 border-green-200 hover:bg-green-100" 
                                   : "bg-white border-gray-200 hover:bg-gray-50"
@@ -124,42 +124,30 @@ export default function AssigneePage() {
                               whileTap={{ scale: 0.98 }}
                             >
                               <div className="flex items-center justify-between">
-                                <div className="flex-1">
-                                  <h3 className={`font-medium mb-2 ${
+                                <div className="flex-1 min-w-0">
+                                  <h3 className={`font-medium text-sm sm:text-base ${
                                     completed ? "text-green-800" : "text-gray-900"
                                   }`}>
                                     {assignment.title}
                                   </h3>
-                                  <p className="text-sm text-muted-foreground">
-                                    Schedule: {assignment.cronSchedule}
-                                  </p>
                                 </div>
-                                <div className="ml-4">
-                                  <motion.div
-                                    initial={false}
-                                    animate={{
-                                      scale: completed ? 1 : 0.8,
-                                      rotate: completed ? 0 : 0
-                                    }}
-                                    transition={{ duration: 0.2, ease: "easeInOut" }}
-                                  >
-                                    {completed ? (
-                                      <div className="w-6 h-6 bg-green-500 rounded-full flex items-center justify-center">
-                                        <motion.svg 
-                                          className="w-4 h-4 text-white" 
-                                          fill="currentColor" 
-                                          viewBox="0 0 20 20"
-                                          initial={{ scale: 0 }}
-                                          animate={{ scale: 1 }}
-                                          transition={{ delay: 0.1, duration: 0.2 }}
-                                        >
-                                          <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                                        </motion.svg>
-                                      </div>
-                                    ) : (
-                                      <div className="w-6 h-6 border-2 border-gray-300 rounded-full"></div>
-                                    )}
-                                  </motion.div>
+                                <div className="ml-3 sm:ml-4 flex-shrink-0">
+                                  {completed ? (
+                                    <div className="w-5 h-5 sm:w-6 sm:h-6 bg-green-500 rounded-full flex items-center justify-center">
+                                      <motion.svg 
+                                        className="w-3 h-3 sm:w-4 sm:h-4 text-white" 
+                                        fill="currentColor" 
+                                        viewBox="0 0 20 20"
+                                        initial={{ scale: 0 }}
+                                        animate={{ scale: 1 }}
+                                        transition={{ delay: 0.1, duration: 0.2 }}
+                                      >
+                                        <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                                      </motion.svg>
+                                    </div>
+                                  ) : (
+                                    <div className="w-5 h-5 sm:w-6 sm:h-6 border-2 border-gray-300 rounded-full"></div>
+                                  )}
                                 </div>
                               </div>
                             </motion.div>
@@ -168,18 +156,18 @@ export default function AssigneePage() {
                       </AnimatePresence>
                     </div>
                   ) : (
-                    <div className="text-center text-muted-foreground py-8">
-                      <div className="text-6xl mb-4">🎉</div>
-                      <h3 className="text-lg font-medium mb-2">No tasks for today!</h3>
-                      <p>Enjoy your free time or check back tomorrow for new assignments.</p>
+                    <div className="text-center text-muted-foreground py-6 sm:py-8">
+                      <div className="text-4xl sm:text-6xl mb-3 sm:mb-4">🎉</div>
+                      <h3 className="text-base sm:text-lg font-medium mb-1 sm:mb-2">No tasks for today!</h3>
+                      <p className="text-sm sm:text-base">Enjoy your free time or check back tomorrow for new assignments.</p>
                     </div>
                   );
                 })()
               ) : (
-                <div className="text-center text-muted-foreground py-8">
-                  <div className="text-6xl mb-4">📝</div>
-                  <h3 className="text-lg font-medium mb-2">No assignments yet</h3>
-                  <p>Your tasks will appear here once they're assigned to you.</p>
+                <div className="text-center text-muted-foreground py-6 sm:py-8">
+                  <div className="text-4xl sm:text-6xl mb-3 sm:mb-4">📝</div>
+                  <h3 className="text-base sm:text-lg font-medium mb-1 sm:mb-2">No assignments yet</h3>
+                  <p className="text-sm sm:text-base">Your tasks will appear here once they're assigned to you.</p>
                 </div>
               )}
             </div>
