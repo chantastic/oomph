@@ -197,6 +197,11 @@ export default function WeekViewPage() {
                             <div className="font-medium leading-tight">
                               {assignment.title}
                             </div>
+                            {assignment.description && (
+                              <div className="text-xs text-gray-600 mt-1 whitespace-pre-line">
+                                {assignment.description}
+                              </div>
+                            )}
                             <div className="text-xs text-gray-500">
                               {assignment.cronSchedule}
                             </div>

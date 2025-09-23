@@ -37,7 +37,7 @@ Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/bui
 
 ## TASKS
 
-- [ ] Add description to assignment
+- [x] Add description to assignment
 - [ ] Add editability to assignment
 - [ ] Migrate database tables to singular form
   - https://www.convex.dev/components/migrations

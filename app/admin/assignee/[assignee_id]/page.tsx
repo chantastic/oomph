@@ -164,6 +164,11 @@ export default function AssigneePage() {
                             }}
                           >
                             <h3 className="font-medium mb-2">{assignment.title}</h3>
+                            {assignment.description && (
+                              <p className="text-sm text-gray-700 mb-2 whitespace-pre-line">
+                                {assignment.description}
+                              </p>
+                            )}
                             <p className="text-sm text-muted-foreground">
                               Schedule: {assignment.cronSchedule}
                             </p>
