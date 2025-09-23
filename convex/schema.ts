@@ -26,6 +26,7 @@ const schema = defineSchema({
     assigneeId: v.id("assignees"),
     cronSchedule: v.string(),
     title: v.string(),
+    description: v.optional(v.string()),
   }).index("by_assignee", ["assigneeId"]),
 
   /*

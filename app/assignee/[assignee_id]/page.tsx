@@ -130,6 +130,11 @@ export default function AssigneePage() {
                                   }`}>
                                     {assignment.title}
                                   </h3>
+                                  {assignment.description && (
+                                    <p className="text-xs sm:text-sm text-gray-700 mt-1 whitespace-pre-line">
+                                      {assignment.description}
+                                    </p>
+                                  )}
                                 </div>
                                 <div className="ml-3 sm:ml-4 flex-shrink-0">
                                   {completed ? (

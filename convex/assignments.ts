@@ -23,12 +23,14 @@ export const create = mutation({
     assigneeId: v.id("assignees"),
     title: v.string(),
     cronSchedule: v.string(),
+    description: v.string(),
   },
   handler: async (ctx, args) => {
     return await ctx.db.insert("assignee_assignments", {
       assigneeId: args.assigneeId,
       title: args.title,
       cronSchedule: args.cronSchedule,
+      description: args.description,
     });
   },
 }); 

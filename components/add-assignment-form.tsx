@@ -24,6 +24,7 @@ interface AddAssignmentFormProps {
 
 export function AddAssignmentForm({ assigneeId, onSuccess }: AddAssignmentFormProps) {
   const [title, setTitle] = useState("");
+  const [description, setDescription] = useState("");
   const [selectedDays, setSelectedDays] = useState<Set<number>>(new Set());
   const [isOpen, setIsOpen] = useState(false);
   
@@ -49,7 +50,7 @@ export function AddAssignmentForm({ assigneeId, onSuccess }: AddAssignmentFormPr
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!title.trim() || selectedDays.size === 0) {
+    if (!title.trim() || !description.trim() || selectedDays.size === 0) {
       return;
     }
 
@@ -58,10 +59,12 @@ export function AddAssignmentForm({ assigneeId, onSuccess }: AddAssignmentFormPr
         assigneeId,
         title: title.trim(),
         cronSchedule: generateCronSchedule(selectedDays),
+        description: description.trim(),
       });
       
       // Reset form
       setTitle("");
+      setDescription("");
       setSelectedDays(new Set());
       setIsOpen(false);
       
@@ -105,6 +108,18 @@ export function AddAssignmentForm({ assigneeId, onSuccess }: AddAssignmentFormPr
           </div>
 
           <div>
+            <Label htmlFor="description" className="text-base font-medium mb-3 block">Description</Label>
+            <Textarea
+              id="description"
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+              placeholder="Share context, steps, or links for this assignment"
+              required
+              rows={4}
+            />
+          </div>
+
+          <div>
             <Label className="text-base font-medium mb-3 block">Schedule</Label>
             <div className="space-y-4">
               <div className="flex gap-2 flex-wrap">
@@ -135,7 +150,11 @@ export function AddAssignmentForm({ assigneeId, onSuccess }: AddAssignmentFormPr
           </div>
 
           <div className="flex gap-3 pt-2">
-            <Button type="submit" className="flex-1 h-11" disabled={selectedDays.size === 0}>
+            <Button
+              type="submit"
+              className="flex-1 h-11"
+              disabled={selectedDays.size === 0 || !title.trim() || !description.trim()}
+            >
               Create Assignment
             </Button>
             <Button
@@ -143,6 +162,8 @@ export function AddAssignmentForm({ assigneeId, onSuccess }: AddAssignmentFormPr
               variant="outline"
               onClick={() => {
                 setIsOpen(false);
+                setTitle("");
+                setDescription("");
                 setSelectedDays(new Set());
               }}
               className="h-11 px-6"
