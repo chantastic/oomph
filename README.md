@@ -34,3 +34,17 @@ You can check out [the Next.js GitHub repository](https://github.com/vercel/next
 The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
 
 Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+
+## TASKS
+
+- [ ] Add description to assignment
+- [ ] Add editability to assignment
+- [ ] Migrate database tables to singular form
+  - https://www.convex.dev/components/migrations
+  - https://stack.convex.dev/intro-to-migrations
+  - https://stack.convex.dev/migrating-data-with-mutations
+- [ ] Improve share feature (it sucks right now)
+- [ ] Improve week view for smaller screens
+  - Something like this? https://www.npmjs.com/package/table.css
+- [ ] Refine user dashboard for high-level overview (maybe percent complete?)
+- [ ] Discuss and implement ideal layout preferences (css-grid-per-page?)
