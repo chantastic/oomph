@@ -3,15 +3,18 @@ import { v } from "convex/values"
 
 const schema = defineSchema({
   /*
-   * Assignments Completions are the core reporting model of the app.
-   * They log the date a datetime an assignment was completed.
+   * Assignment Completions are the core reporting model of the app.
+   * They log the date and time an assignment was completed.
+   * Works for both regular assignments and JIT assignments.
    */
   assignment_completions: defineTable({
-    assignmentId: v.id("assignee_assignments"),
+    assignmentId: v.string(), // Can be either assignee_assignments or assignee_jit_assignment ID
+    assignmentType: v.union(v.literal("cron"), v.literal("jit")),
     time: v.number(),
   })
     .index("by_time", ["time"])
-    .index("by_assignment_time", ["assignmentId", "time"]),
+    .index("by_assignment_time", ["assignmentId", "time"])
+    .index("by_type_time", ["assignmentType", "time"]),
   /*
    * Assignees are the people who are assigned to tasks.
    */
@@ -38,6 +41,17 @@ const schema = defineSchema({
   })
     .index("by_user", ["userId"])
     .index("by_assignee", ["assigneeId"]),
+
+  /*
+   * JIT (Just in Time) assignments are one-time assignments for a specific date.
+   * These appear only on the date they were created for.
+   */
+  assignee_jit_assignment: defineTable({
+    assigneeId: v.id("assignees"),
+    title: v.string(),
+    description: v.optional(v.string()),
+    date: v.number(), // timestamp for the date this assignment is for
+  }).index("by_assignee_date", ["assigneeId", "date"]),
 })
 
 export default schema

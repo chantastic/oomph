@@ -42,13 +42,20 @@ export const getCompletionsForAssigneeBetween = query({
     endMs: v.number(),
   },
   handler: async (ctx, args) => {
-    // Get assignments for the assignee
-    const assignments = await ctx.db
+    // Get regular assignments for the assignee
+    const regularAssignments = await ctx.db
       .query("assignee_assignments")
       .withIndex("by_assignee", (q) => q.eq("assigneeId", args.assigneeId))
       .collect();
 
-    const assignmentIds = new Set(assignments.map((a) => a._id.toString()));
+    // Get JIT assignments for the assignee
+    const jitAssignments = await ctx.db
+      .query("assignee_jit_assignment")
+      .withIndex("by_assignee_date", (q) => q.eq("assigneeId", args.assigneeId))
+      .collect();
+
+    const regularAssignmentIds = new Set(regularAssignments.map((a) => a._id.toString()));
+    const jitAssignmentIds = new Set(jitAssignments.map((a) => a._id.toString()));
 
     // Query completions in the time window using the `by_time` index,
     // then filter by assignmentId in-memory. This avoids fetching all
@@ -60,9 +67,14 @@ export const getCompletionsForAssigneeBetween = query({
       )
       .collect();
 
-    const filtered = completionsInWindow.filter((c) =>
-      assignmentIds.has(c.assignmentId.toString())
-    );
+    const filtered = completionsInWindow.filter((c) => {
+      if (c.assignmentType === "cron") {
+        return regularAssignmentIds.has(c.assignmentId);
+      } else if (c.assignmentType === "jit") {
+        return jitAssignmentIds.has(c.assignmentId);
+      }
+      return false;
+    });
 
     return filtered;
   },
@@ -70,12 +82,14 @@ export const getCompletionsForAssigneeBetween = query({
 
 export const createCompletion = mutation({
   args: {
-    assignmentId: v.id("assignee_assignments"),
+    assignmentId: v.string(),
+    assignmentType: v.union(v.literal("cron"), v.literal("jit")),
     time: v.number(),
   },
   handler: async (ctx, args) => {
     return await ctx.db.insert("assignment_completions", {
       assignmentId: args.assignmentId,
+      assignmentType: args.assignmentType,
       time: args.time,
     });
   },
@@ -83,7 +97,8 @@ export const createCompletion = mutation({
 
 export const deleteCompletion = mutation({
   args: {
-    assignmentId: v.id("assignee_assignments"),
+    assignmentId: v.string(),
+    assignmentType: v.union(v.literal("cron"), v.literal("jit")),
     time: v.number(),
   },
   handler: async (ctx, args) => {
@@ -114,3 +129,57 @@ export const deleteCompletionById = mutation({
     return { deleted: 1 };
   },
 });
+
+// JIT (Just in Time) assignment mutations and queries
+export const createJitAssignment = mutation({
+  args: {
+    assigneeId: v.id("assignees"),
+    title: v.string(),
+    description: v.optional(v.string()),
+    date: v.number(),
+  },
+  handler: async (ctx, args) => {
+    return await ctx.db.insert("assignee_jit_assignment", {
+      assigneeId: args.assigneeId,
+      title: args.title,
+      description: args.description,
+      date: args.date,
+    });
+  },
+});
+
+export const getJitAssignmentsForAssigneeOnDate = query({
+  args: {
+    assigneeId: v.id("assignees"),
+    date: v.number(),
+  },
+  handler: async (ctx, args) => {
+    return await ctx.db
+      .query("assignee_jit_assignment")
+      .withIndex("by_assignee_date", (q) => 
+        q.eq("assigneeId", args.assigneeId).eq("date", args.date)
+      )
+      .collect();
+  },
+});
+
+export const getJitAssignmentsForAssigneeBetween = query({
+  args: {
+    assigneeId: v.id("assignees"),
+    startMs: v.number(),
+    endMs: v.number(),
+  },
+  handler: async (ctx, args) => {
+    // Get all JIT assignments for the assignee
+    const jitAssignments = await ctx.db
+      .query("assignee_jit_assignment")
+      .withIndex("by_assignee_date", (q) => q.eq("assigneeId", args.assigneeId))
+      .collect();
+
+    // Filter by date range
+    return jitAssignments.filter((assignment) => {
+      return assignment.date >= args.startMs && assignment.date <= args.endMs;
+    });
+  },
+});
+
