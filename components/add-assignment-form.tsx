@@ -50,7 +50,7 @@ export function AddAssignmentForm({ assigneeId, onSuccess }: AddAssignmentFormPr
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!title.trim() || !description.trim() || selectedDays.size === 0) {
+    if (!title.trim() || selectedDays.size === 0) {
       return;
     }
 
@@ -59,7 +59,7 @@ export function AddAssignmentForm({ assigneeId, onSuccess }: AddAssignmentFormPr
         assigneeId,
         title: title.trim(),
         cronSchedule: generateCronSchedule(selectedDays),
-        description: description.trim(),
+        ...(description.trim() && { description: description.trim() }),
       });
       
       // Reset form
@@ -113,8 +113,7 @@ export function AddAssignmentForm({ assigneeId, onSuccess }: AddAssignmentFormPr
               id="description"
               value={description}
               onChange={(e) => setDescription(e.target.value)}
-              placeholder="Share context, steps, or links for this assignment"
-              required
+              placeholder="Share context, steps, or links for this assignment (optional)"
               rows={4}
             />
           </div>
@@ -153,7 +152,7 @@ export function AddAssignmentForm({ assigneeId, onSuccess }: AddAssignmentFormPr
             <Button
               type="submit"
               className="flex-1 h-11"
-              disabled={selectedDays.size === 0 || !title.trim() || !description.trim()}
+              disabled={selectedDays.size === 0 || !title.trim()}
             >
               Create Assignment
             </Button>
