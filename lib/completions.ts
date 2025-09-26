@@ -30,6 +30,7 @@ export function buildAssignmentLookup(completions: any[]) {
 export async function toggleCompletion(
   mutations: any,
   assignmentId: any,
+  assignmentType: "cron" | "jit",
   date: any,
   matchingCompletion: any
 ) {
@@ -41,10 +42,18 @@ export async function toggleCompletion(
     if (matchingCompletion._id) {
       await deleteCompletionById({ completionId: matchingCompletion._id });
     } else {
-      await deleteCompletion({ assignmentId, time: startOfDay.getTime() });
+      await deleteCompletion({ 
+        assignmentId: assignmentId.toString(), 
+        assignmentType, 
+        time: startOfDay.getTime() 
+      });
     }
   } else {
-    await createCompletion({ assignmentId, time: startOfDay.getTime() });
+    await createCompletion({ 
+      assignmentId: assignmentId.toString(), 
+      assignmentType, 
+      time: startOfDay.getTime() 
+    });
   }
 }
 

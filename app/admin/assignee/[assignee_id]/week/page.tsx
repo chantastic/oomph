@@ -27,6 +27,12 @@ export default function WeekViewPage() {
     new Date(Date.now() + currentWeekOffset * 7 * 24 * 60 * 60 * 1000)
   );
 
+  // Compute start/end ms for the week and fetch JIT assignments for each day
+  const startOfWeek = new Date(weekDates[0]);
+  startOfWeek.setHours(0, 0, 0, 0);
+  const endOfWeek = new Date(weekDates[6]);
+  endOfWeek.setHours(23, 59, 59, 999);
+
   const visibleAssignments = assignments
     ? assignments.filter((a: any) =>
         weekDates.some((date) =>
@@ -35,11 +41,13 @@ export default function WeekViewPage() {
       )
     : [];
 
-  // Compute start/end ms for the week and fetch completions in that window
-  const startOfWeek = new Date(weekDates[0]);
-  startOfWeek.setHours(0, 0, 0, 0);
-  const endOfWeek = new Date(weekDates[6]);
-  endOfWeek.setHours(23, 59, 59, 999);
+  // Get JIT assignments for the week
+  const jitAssignmentsForWeek = useQuery(api.assignments.getJitAssignmentsForAssigneeBetween, {
+    assigneeId,
+    startMs: startOfWeek.getTime(),
+    endMs: endOfWeek.getTime(),
+  });
+
   const completions = useQuery(
     api.assignments.getCompletionsForAssigneeBetween,
     {
@@ -158,7 +166,7 @@ export default function WeekViewPage() {
             />
 
             <div className="mt-6">
-              {assignments && assignments.length > 0 ? (
+              {(assignments && assignments.length > 0) || (jitAssignmentsForWeek && jitAssignmentsForWeek.length > 0) ? (
                 <div className="overflow-auto">
                   <table className="min-w-full table-auto border-collapse">
                     <thead>
@@ -188,6 +196,87 @@ export default function WeekViewPage() {
                       </tr>
                     </thead>
                     <tbody>
+                      {/* JIT Assignments */}
+                      {jitAssignmentsForWeek && jitAssignmentsForWeek.map((assignment: any) => (
+                        <tr key={`jit-${assignment._id}`} className="hover:bg-blue-50">
+                          <td
+                            className="border px-3 py-2 align-top w-48 leading-tight"
+                            style={{ lineHeight: "1.25rem" }}
+                          >
+                            <div className="font-medium leading-tight">
+                              {assignment.title}
+                            </div>
+                          </td>
+                          {weekDates.map((date, idx) => {
+                            // JIT assignments only show on their specific date
+                            const jitDate = new Date(assignment.date);
+                            const isJitDate = jitDate.toDateString() === date.toDateString();
+                            
+                            // Find completion for this JIT assignment on this date
+                            let matchingCompletion: any = undefined;
+                            if (completions) {
+                              const startOfDay = new Date(date);
+                              startOfDay.setHours(0, 0, 0, 0);
+                              const key = `${assignment._id.toString()}-${startOfDay.getTime()}`;
+                              matchingCompletion = dayLookup.get(key);
+                            }
+                            const completed = !!matchingCompletion;
+                            
+                            return (
+                              <td
+                                key={idx}
+                                className="border px-3 py-2 text-center align-top h-14 leading-tight"
+                                onClick={async () => {
+                                  if (!isJitDate) return;
+                                  try {
+                                    await toggleCompletion(
+                                      { createCompletion, deleteCompletion, deleteCompletionById },
+                                      assignment._id,
+                                      "jit",
+                                      date,
+                                      matchingCompletion
+                                    );
+                                  } catch (err) {
+                                    console.error("Failed to toggle JIT completion", err);
+                                  }
+                                }}
+                              >
+                                {isJitDate ? (
+                                  <div className="leading-tight">
+                                    {completions ? (
+                                      completed ? (
+                                        <span className="text-green-600 font-medium">
+                                          Completed
+                                        </span>
+                                      ) : (
+                                        <span className="text-red-500">
+                                          Incomplete
+                                        </span>
+                                      )
+                                    ) : (
+                                      <span className="text-gray-500">
+                                        Loading…
+                                      </span>
+                                    )}
+                                  </div>
+                                ) : (
+                                  <div
+                                    className="text-xs text-muted-foreground h-full w-full flex items-center justify-center text-gray-300 pointer-events-none"
+                                    style={{
+                                      backgroundImage:
+                                        "repeating-linear-gradient(45deg, rgba(0,0,0,0.03) 0 1px, transparent 1px 8px)",
+                                    }}
+                                  >
+                                    —
+                                  </div>
+                                )}
+                              </td>
+                            );
+                          })}
+                        </tr>
+                      ))}
+                      
+                      {/* Cron Assignments */}
                       {visibleAssignments.map((assignment: any) => (
                         <tr key={assignment._id} className="hover:bg-gray-50">
                           <td
@@ -230,6 +319,7 @@ export default function WeekViewPage() {
                                     await toggleCompletion(
                                       { createCompletion, deleteCompletion, deleteCompletionById },
                                       assignment._id,
+                                      "cron",
                                       date,
                                       matchingCompletion
                                     );
@@ -277,7 +367,7 @@ export default function WeekViewPage() {
                 </div>
               ) : (
                 <div className="text-center text-muted-foreground py-8">
-                  No assignments found for this assignee.
+                  No assignments found for this assignee this week.
                 </div>
               )}
             </div>

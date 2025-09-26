@@ -27,6 +27,10 @@ export default function AssigneePage() {
     startMs: startOfDay.getTime(),
     endMs: endOfDay.getTime(),
   });
+  const jitAssignments = useQuery(api.assignments.getJitAssignmentsForAssigneeOnDate, {
+    assigneeId,
+    date: startOfDay.getTime(),
+  });
 
   const createCompletion = useMutation(api.assignments.createCompletion);
   const deleteCompletion = useMutation(api.assignments.deleteCompletion);
@@ -62,31 +66,129 @@ export default function AssigneePage() {
         <div className="space-y-4 sm:space-y-6">
           <div>
             <div className="mt-4 sm:mt-6">
-              {assignments && assignments.length > 0 ? (
-                (() => {
-                  const today = new Date();
-                  const todaysAssignments = assignments.filter(a =>
-                    shouldShowAssignmentOnDate(a.cronSchedule, today)
+              {(() => {
+                const today = new Date();
+                const todaysAssignments = assignments ? assignments.filter(a =>
+                  shouldShowAssignmentOnDate(a.cronSchedule, today)
+                ) : [];
+                
+                const hasJitAssignments = jitAssignments && jitAssignments.length > 0;
+                const hasRegularAssignments = todaysAssignments.length > 0;
+                
+                if (!hasJitAssignments && !hasRegularAssignments) {
+                  return (
+                    <div className="text-center text-muted-foreground py-6 sm:py-8">
+                      <div className="text-4xl sm:text-6xl mb-3 sm:mb-4">🎉</div>
+                      <h3 className="text-base sm:text-lg font-medium mb-1 sm:mb-2">No tasks for today!</h3>
+                      <p className="text-sm sm:text-base">Enjoy your free time or check back tomorrow for new assignments.</p>
+                    </div>
                   );
-                  
-                  // Sort assignments: incomplete first, then completed
-                  const sortedAssignments = todaysAssignments.sort((a, b) => {
-                    const aCompleted = !!assignmentLookup.get(a._id.toString());
-                    const bCompleted = !!assignmentLookup.get(b._id.toString());
-                    
-                    // If one is completed and the other isn't, incomplete comes first
-                    if (aCompleted !== bCompleted) {
-                      return aCompleted ? 1 : -1;
-                    }
-                    
-                    // If both have the same completion status, maintain original order
-                    return 0;
-                  });
-                  
-                  return sortedAssignments.length > 0 ? (
-                    <div className="space-y-3 sm:space-y-4">
-                      <AnimatePresence mode="popLayout">
-                        {sortedAssignments.map((assignment, index) => {
+                }
+                
+                return (
+                  <div className="space-y-3 sm:space-y-4">
+                    <AnimatePresence mode="popLayout">
+                      {/* JIT assignments at the top */}
+                      {hasJitAssignments && jitAssignments.map((assignment) => {
+                        const matchingCompletion = assignmentLookup.get(
+                          assignment._id.toString()
+                        );
+                        const completed = !!matchingCompletion;
+                        return (
+                          <motion.div
+                            key={`jit-${assignment._id}`}
+                            layout
+                            initial={{ opacity: 0, y: 20 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            exit={{ opacity: 0, y: -20 }}
+                            transition={{
+                              duration: 0.3,
+                              ease: "easeInOut",
+                              layout: { duration: 0.4, ease: "easeInOut" }
+                            }}
+                            className={`p-3 sm:p-4 border-2 rounded-lg cursor-pointer relative ${
+                              completed 
+                                ? "border-green-200 bg-green-50" 
+                                : "border-blue-200 bg-blue-50"
+                            }`}
+                            onClick={async () => {
+                              try {
+                                await toggleCompletion(
+                                  { createCompletion, deleteCompletion, deleteCompletionById },
+                                  assignment._id,
+                                  "jit",
+                                  startOfDay,
+                                  matchingCompletion
+                                );
+                              } catch (err) {
+                                console.error("Failed to toggle JIT completion", err);
+                              }
+                            }}
+                            whileHover={{ scale: 1.02 }}
+                            whileTap={{ scale: 0.98 }}
+                          >
+                            <div className="flex items-center justify-between mb-2">
+                              <div className="flex items-center gap-2">
+                                <span className={`text-xs font-medium px-2 py-1 rounded ${
+                                  completed 
+                                    ? "text-green-600 bg-green-100" 
+                                    : "text-blue-600 bg-blue-100"
+                                }`}>
+                                  JUST IN TIME
+                                </span>
+                              </div>
+                              <div className="flex-shrink-0">
+                                {completed ? (
+                                  <div className="w-5 h-5 sm:w-6 sm:h-6 bg-green-500 rounded-full flex items-center justify-center">
+                                    <motion.svg 
+                                      className="w-3 h-3 sm:w-4 sm:h-4 text-white" 
+                                      fill="currentColor" 
+                                      viewBox="0 0 20 20"
+                                      initial={{ scale: 0 }}
+                                      animate={{ scale: 1 }}
+                                      transition={{ delay: 0.1, duration: 0.2 }}
+                                    >
+                                      <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                                    </motion.svg>
+                                  </div>
+                                ) : (
+                                  <div className="w-5 h-5 sm:w-6 sm:h-6 border-2 border-gray-300 rounded-full"></div>
+                                )}
+                              </div>
+                            </div>
+                            <h3 className={`font-medium text-sm sm:text-base mb-1 ${
+                              completed ? "text-green-900" : "text-blue-900"
+                            }`}>
+                              {assignment.title}
+                            </h3>
+                            {assignment.description && (
+                              <p className={`text-xs sm:text-sm whitespace-pre-line ${
+                                completed ? "text-green-700" : "text-blue-700"
+                              }`}>
+                                {assignment.description}
+                              </p>
+                            )}
+                          </motion.div>
+                        );
+                      })}
+                      
+                      {/* Regular assignments */}
+                      {hasRegularAssignments && (() => {
+                        // Sort assignments: incomplete first, then completed
+                        const sortedAssignments = todaysAssignments.sort((a, b) => {
+                          const aCompleted = !!assignmentLookup.get(a._id.toString());
+                          const bCompleted = !!assignmentLookup.get(b._id.toString());
+                          
+                          // If one is completed and the other isn't, incomplete comes first
+                          if (aCompleted !== bCompleted) {
+                            return aCompleted ? 1 : -1;
+                          }
+                          
+                          // If both have the same completion status, maintain original order
+                          return 0;
+                        });
+                        
+                        return sortedAssignments.map((assignment) => {
                           const matchingCompletion = assignmentLookup.get(
                             assignment._id.toString()
                           );
@@ -113,6 +215,7 @@ export default function AssigneePage() {
                                   await toggleCompletion(
                                     { createCompletion, deleteCompletion, deleteCompletionById },
                                     assignment._id,
+                                    "cron",
                                     startOfDay,
                                     matchingCompletion
                                   );
@@ -157,24 +260,12 @@ export default function AssigneePage() {
                               </div>
                             </motion.div>
                           );
-                        })}
-                      </AnimatePresence>
-                    </div>
-                  ) : (
-                    <div className="text-center text-muted-foreground py-6 sm:py-8">
-                      <div className="text-4xl sm:text-6xl mb-3 sm:mb-4">🎉</div>
-                      <h3 className="text-base sm:text-lg font-medium mb-1 sm:mb-2">No tasks for today!</h3>
-                      <p className="text-sm sm:text-base">Enjoy your free time or check back tomorrow for new assignments.</p>
-                    </div>
-                  );
-                })()
-              ) : (
-                <div className="text-center text-muted-foreground py-6 sm:py-8">
-                  <div className="text-4xl sm:text-6xl mb-3 sm:mb-4">📝</div>
-                  <h3 className="text-base sm:text-lg font-medium mb-1 sm:mb-2">No assignments yet</h3>
-                  <p className="text-sm sm:text-base">Your tasks will appear here once they're assigned to you.</p>
-                </div>
-              )}
+                        });
+                      })()}
+                    </AnimatePresence>
+                  </div>
+                );
+              })()}
             </div>
           </div>
         </div>
