@@ -2,7 +2,7 @@
 
 import { useParams } from "next/navigation";
 import { useQuery, useMutation } from "convex/react";
-import { useMemo, useState } from "react";
+import { useMemo } from "react";
 import { buildAssignmentLookup, toggleCompletion } from "@/lib/completions";
 import { api } from "@/convex/_generated/api";
 import { Id } from "@/convex/_generated/dataModel";
@@ -36,36 +36,6 @@ export default function AssigneePage() {
     return completions ? buildAssignmentLookup(completions) : new Map();
   }, [completions]);
 
-  const [isSharing, setIsSharing] = useState(false);
-
-  const handleShare = async () => {
-    const assigneeUrl = `${window.location.origin}/assignee/${assigneeId}`;
-
-    try {
-      setIsSharing(true);
-      
-      // Try native Web Share API first (works on mobile devices)
-      if (navigator.share) {
-        await navigator.share({ url: assigneeUrl });
-      } else {
-        // Fallback: copy to clipboard
-        await navigator.clipboard.writeText(assigneeUrl);
-        alert('URL copied to clipboard!');
-      }
-    } catch (error) {
-      console.error('Error sharing:', error);
-      // Final fallback: copy to clipboard
-      try {
-        await navigator.clipboard.writeText(assigneeUrl);
-        alert('URL copied to clipboard!');
-      } catch (clipboardError) {
-        console.error('Clipboard not available:', clipboardError);
-        alert('Unable to share. Please copy the URL manually.');
-      }
-    } finally {
-      setIsSharing(false);
-    }
-  };
 
   if (!assignee) {
     return (
@@ -93,23 +63,11 @@ export default function AssigneePage() {
           <div className="flex items-center justify-between mb-4">
             <div>
               <h1 className="text-3xl font-bold mb-2">{assignee.name}</h1>
-              <p className="text-muted-foreground">Today</p>
             </div>
             <div className="flex gap-2">
-              <Button 
-                size="sm" 
-                variant="outline"
-                onClick={handleShare}
-                disabled={isSharing}
-              >
-                {isSharing ? 'Sharing...' : '📤 Share'}
-              </Button>
-              <Button size="sm" disabled>
-                Today
-              </Button>
-              <Link href={`/admin/assignee/${assigneeId}/week`}>
-                <Button variant="outline" size="sm">
-                  Week View
+              <Link href={`/assignee/${assigneeId}`} target="_blank" rel="noopener noreferrer">
+                <Button size="sm" variant="outline">
+                  🔗 Public Page
                 </Button>
               </Link>
             </div>

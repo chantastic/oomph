@@ -44,7 +44,5 @@ Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/bui
   - https://stack.convex.dev/intro-to-migrations
   - https://stack.convex.dev/migrating-data-with-mutations
 - [ ] Improve share feature (it sucks right now)
-- [ ] Improve week view for smaller screens
-  - Something like this? https://www.npmjs.com/package/table.css
 - [ ] Refine user dashboard for high-level overview (maybe percent complete?)
 - [ ] Discuss and implement ideal layout preferences (css-grid-per-page?)

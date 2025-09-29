@@ -141,23 +141,3 @@ export function shouldShowAssignmentOnDate(cronSchedule: string, date: Date): bo
   return true
 }
 
-// Helper function to get week dates
-export function getWeekDates(startDate?: Date): Date[] {
-  const today = startDate || new Date();
-  const startOfWeek = new Date(today);
-  startOfWeek.setDate(today.getDate() - today.getDay()); // Start from Sunday
-  
-  const weekDates = [];
-  for (let i = 0; i < 7; i++) {
-    const date = new Date(startOfWeek);
-    date.setDate(startOfWeek.getDate() + i);
-    weekDates.push(date);
-  }
-  return weekDates;
-}
-
-// Helper function to check if a date is today
-export function isToday(date: Date): boolean {
-  const today = new Date();
-  return date.toDateString() === today.toDateString();
-}

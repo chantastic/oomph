@@ -1,19 +1,4 @@
 // Utilities for efficient completion lookups and toggling
-export function buildDayLookup(completions: any[]) {
-  const map = new Map();
-  for (const c of completions) {
-    try {
-      const assignmentId = c.assignmentId.toString();
-      const d = new Date(c.time);
-      d.setHours(0, 0, 0, 0);
-      const key = `${assignmentId}-${d.getTime()}`;
-      map.set(key, c);
-    } catch (e) {
-      // ignore malformed entries
-    }
-  }
-  return map;
-}
 
 export function buildAssignmentLookup(completions: any[]) {
   const map = new Map();

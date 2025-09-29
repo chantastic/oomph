@@ -6,7 +6,6 @@ export default authkitMiddleware({
     unauthenticatedPaths: [
       "/",
       "/assignee/:assignee_id",
-      "/assignee/:assignee_id/week",
       "/sign-in",
       "/sign-up",
     ],
