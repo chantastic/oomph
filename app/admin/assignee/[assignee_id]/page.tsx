@@ -2,7 +2,7 @@
 
 import { useParams } from "next/navigation";
 import { useQuery, useMutation } from "convex/react";
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { buildAssignmentLookup, toggleCompletion } from "@/lib/completions";
 import { api } from "@/convex/_generated/api";
 import { Id } from "@/convex/_generated/dataModel";
@@ -31,11 +31,34 @@ export default function AssigneePage() {
   const createCompletion = useMutation(api.assignments.createCompletion);
   const deleteCompletion = useMutation(api.assignments.deleteCompletion);
   const deleteCompletionById = useMutation(api.assignments.deleteCompletionById);
+  
+  // Assignee assignments
+  const assigneeAssignments = useQuery(api.materializedAssignments.getByAssignee, {
+    assigneeId,
+  });
+  const materializeForToday = useMutation(api.materializedAssignments.materializeForToday);
+  const markCompleted = useMutation(api.materializedAssignments.markCompleted);
+  const markNotCompleted = useMutation(api.materializedAssignments.markNotCompleted);
+
+  const [isMaterializing, setIsMaterializing] = useState(false);
 
   const assignmentLookup = useMemo(() => {
     return completions ? buildAssignmentLookup(completions) : new Map();
   }, [completions]);
 
+  const handleMaterialize = async () => {
+    try {
+      setIsMaterializing(true);
+      const result = await materializeForToday({ assigneeId });
+      console.log(`Materialized ${result.count} assignments:`, result.materialized);
+      alert(`Successfully materialized ${result.count} assignments for today!`);
+    } catch (error) {
+      console.error("Failed to materialize assignments:", error);
+      alert("Failed to materialize assignments. Check console for details.");
+    } finally {
+      setIsMaterializing(false);
+    }
+  };
 
   if (!assignee) {
     return (
@@ -70,6 +93,14 @@ export default function AssigneePage() {
                   🔗 Public Page
                 </Button>
               </Link>
+              <Button 
+                size="sm" 
+                variant="outline"
+                onClick={handleMaterialize}
+                disabled={isMaterializing}
+              >
+                {isMaterializing ? 'Materializing...' : '🧪 Test Materialize'}
+              </Button>
             </div>
           </div>
         </div>
@@ -143,6 +174,64 @@ export default function AssigneePage() {
               ) : (
                 <div className="text-center text-muted-foreground py-8">
                   No assignments found for this assignee.
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Assignee Assignments Section */}
+          <div>
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-xl font-semibold">Assignee Assignments</h2>
+              <div className="text-sm text-muted-foreground">
+                {assigneeAssignments ? `${assigneeAssignments.length} tasks` : 'Loading...'}
+              </div>
+            </div>
+            
+            <div className="mt-4">
+              {assigneeAssignments && assigneeAssignments.length > 0 ? (
+                <div className="space-y-4">
+                  {assigneeAssignments.map((assignment) => (
+                    <div
+                      key={assignment._id}
+                      className={`p-4 border rounded-lg ${
+                        assignment.status === "completed" 
+                          ? "bg-green-50 border-green-200" 
+                          : "bg-white border-gray-200"
+                      }`}
+                    >
+                      <div className="flex items-center justify-between mb-2">
+                        <h3 className="font-medium">{assignment.title}</h3>
+                        <div className="flex gap-2">
+                          <Button
+                            size="sm"
+                            variant={assignment.status === "completed" ? "default" : "outline"}
+                            onClick={() => {
+                              if (assignment.status === "completed") {
+                                markNotCompleted({ assigneeAssignmentId: assignment._id });
+                              } else {
+                                markCompleted({ assigneeAssignmentId: assignment._id });
+                              }
+                            }}
+                          >
+                            {assignment.status === "completed" ? "✓ Completed" : "Mark Complete"}
+                          </Button>
+                        </div>
+                      </div>
+                      {assignment.description && (
+                        <p className="text-sm text-gray-700 mb-2 whitespace-pre-line">
+                          {assignment.description}
+                        </p>
+                      )}
+                      <div className="flex items-center gap-4 text-xs text-muted-foreground">
+                        <span>Status: <strong>{assignment.status || "pending"}</strong></span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="text-center text-muted-foreground py-8">
+                  No assignee assignments yet.
                 </div>
               )}
             </div>

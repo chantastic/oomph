@@ -38,6 +38,14 @@ const schema = defineSchema({
   })
     .index("by_user", ["userId"])
     .index("by_assignee", ["assigneeId"]),
+
+  assignee_assignment: defineTable({
+    assigneeId: v.id("assignees"),
+    title: v.string(),
+    description: v.optional(v.string()),
+    status: v.optional(v.union(v.literal("completed"))),
+  })
+    .index("by_assignee", ["assigneeId"])
 })
 
 export default schema
