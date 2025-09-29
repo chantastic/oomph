@@ -3,16 +3,6 @@ import { v } from "convex/values"
 
 const schema = defineSchema({
   /*
-   * Assignments Completions are the core reporting model of the app.
-   * They log the date a datetime an assignment was completed.
-   */
-  assignment_completions: defineTable({
-    assignmentId: v.id("assignee_assignments"),
-    time: v.number(),
-  })
-    .index("by_time", ["time"])
-    .index("by_assignment_time", ["assignmentId", "time"]),
-  /*
    * Assignees are the people who are assigned to tasks.
    */
   assignees: defineTable({
@@ -43,7 +33,7 @@ const schema = defineSchema({
     assigneeId: v.id("assignees"),
     title: v.string(),
     description: v.optional(v.string()),
-    status: v.optional(v.union(v.literal("completed"))),
+    status: v.optional(v.union(v.literal("complete"))),
   })
     .index("by_assignee", ["assigneeId"])
 })

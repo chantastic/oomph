@@ -3,7 +3,6 @@
 import { useParams } from "next/navigation";
 import { useQuery, useMutation } from "convex/react";
 import { useMemo, useState } from "react";
-import { buildAssignmentLookup, toggleCompletion } from "@/lib/completions";
 import { api } from "@/convex/_generated/api";
 import { Id } from "@/convex/_generated/dataModel";
 import Link from "next/link";
@@ -17,20 +16,6 @@ export default function AssigneePage() {
   
   const assignee = useQuery(api.assignments.getAssignee, { assigneeId });
   const assignments = useQuery(api.assignments.getByAssignee, { assigneeId });
-  const today = new Date();
-  const startOfDay = new Date(today);
-  startOfDay.setHours(0, 0, 0, 0);
-  const endOfDay = new Date(today);
-  endOfDay.setHours(23, 59, 59, 999);
-  const completions = useQuery(api.assignments.getCompletionsForAssigneeBetween, {
-    assigneeId,
-    startMs: startOfDay.getTime(),
-    endMs: endOfDay.getTime(),
-  });
-
-  const createCompletion = useMutation(api.assignments.createCompletion);
-  const deleteCompletion = useMutation(api.assignments.deleteCompletion);
-  const deleteCompletionById = useMutation(api.assignments.deleteCompletionById);
   
   // Assignee assignments
   const assigneeAssignments = useQuery(api.materializedAssignments.getByAssignee, {
@@ -42,9 +27,6 @@ export default function AssigneePage() {
 
   const [isMaterializing, setIsMaterializing] = useState(false);
 
-  const assignmentLookup = useMemo(() => {
-    return completions ? buildAssignmentLookup(completions) : new Map();
-  }, [completions]);
 
   const handleMaterialize = async () => {
     try {
@@ -121,56 +103,24 @@ export default function AssigneePage() {
             
             <div className="mt-6">
               {assignments && assignments.length > 0 ? (
-                (() => {
-                  const today = new Date();
-                  const todaysAssignments = assignments.filter(a =>
-                    shouldShowAssignmentOnDate(a.cronSchedule, today)
-                  );
-                  return todaysAssignments.length > 0 ? (
-                    <div className="space-y-4">
-                      {todaysAssignments.map((assignment) => {
-                        const matchingCompletion = assignmentLookup.get(
-                          assignment._id.toString()
-                        );
-                        const completed = !!matchingCompletion;
-                        return (
-                          <div
-                            key={assignment._id}
-                            className={`p-4 border rounded-lg cursor-pointer ${
-                              completed ? "bg-green-50" : "bg-white"
-                            }`}
-                            onClick={async () => {
-                              try {
-                                await toggleCompletion(
-                                  { createCompletion, deleteCompletion, deleteCompletionById },
-                                  assignment._id,
-                                  startOfDay,
-                                  matchingCompletion
-                                );
-                              } catch (err) {
-                                console.error("Failed to toggle completion", err);
-                              }
-                            }}
-                          >
-                            <h3 className="font-medium mb-2">{assignment.title}</h3>
-                            {assignment.description && (
-                              <p className="text-sm text-gray-700 mb-2 whitespace-pre-line">
-                                {assignment.description}
-                              </p>
-                            )}
-                            <p className="text-sm text-muted-foreground">
-                              Schedule: {assignment.cronSchedule}
-                            </p>
-                          </div>
-                        );
-                      })}
+                <div className="space-y-4">
+                  {assignments.map((assignment) => (
+                    <div
+                      key={assignment._id}
+                      className="p-4 border rounded-lg bg-white"
+                    >
+                      <h3 className="font-medium mb-2">{assignment.title}</h3>
+                      {assignment.description && (
+                        <p className="text-sm text-gray-700 mb-2 whitespace-pre-line">
+                          {assignment.description}
+                        </p>
+                      )}
+                      <p className="text-sm text-muted-foreground">
+                        Schedule: {assignment.cronSchedule}
+                      </p>
                     </div>
-                  ) : (
-                    <div className="text-center text-muted-foreground py-8">
-                      No assignments scheduled for today.
-                    </div>
-                  );
-                })()
+                  ))}
+                </div>
               ) : (
                 <div className="text-center text-muted-foreground py-8">
                   No assignments found for this assignee.
@@ -195,7 +145,7 @@ export default function AssigneePage() {
                     <div
                       key={assignment._id}
                       className={`p-4 border rounded-lg ${
-                        assignment.status === "completed" 
+                        assignment.status === "complete" 
                           ? "bg-green-50 border-green-200" 
                           : "bg-white border-gray-200"
                       }`}
@@ -205,16 +155,16 @@ export default function AssigneePage() {
                         <div className="flex gap-2">
                           <Button
                             size="sm"
-                            variant={assignment.status === "completed" ? "default" : "outline"}
+                            variant={assignment.status === "complete" ? "default" : "outline"}
                             onClick={() => {
-                              if (assignment.status === "completed") {
+                              if (assignment.status === "complete") {
                                 markNotCompleted({ assigneeAssignmentId: assignment._id });
                               } else {
                                 markCompleted({ assigneeAssignmentId: assignment._id });
                               }
                             }}
                           >
-                            {assignment.status === "completed" ? "✓ Completed" : "Mark Complete"}
+                            {assignment.status === "complete" ? "✓ Complete" : "Mark Complete"}
                           </Button>
                         </div>
                       </div>

@@ -16,6 +16,7 @@ export default function AssigneePage() {
   const markCompleted = useMutation(api.materializedAssignments.markCompleted);
   const markNotCompleted = useMutation(api.materializedAssignments.markNotCompleted);
 
+
   if (!assignee) {
     return (
       <main className="flex min-h-screen flex-col items-center p-24">
@@ -46,8 +47,8 @@ export default function AssigneePage() {
                 (() => {
                   // Sort assignments: incomplete first, then completed
                   const sortedAssignments = assigneeAssignments.sort((a, b) => {
-                    const aCompleted = a.status === "completed";
-                    const bCompleted = b.status === "completed";
+                    const aCompleted = a.status === "complete";
+                    const bCompleted = b.status === "complete";
                     
                     // If one is completed and the other isn't, incomplete comes first
                     if (aCompleted !== bCompleted) {
@@ -62,7 +63,7 @@ export default function AssigneePage() {
                     <div className="space-y-3 sm:space-y-4">
                       <AnimatePresence mode="popLayout">
                         {sortedAssignments.map((assignment) => {
-                          const completed = assignment.status === "completed";
+                          const completed = assignment.status === "complete";
                           return (
                             <motion.div
                               key={assignment._id}

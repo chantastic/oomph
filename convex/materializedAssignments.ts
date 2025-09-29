@@ -36,7 +36,7 @@ export const markCompleted = mutation({
   },
   handler: async (ctx, args) => {
     await ctx.db.patch(args.assigneeAssignmentId, {
-      status: "completed",
+      status: "complete",
     });
   },
 });
