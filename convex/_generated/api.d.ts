@@ -15,6 +15,7 @@ import type {
 } from "convex/server";
 import type * as assignees from "../assignees.js";
 import type * as assignments from "../assignments.js";
+import type * as materializedAssignments from "../materializedAssignments.js";
 
 /**
  * A utility for referencing Convex functions in your app's API.
@@ -27,6 +28,7 @@ import type * as assignments from "../assignments.js";
 declare const fullApi: ApiFromModules<{
   assignees: typeof assignees;
   assignments: typeof assignments;
+  materializedAssignments: typeof materializedAssignments;
 }>;
 export declare const api: FilterApi<
   typeof fullApi,

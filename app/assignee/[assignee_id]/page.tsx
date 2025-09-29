@@ -2,13 +2,8 @@
 
 import { useParams } from "next/navigation";
 import { useQuery, useMutation } from "convex/react";
-import { useMemo } from "react";
-import { buildAssignmentLookup, toggleCompletion } from "@/lib/completions";
 import { api } from "@/convex/_generated/api";
 import { Id } from "@/convex/_generated/dataModel";
-import Link from "next/link";
-import { Button } from "@/components/ui/button";
-import { shouldShowAssignmentOnDate } from "@/lib/utils";
 import { motion, AnimatePresence } from "framer-motion";
 
 export default function AssigneePage() {
@@ -16,25 +11,10 @@ export default function AssigneePage() {
   const assigneeId = params.assignee_id as Id<"assignees">;
   
   const assignee = useQuery(api.assignments.getAssignee, { assigneeId });
-  const assignments = useQuery(api.assignments.getByAssignee, { assigneeId });
-  const today = new Date();
-  const startOfDay = new Date(today);
-  startOfDay.setHours(0, 0, 0, 0);
-  const endOfDay = new Date(today);
-  endOfDay.setHours(23, 59, 59, 999);
-  const completions = useQuery(api.assignments.getCompletionsForAssigneeBetween, {
-    assigneeId,
-    startMs: startOfDay.getTime(),
-    endMs: endOfDay.getTime(),
-  });
+  const assigneeAssignments = useQuery(api.materializedAssignments.getByAssignee, { assigneeId });
 
-  const createCompletion = useMutation(api.assignments.createCompletion);
-  const deleteCompletion = useMutation(api.assignments.deleteCompletion);
-  const deleteCompletionById = useMutation(api.assignments.deleteCompletionById);
-
-  const assignmentLookup = useMemo(() => {
-    return completions ? buildAssignmentLookup(completions) : new Map();
-  }, [completions]);
+  const markCompleted = useMutation(api.materializedAssignments.markCompleted);
+  const markNotCompleted = useMutation(api.materializedAssignments.markNotCompleted);
 
   if (!assignee) {
     return (
@@ -62,17 +42,12 @@ export default function AssigneePage() {
         <div className="space-y-4 sm:space-y-6">
           <div>
             <div className="mt-4 sm:mt-6">
-              {assignments && assignments.length > 0 ? (
+              {assigneeAssignments && assigneeAssignments.length > 0 ? (
                 (() => {
-                  const today = new Date();
-                  const todaysAssignments = assignments.filter(a =>
-                    shouldShowAssignmentOnDate(a.cronSchedule, today)
-                  );
-                  
                   // Sort assignments: incomplete first, then completed
-                  const sortedAssignments = todaysAssignments.sort((a, b) => {
-                    const aCompleted = !!assignmentLookup.get(a._id.toString());
-                    const bCompleted = !!assignmentLookup.get(b._id.toString());
+                  const sortedAssignments = assigneeAssignments.sort((a, b) => {
+                    const aCompleted = a.status === "completed";
+                    const bCompleted = b.status === "completed";
                     
                     // If one is completed and the other isn't, incomplete comes first
                     if (aCompleted !== bCompleted) {
@@ -83,14 +58,11 @@ export default function AssigneePage() {
                     return 0;
                   });
                   
-                  return sortedAssignments.length > 0 ? (
+                  return (
                     <div className="space-y-3 sm:space-y-4">
                       <AnimatePresence mode="popLayout">
-                        {sortedAssignments.map((assignment, index) => {
-                          const matchingCompletion = assignmentLookup.get(
-                            assignment._id.toString()
-                          );
-                          const completed = !!matchingCompletion;
+                        {sortedAssignments.map((assignment) => {
+                          const completed = assignment.status === "completed";
                           return (
                             <motion.div
                               key={assignment._id}
@@ -110,12 +82,11 @@ export default function AssigneePage() {
                               }`}
                               onClick={async () => {
                                 try {
-                                  await toggleCompletion(
-                                    { createCompletion, deleteCompletion, deleteCompletionById },
-                                    assignment._id,
-                                    startOfDay,
-                                    matchingCompletion
-                                  );
+                                  if (completed) {
+                                    await markNotCompleted({ assigneeAssignmentId: assignment._id });
+                                  } else {
+                                    await markCompleted({ assigneeAssignmentId: assignment._id });
+                                  }
                                 } catch (err) {
                                   console.error("Failed to toggle completion", err);
                                 }
@@ -159,12 +130,6 @@ export default function AssigneePage() {
                           );
                         })}
                       </AnimatePresence>
-                    </div>
-                  ) : (
-                    <div className="text-center text-muted-foreground py-6 sm:py-8">
-                      <div className="text-4xl sm:text-6xl mb-3 sm:mb-4">🎉</div>
-                      <h3 className="text-base sm:text-lg font-medium mb-1 sm:mb-2">No tasks for today!</h3>
-                      <p className="text-sm sm:text-base">Enjoy your free time or check back tomorrow for new assignments.</p>
                     </div>
                   );
                 })()
