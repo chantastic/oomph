@@ -18,7 +18,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 
 interface AddAssignmentFormProps {
-  assigneeId: Id<"assignees">;
+  assigneeId: Id<"assignee">;
   onSuccess?: () => void;
 }
 

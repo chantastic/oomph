@@ -13,7 +13,7 @@ import { shouldShowAssignmentOnDate } from "@/lib/utils";
 
 export default function AssigneePage() {
   const params = useParams();
-  const assigneeId = params.assignee_id as Id<"assignees">;
+  const assigneeId = params.assignee_id as Id<"assignee">;
   
   const assignee = useQuery(api.assignments.getAssignee, { assigneeId });
   const assignments = useQuery(api.assignments.getByAssignee, { assigneeId });

@@ -26,7 +26,7 @@ import workosSignOut from "../actions/workos-sign-out";
 function AddAssigneeDialog() {
   const [name, setName] = useState("");
   const [open, setOpen] = useState(false);
-  const createAssignee = useMutation(api.assignees.create);
+  const createAssignee = useMutation(api.assignee.create);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -85,7 +85,7 @@ function AddAssigneeDialog() {
 }
 
 export default function Home() {
-  const assignees = useQuery(api.assignees.get);
+  const assignees = useQuery(api.assignee.get);
 
   return (
     <main className="flex min-h-screen flex-col items-center p-24">
