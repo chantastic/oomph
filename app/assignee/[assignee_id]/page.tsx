@@ -8,7 +8,7 @@ import { motion, AnimatePresence } from "framer-motion";
 
 export default function AssigneePage() {
   const params = useParams();
-  const assigneeId = params.assignee_id as Id<"assignees">;
+  const assigneeId = params.assignee_id as Id<"assignee">;
   
   const assignee = useQuery(api.assignments.getAssignee, { assigneeId });
   const assigneeAssignments = useQuery(api.materializedAssignments.getByAssignee, { assigneeId });

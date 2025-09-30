@@ -2,7 +2,7 @@ import { query, mutation } from "./_generated/server";
 import { v } from "convex/values";
 
 export const getByAssignee = query({
-  args: { assigneeId: v.id("assignees") },
+  args: { assigneeId: v.id("assignee") },
   handler: async (ctx, args) => {
     return await ctx.db
       .query("assignee_assignment_descriptor")
@@ -12,7 +12,7 @@ export const getByAssignee = query({
 });
 
 export const getAssignee = query({
-  args: { assigneeId: v.id("assignees") },
+  args: { assigneeId: v.id("assignee") },
   handler: async (ctx, args) => {
     return await ctx.db.get(args.assigneeId);
   },
@@ -20,7 +20,7 @@ export const getAssignee = query({
 
 export const create = mutation({
   args: {
-    assigneeId: v.id("assignees"),
+    assigneeId: v.id("assignee"),
     title: v.string(),
     cronSchedule: v.string(),
     description: v.optional(v.string()),

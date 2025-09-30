@@ -4,7 +4,7 @@ import { shouldShowAssignmentOnDate } from "../lib/utils";
 
 // Get all assignee assignments for an assignee
 export const getByAssignee = query({
-  args: { assigneeId: v.id("assignees") },
+  args: { assigneeId: v.id("assignee") },
   handler: async (ctx, args) => {
     return await ctx.db
       .query("assignee_assignment")
@@ -16,7 +16,7 @@ export const getByAssignee = query({
 // Create an assignee assignment
 export const create = mutation({
   args: {
-    assigneeId: v.id("assignees"),
+    assigneeId: v.id("assignee"),
     title: v.string(),
     description: v.optional(v.string()),
   },
@@ -64,7 +64,7 @@ export const deleteById = mutation({
 // Test function to materialize assignments for today
 export const materializeForToday = mutation({
   args: { 
-    assigneeId: v.id("assignees"),
+    assigneeId: v.id("assignee"),
   },
   handler: async (ctx, args) => {
     const today = new Date(new Date().toLocaleString("en-US", { timeZone: "America/Los_Angeles" }));
@@ -121,7 +121,7 @@ export const materializeForToday = mutation({
 export const getAllAssignees = query({
   args: {},
   handler: async (ctx) => {
-    return await ctx.db.query("assignees").collect();
+    return await ctx.db.query("assignee").collect();
   },
 });
 
@@ -133,7 +133,7 @@ export const materializeForAllAssignees = mutation({
     
     // Batch 1: Get all assignees and all assignment descriptors in parallel
     const [assignees, allAssignmentDescriptors] = await Promise.all([
-      ctx.db.query("assignees").collect(),
+      ctx.db.query("assignee").collect(),
       ctx.db.query("assignee_assignment_descriptor").collect()
     ]);
     
