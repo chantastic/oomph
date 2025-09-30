@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import React, { useState } from "react";
 import {
   Dialog,
   DialogTrigger,
@@ -20,15 +20,47 @@ import { Textarea } from "@/components/ui/textarea";
 interface AddAssignmentFormProps {
   assigneeId: Id<"assignee">;
   onSuccess?: () => void;
+  editingDescriptor?: {
+    id: Id<"assignee_assignment_descriptor">;
+    title: string;
+    cronSchedule: string;
+    description?: string;
+  };
 }
 
-export function AddAssignmentForm({ assigneeId, onSuccess }: AddAssignmentFormProps) {
+export function AddAssignmentForm({ assigneeId, onSuccess, editingDescriptor }: AddAssignmentFormProps) {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [selectedDays, setSelectedDays] = useState<Set<number>>(new Set());
   const [isOpen, setIsOpen] = useState(false);
   
-  const createAssignment = useMutation(api.assigneeAssignmentDescriptor.create);
+  const upsertAssignment = useMutation(api.assigneeAssignmentDescriptor.upsert);
+
+  // Parse cron schedule to selected days
+  const parseCronToDays = (cronSchedule: string): Set<number> => {
+    // Parse cron format: "0 1 * * 1,2,3" -> Set([1,2,3])
+    const parts = cronSchedule.split(" ");
+    if (parts.length >= 5) {
+      const dayPart = parts[4];
+      const days = dayPart.split(",").map(d => parseInt(d.trim())).filter(d => !isNaN(d));
+      return new Set(days);
+    }
+    return new Set();
+  };
+
+  // Initialize form fields when editing descriptor changes and dialog opens
+  React.useEffect(() => {
+    if (editingDescriptor && isOpen) {
+      setTitle(editingDescriptor.title);
+      setDescription(editingDescriptor.description || "");
+      setSelectedDays(parseCronToDays(editingDescriptor.cronSchedule));
+    } else if (!editingDescriptor && isOpen) {
+      // Reset form when creating new assignment
+      setTitle("");
+      setDescription("");
+      setSelectedDays(new Set());
+    }
+  }, [editingDescriptor, isOpen]);
 
   // Generate cron schedule from selected days
   const generateCronSchedule = (days: Set<number>): string => {
@@ -63,7 +95,8 @@ export function AddAssignmentForm({ assigneeId, onSuccess }: AddAssignmentFormPr
     }
 
     try {
-      await createAssignment({
+      await upsertAssignment({
+        id: editingDescriptor?.id,
         assigneeId,
         title: title.trim(),
         cronSchedule: generateCronSchedule(selectedDays),
@@ -81,7 +114,7 @@ export function AddAssignmentForm({ assigneeId, onSuccess }: AddAssignmentFormPr
         onSuccess();
       }
     } catch (error) {
-      console.error("Failed to create assignment:", error);
+      console.error("Failed to save assignment:", error);
     }
   };
 
@@ -94,12 +127,14 @@ export function AddAssignmentForm({ assigneeId, onSuccess }: AddAssignmentFormPr
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogTrigger asChild>
-        <Button className="w-full">+ Add Assignment</Button>
+        <Button className="w-full">{editingDescriptor ? "✏️ Edit" : "+ Add Assignment"}</Button>
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Add Assignment</DialogTitle>
-          <DialogDescription>Create a recurring assignment for this assignee.</DialogDescription>
+          <DialogTitle>{editingDescriptor ? "Edit Assignment" : "Add Assignment"}</DialogTitle>
+          <DialogDescription>
+            {editingDescriptor ? "Edit the recurring assignment details." : "Create a recurring assignment for this assignee."}
+          </DialogDescription>
         </DialogHeader>
 
         <form onSubmit={handleSubmit} className="space-y-2">
@@ -162,7 +197,7 @@ export function AddAssignmentForm({ assigneeId, onSuccess }: AddAssignmentFormPr
               className="flex-1 h-11"
               disabled={selectedDays.size === 0 || !title.trim()}
             >
-              Create Assignment
+              {editingDescriptor ? "Update Assignment" : "Create Assignment"}
             </Button>
             <Button
               type="button"
@@ -171,7 +206,8 @@ export function AddAssignmentForm({ assigneeId, onSuccess }: AddAssignmentFormPr
                 if (!title.trim()) return;
                 
                 try {
-                  await createAssignment({
+                  await upsertAssignment({
+                    id: editingDescriptor?.id,
                     assigneeId,
                     title: title.trim() + " (Test - Today)",
                     cronSchedule: generateTestCronSchedule(),
