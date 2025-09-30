@@ -1,13 +1,6 @@
 import { query, mutation } from "./_generated/server";
 import { v } from "convex/values";
-
-// Status constants for assignee assignments
-export const ASSIGNMENT_STATUS = {
-  COMPLETE: "complete",
-  INCOMPLETE: undefined, // No status means incomplete
-} as const;
-
-export type AssignmentStatus = typeof ASSIGNMENT_STATUS[keyof typeof ASSIGNMENT_STATUS];
+import { ASSIGNMENT_STATUS, AssignmentStatus } from "./constants";
 
 // Helper function to check if an assignment should appear on a specific date
 function shouldShowAssignmentOnDate(cronSchedule: string, date: Date): boolean {
