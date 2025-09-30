@@ -1,8 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useState, Suspense } from "react";
 import {
-  useQuery,
   useMutation,
   Authenticated,
   Unauthenticated,
@@ -23,6 +22,9 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import Link from "next/link";
 import workosSignOut from "../actions/workos-sign-out";
+import { useQuerySuspense } from "@/lib/useQuerySuspense";
+import { LoadingSpinner } from "@/components/ui/loading";
+import { toast } from "sonner";
 
 function AddAssigneeDialog() {
   const [name, setName] = useState("");
@@ -37,8 +39,9 @@ function AddAssigneeDialog() {
       await createAssignee({ name: name.trim() });
       setName("");
       setOpen(false);
+      toast.success("Assignee created successfully!");
     } catch (error) {
-      // Handle error silently
+      toast.error("Failed to create assignee. Please try again.");
     }
   };
 
@@ -85,8 +88,8 @@ function AddAssigneeDialog() {
   );
 }
 
-export default function Home() {
-  const assignees = useQuery(api.assignee.getAllAssignees);
+function DashboardContent() {
+  const assignees = useQuerySuspense(api.assignee.getAllAssignees);
 
   return (
     <main className="flex min-h-screen flex-col items-center p-24">
@@ -102,11 +105,11 @@ export default function Home() {
         </Unauthenticated>
         <Authenticated>
           <div className="space-y-4">
-            {assignees?.map((assignee: { _id: Id<"assignee">; name: string }) => {
+            {assignees.map((assignee: { _id: Id<"assignee">; name: string }) => {
               return (
-                <Link key={assignee?._id} href={`/admin/assignee/${assignee?._id}`}>
+                <Link key={assignee._id} href={`/admin/assignee/${assignee._id}`}>
                   <div className="p-4 border rounded-lg hover:bg-gray-50 transition-colors cursor-pointer">
-                    <h3 className="font-medium">{assignee?.name}</h3>
+                    <h3 className="font-medium">{assignee.name}</h3>
                     <p className="text-sm text-muted-foreground">
                       Click to view assignments
                     </p>
@@ -114,7 +117,7 @@ export default function Home() {
                 </Link>
               );
             })}
-            {assignees?.length === 0 && (
+            {assignees.length === 0 && (
               <div className="text-center text-muted-foreground py-8">
                 No assignees yet. Add your first assignee using the button
                 above.
@@ -127,5 +130,13 @@ export default function Home() {
         </Authenticated>
       </div>
     </main>
+  );
+}
+
+export default function Home() {
+  return (
+    <Suspense fallback={<LoadingSpinner />}>
+      <DashboardContent />
+    </Suspense>
   );
 }

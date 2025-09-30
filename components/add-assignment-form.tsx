@@ -17,6 +17,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Edit } from "lucide-react";
+import { toast } from "sonner";
 
 interface AddAssignmentFormProps {
   assigneeId: Id<"assignee">;
@@ -103,12 +104,15 @@ export function AddAssignmentForm({ assigneeId, onSuccess, editingDescriptor }: 
       setSelectedDays(new Set());
       setIsOpen(false);
       
+      // Show success toast
+      toast.success(editingDescriptor ? "Assignment updated successfully!" : "Assignment created successfully!");
+      
       // Call success callback if provided
       if (onSuccess) {
         onSuccess();
       }
     } catch (error) {
-      // Handle error silently
+      toast.error(editingDescriptor ? "Failed to update assignment. Please try again." : "Failed to create assignment. Please try again.");
     }
   };
 
