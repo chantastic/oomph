@@ -1,6 +1,14 @@
 import { query, mutation } from "./_generated/server";
 import { v } from "convex/values";
 
+// Status constants for assignee assignments
+export const ASSIGNMENT_STATUS = {
+  COMPLETE: "complete",
+  INCOMPLETE: undefined, // No status means incomplete
+} as const;
+
+export type AssignmentStatus = typeof ASSIGNMENT_STATUS[keyof typeof ASSIGNMENT_STATUS];
+
 // Helper function to check if an assignment should appear on a specific date
 function shouldShowAssignmentOnDate(cronSchedule: string, date: Date): boolean {
   // Evaluate whether a given date is included by a cron expression.
@@ -164,26 +172,15 @@ export const create = mutation({
   },
 });
 
-// Mark an assignee assignment as completed
-export const markCompleted = mutation({
+// Update assignee assignment status
+export const updateStatus = mutation({
   args: {
     assigneeAssignmentId: v.id("assignee_assignment"),
+    status: v.optional(v.union(v.literal("complete"))),
   },
   handler: async (ctx, args) => {
     await ctx.db.patch(args.assigneeAssignmentId, {
-      status: "complete",
-    });
-  },
-});
-
-// Mark an assignee assignment as not completed (remove status)
-export const markNotCompleted = mutation({
-  args: {
-    assigneeAssignmentId: v.id("assignee_assignment"),
-  },
-  handler: async (ctx, args) => {
-    await ctx.db.patch(args.assigneeAssignmentId, {
-      status: undefined,
+      status: args.status,
     });
   },
 });

@@ -5,6 +5,7 @@ import { useQuery, useMutation } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { Id } from "@/convex/_generated/dataModel";
 import { motion, AnimatePresence } from "framer-motion";
+import { ASSIGNMENT_STATUS } from "@/convex/assigneeAssignment";
 
 export default function AssigneePage() {
   const params = useParams();
@@ -13,8 +14,7 @@ export default function AssigneePage() {
   const assignee = useQuery(api.assignee.getAssignee, { assigneeId });
   const assigneeAssignments = useQuery(api.assigneeAssignment.getByAssignee, { assigneeId });
 
-  const markCompleted = useMutation(api.assigneeAssignment.markCompleted);
-  const markNotCompleted = useMutation(api.assigneeAssignment.markNotCompleted);
+  const updateStatus = useMutation(api.assigneeAssignment.updateStatus);
 
 
   if (!assignee) {
@@ -47,8 +47,8 @@ export default function AssigneePage() {
                 (() => {
                   // Sort assignments: incomplete first, then completed
                   const sortedAssignments = assigneeAssignments.sort((a, b) => {
-                    const aCompleted = a.status === "complete";
-                    const bCompleted = b.status === "complete";
+                    const aCompleted = a.status === ASSIGNMENT_STATUS.COMPLETE;
+                    const bCompleted = b.status === ASSIGNMENT_STATUS.COMPLETE;
                     
                     // If one is completed and the other isn't, incomplete comes first
                     if (aCompleted !== bCompleted) {
@@ -63,7 +63,7 @@ export default function AssigneePage() {
                     <div className="space-y-3 sm:space-y-4">
                       <AnimatePresence mode="popLayout">
                         {sortedAssignments.map((assignment) => {
-                          const completed = assignment.status === "complete";
+                          const completed = assignment.status === ASSIGNMENT_STATUS.COMPLETE;
                           return (
                             <motion.div
                               key={assignment._id}
@@ -84,9 +84,15 @@ export default function AssigneePage() {
                               onClick={async () => {
                                 try {
                                   if (completed) {
-                                    await markNotCompleted({ assigneeAssignmentId: assignment._id });
+                                    await updateStatus({ 
+                                      assigneeAssignmentId: assignment._id, 
+                                      status: ASSIGNMENT_STATUS.INCOMPLETE 
+                                    });
                                   } else {
-                                    await markCompleted({ assigneeAssignmentId: assignment._id });
+                                    await updateStatus({ 
+                                      assigneeAssignmentId: assignment._id, 
+                                      status: ASSIGNMENT_STATUS.COMPLETE 
+                                    });
                                   }
                                 } catch (err) {
                                   console.error("Failed to toggle completion", err);
