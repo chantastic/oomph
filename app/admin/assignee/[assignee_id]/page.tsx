@@ -9,6 +9,7 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { AddAssignmentForm } from "@/components/add-assignment-form";
 import { TaskLog } from "@/components/task-log";
+import { cronToColloquial } from "@/lib/cron-parser";
 
 export default function AssigneePage() {
   const params = useParams();
@@ -117,7 +118,7 @@ export default function AssigneePage() {
                         </p>
                       )}
                       <p className="text-sm text-muted-foreground">
-                        Schedule: {assignment.cronSchedule}
+                        Schedule: {cronToColloquial(assignment.cronSchedule)}
                       </p>
                     </div>
                   ))}
