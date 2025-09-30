@@ -95,7 +95,7 @@ export default function AssigneePage() {
                                     });
                                   }
                                 } catch (err) {
-                                  console.error("Failed to toggle completion", err);
+                                  // Handle error silently
                                 }
                               }}
                               whileHover={{ scale: 1.02 }}
@@ -144,7 +144,7 @@ export default function AssigneePage() {
                 <div className="text-center text-muted-foreground py-6 sm:py-8">
                   <div className="text-4xl sm:text-6xl mb-3 sm:mb-4">📝</div>
                   <h3 className="text-base sm:text-lg font-medium mb-1 sm:mb-2">No assignments yet</h3>
-                  <p className="text-sm sm:text-base">Your tasks will appear here once they're assigned to you.</p>
+                  <p className="text-sm sm:text-base">Your assignments will appear here once they're assigned to you.</p>
                 </div>
               )}
             </div>

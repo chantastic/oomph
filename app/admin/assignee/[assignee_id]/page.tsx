@@ -8,8 +8,17 @@ import { Id } from "@/convex/_generated/dataModel";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { AddAssignmentForm } from "@/components/add-assignment-form";
-import { TaskLog } from "@/components/task-log";
+import { AssignmentLog } from "@/components/task-log";
 import { cronToColloquial } from "@/lib/cron-parser";
+import { ExternalLink } from "lucide-react";
+import {
+  Breadcrumb,
+  BreadcrumbList,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
+} from "@/components/ui/breadcrumb";
 
 export default function AssigneePage() {
   const params = useParams();
@@ -22,24 +31,7 @@ export default function AssigneePage() {
   const assigneeAssignments = useQuery(api.assigneeAssignment.getByAssignee, {
     assigneeId,
   });
-  const materializeForToday = useMutation(api.assigneeAssignment.materializeForToday);
 
-  const [isMaterializing, setIsMaterializing] = useState(false);
-
-
-  const handleMaterialize = async () => {
-    try {
-      setIsMaterializing(true);
-      const result = await materializeForToday({ assigneeId });
-      console.log(`Materialized ${result.count} assignments:`, result.materialized);
-      alert(`Successfully materialized ${result.count} assignments for today!`);
-    } catch (error) {
-      console.error("Failed to materialize assignments:", error);
-      alert("Failed to materialize assignments. Check console for details.");
-    } finally {
-      setIsMaterializing(false);
-    }
-  };
 
 
 
@@ -59,13 +51,19 @@ export default function AssigneePage() {
     <main className="flex min-h-screen flex-col items-center p-24">
       <div className="w-full max-w-2xl">
         <div className="mb-8">
-          <div className="flex items-center gap-4 mb-4">
-            <Link href="/">
-              <Button variant="outline" size="sm">
-                ← Back to Assignees
-              </Button>
-            </Link>
-          </div>
+          <Breadcrumb className="mb-4">
+            <BreadcrumbList>
+              <BreadcrumbItem>
+                <BreadcrumbLink asChild>
+                  <Link href="/">Assignees</Link>
+                </BreadcrumbLink>
+              </BreadcrumbItem>
+              <BreadcrumbSeparator />
+              <BreadcrumbItem>
+                <BreadcrumbPage>{assignee.name}</BreadcrumbPage>
+              </BreadcrumbItem>
+            </BreadcrumbList>
+          </Breadcrumb>
           <div className="flex items-center justify-between mb-4">
             <div>
               <h1 className="text-3xl font-bold mb-2">{assignee.name}</h1>
@@ -73,18 +71,11 @@ export default function AssigneePage() {
             </div>
             <div className="flex gap-2">
               <Link href={`/assignee/${assigneeId}`} target="_blank" rel="noopener noreferrer">
-                <Button size="sm" variant="outline">
-                  🔗 Public Page
+                <Button size="sm" variant="outline" className="flex items-center gap-2">
+                  Public Page
+                  <ExternalLink className="h-4 w-4" />
                 </Button>
               </Link>
-              <Button 
-                size="sm" 
-                variant="outline"
-                onClick={handleMaterialize}
-                disabled={isMaterializing}
-              >
-                {isMaterializing ? 'Materializing...' : '🧪 Test Materialize'}
-              </Button>
             </div>
           </div>
         </div>
@@ -93,20 +84,19 @@ export default function AssigneePage() {
           <div>
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-xl font-semibold">Assignments</h2>
+              <AddAssignmentForm 
+                assigneeId={assigneeId} 
+                onSuccess={() => {
+                  // This will trigger a re-fetch of assignments
+                  // since Convex automatically updates the UI
+                }}
+              />
             </div>
-            
-            <AddAssignmentForm 
-              assigneeId={assigneeId} 
-              onSuccess={() => {
-                // This will trigger a re-fetch of assignments
-                // since Convex automatically updates the UI
-              }}
-            />
             
             <div className="mt-6">
               {assignments && assignments.length > 0 ? (
                 <div className="space-y-4">
-                  {assignments.map((assignment) => (
+                  {assignments.map((assignment: any) => (
                     <div
                       key={assignment._id}
                       className="p-4 border rounded-lg bg-white"
@@ -150,21 +140,18 @@ export default function AssigneePage() {
             </div>
           </div>
 
-          {/* Task Log Section */}
+          {/* Assignment Log Section */}
           <div>
             <div className="flex items-center justify-between mb-4">
-              <h2 className="text-xl font-semibold">Task Log</h2>
-              <div className="text-sm text-muted-foreground">
-                {assigneeAssignments ? `${assigneeAssignments.length} tasks` : 'Loading...'}
-              </div>
+              <h2 className="text-xl font-semibold">Assignment Log</h2>
             </div>
             
             <div className="mt-4">
               {assigneeAssignments && assigneeAssignments.length > 0 ? (
-                <TaskLog assigneeAssignments={assigneeAssignments} />
+                <AssignmentLog assigneeAssignments={assigneeAssignments} />
               ) : (
                 <div className="text-center text-muted-foreground py-8">
-                  No tasks yet. Use the "Test Materialize" button to create tasks for today.
+                  No assignments yet.
                 </div>
               )}
             </div>

@@ -6,8 +6,9 @@ import { Id } from "@/convex/_generated/dataModel";
 import { Button } from "@/components/ui/button";
 import { useMemo } from "react";
 import { ASSIGNMENT_STATUS } from "@/convex/constants";
+import { Circle, CheckCircle2, Calendar } from "lucide-react";
 
-interface TaskLogProps {
+interface AssignmentLogProps {
   assigneeAssignments: Array<{
     _id: Id<"assignee_assignment">;
     title: string;
@@ -17,20 +18,20 @@ interface TaskLogProps {
   }>;
 }
 
-type TaskStatus = "pending" | "complete";
+type AssignmentStatus = "pending" | "complete";
 
 const statusConfig = {
   pending: {
-    label: "○",
+    icon: Circle,
     className: "text-gray-400 hover:text-gray-600 border border-gray-300 hover:border-gray-400 bg-white hover:bg-gray-50 transition-colors",
   },
   complete: {
-    label: "✓",
+    icon: CheckCircle2,
     className: "text-white bg-green-500 hover:bg-green-600 border-0 transition-colors",
   },
 };
 
-export function TaskLog({ assigneeAssignments }: TaskLogProps) {
+export function AssignmentLog({ assigneeAssignments }: AssignmentLogProps) {
   const updateStatus = useMutation(api.assigneeAssignment.updateStatus);
 
   const groupedByDay = useMemo(() => {
@@ -96,11 +97,11 @@ export function TaskLog({ assigneeAssignments }: TaskLogProps) {
         });
       }
     } catch (error) {
-      console.error("Failed to toggle status:", error);
+      // Handle error silently
     }
   };
 
-  const getNextStatus = (currentStatus?: "complete"): TaskStatus => {
+  const getNextStatus = (currentStatus?: "complete"): AssignmentStatus => {
     return currentStatus === ASSIGNMENT_STATUS.COMPLETE ? "pending" : "complete";
   };
 
@@ -111,21 +112,25 @@ export function TaskLog({ assigneeAssignments }: TaskLogProps) {
         .map(([dateKey, assignments]) => (
           <div key={dateKey} className="space-y-2">
             <div className="flex items-center gap-2 mb-2">
+              <Calendar className="h-4 w-4 text-gray-500" />
               <h3 className="text-sm font-medium text-gray-700">
                 {formatDate(dateKey)}
               </h3>
               <div className="flex-1 h-px bg-gray-200"></div>
-              <span className="text-xs text-gray-500">
-                {assignments.length} task{assignments.length !== 1 ? 's' : ''}
-              </span>
+              {assignments.length > 0 && (
+                <span className="text-xs text-gray-500">
+                  {assignments.length} assignment{assignments.length !== 1 ? 's' : ''}
+                </span>
+              )}
             </div>
             
             {assignments.length > 0 ? (
               <div className="space-y-2 pl-4">
                 {assignments.map((assignment) => {
-                  const currentStatus: TaskStatus = assignment.status === ASSIGNMENT_STATUS.COMPLETE ? "complete" : "pending";
+                  const currentStatus: AssignmentStatus = assignment.status === ASSIGNMENT_STATUS.COMPLETE ? "complete" : "pending";
                   const nextStatus = getNextStatus(assignment.status);
                   const config = statusConfig[currentStatus];
+                  const IconComponent = config.icon;
                   
                   return (
                     <div
@@ -133,12 +138,12 @@ export function TaskLog({ assigneeAssignments }: TaskLogProps) {
                       className="flex items-center gap-3 p-2 rounded-md hover:bg-gray-50 transition-colors"
                     >
                       <button
-                        className={`h-6 w-6 rounded-full text-xs flex items-center justify-center aspect-square ${config.className}`}
+                        className={`h-6 w-6 rounded-full flex items-center justify-center aspect-square ${config.className}`}
                         onClick={() => toggleStatus(assignment)}
                         title={`Mark as ${nextStatus}`}
                         style={{ minWidth: '1.5rem', minHeight: '1.5rem' }}
                       >
-                        {config.label}
+                        <IconComponent className="h-4 w-4" />
                       </button>
                       <div className="flex-1 min-w-0">
                         <div className="text-sm font-medium text-gray-900 truncate">
@@ -155,8 +160,8 @@ export function TaskLog({ assigneeAssignments }: TaskLogProps) {
                 })}
               </div>
             ) : (
-              <div className="text-xs text-gray-400 italic py-2">
-                No tasks for this day
+              <div className="text-xs text-gray-400 italic py-2 text-center">
+                No assignments for this day
               </div>
             )}
           </div>

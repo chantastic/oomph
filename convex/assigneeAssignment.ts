@@ -186,61 +186,6 @@ export const deleteById = mutation({
   },
 });
 
-// Test function to materialize assignments for today
-export const materializeForToday = mutation({
-  args: { 
-    assigneeId: v.id("assignee"),
-  },
-  handler: async (ctx, args) => {
-    const today = new Date(new Date().toLocaleString("en-US", { timeZone: "America/Los_Angeles" }));
-    
-    // Get assignment descriptors for this assignee
-    const assignmentDescriptors = await ctx.db
-      .query("assignee_assignment_descriptor")
-      .withIndex("by_assignee", (q: any) => q.eq("assigneeId", args.assigneeId))
-      .collect();
-    
-    // Get existing assignments for this assignee
-    const existingAssignments = await ctx.db
-      .query("assignee_assignment")
-      .withIndex("by_assignee", (q: any) => q.eq("assigneeId", args.assigneeId))
-      .collect();
-    
-    // Create lookup map for efficient duplicate checking
-    const existingByTitle = new Map<string, any>();
-    for (const existing of existingAssignments) {
-      existingByTitle.set(existing.title, existing);
-    }
-    
-    const materialized = [];
-    
-    for (const assignment of assignmentDescriptors) {
-      // Check if this assignment should be materialized for today
-      if (shouldShowAssignmentOnDate(assignment.cronSchedule, today)) {
-        // Check if already materialized (by title match) - now O(1) lookup
-        if (!existingByTitle.has(assignment.title)) {
-          // Create assignee assignment
-          const assigneeAssignmentId = await ctx.db.insert("assignee_assignment", {
-            assigneeId: args.assigneeId,
-            title: assignment.title,
-            description: assignment.description,
-          });
-          
-          materialized.push({
-            id: assigneeAssignmentId,
-            title: assignment.title,
-            description: assignment.description,
-          });
-        }
-      }
-    }
-    
-    return {
-      materialized,
-      count: materialized.length,
-    };
-  },
-});
 
 // Materialize assignments for all assignees with optimized batching
 export const materializeForAllAssignees = mutation({
