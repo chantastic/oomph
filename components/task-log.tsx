@@ -5,6 +5,7 @@ import { api } from "@/convex/_generated/api";
 import { Id } from "@/convex/_generated/dataModel";
 import { Button } from "@/components/ui/button";
 import { useMemo } from "react";
+import { ASSIGNMENT_STATUS } from "@/convex/assigneeAssignment";
 
 interface TaskLogProps {
   assigneeAssignments: Array<{
@@ -30,8 +31,7 @@ const statusConfig = {
 };
 
 export function TaskLog({ assigneeAssignments }: TaskLogProps) {
-  const markCompleted = useMutation(api.assigneeAssignment.markCompleted);
-  const markNotCompleted = useMutation(api.assigneeAssignment.markNotCompleted);
+  const updateStatus = useMutation(api.assigneeAssignment.updateStatus);
 
   const groupedByDay = useMemo(() => {
     const now = new Date();
@@ -84,10 +84,16 @@ export function TaskLog({ assigneeAssignments }: TaskLogProps) {
 
   const toggleStatus = async (assignment: typeof assigneeAssignments[0]) => {
     try {
-      if (assignment.status === "complete") {
-        await markNotCompleted({ assigneeAssignmentId: assignment._id });
+      if (assignment.status === ASSIGNMENT_STATUS.COMPLETE) {
+        await updateStatus({ 
+          assigneeAssignmentId: assignment._id, 
+          status: ASSIGNMENT_STATUS.INCOMPLETE 
+        });
       } else {
-        await markCompleted({ assigneeAssignmentId: assignment._id });
+        await updateStatus({ 
+          assigneeAssignmentId: assignment._id, 
+          status: ASSIGNMENT_STATUS.COMPLETE 
+        });
       }
     } catch (error) {
       console.error("Failed to toggle status:", error);
@@ -95,7 +101,7 @@ export function TaskLog({ assigneeAssignments }: TaskLogProps) {
   };
 
   const getNextStatus = (currentStatus?: "complete"): TaskStatus => {
-    return currentStatus === "complete" ? "pending" : "complete";
+    return currentStatus === ASSIGNMENT_STATUS.COMPLETE ? "pending" : "complete";
   };
 
   return (
@@ -117,7 +123,7 @@ export function TaskLog({ assigneeAssignments }: TaskLogProps) {
             {assignments.length > 0 ? (
               <div className="space-y-2 pl-4">
                 {assignments.map((assignment) => {
-                  const currentStatus: TaskStatus = assignment.status || "pending";
+                  const currentStatus: TaskStatus = assignment.status === ASSIGNMENT_STATUS.COMPLETE ? "complete" : "pending";
                   const nextStatus = getNextStatus(assignment.status);
                   const config = statusConfig[currentStatus];
                   
