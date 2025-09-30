@@ -22,6 +22,13 @@ export const get = query({
   },
 });
 
+export const getAssignee = query({
+  args: { assigneeId: v.id("assignee") },
+  handler: async (ctx, args) => {
+    return await ctx.db.get(args.assigneeId);
+  },
+});
+
 export const create = mutation({
   args: {
     name: v.string(),
@@ -42,5 +49,13 @@ export const create = mutation({
     });
 
     return assigneeId;
+  },
+});
+
+// Get all assignees (for testing purposes)
+export const getAllAssignees = query({
+  args: {},
+  handler: async (ctx) => {
+    return await ctx.db.query("assignee").collect();
   },
 });

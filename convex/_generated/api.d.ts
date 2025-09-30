@@ -14,10 +14,9 @@ import type {
   FunctionReference,
 } from "convex/server";
 import type * as assignee from "../assignee.js";
-import type * as assignees from "../assignees.js";
-import type * as assignments from "../assignments.js";
+import type * as assigneeAssignment from "../assigneeAssignment.js";
+import type * as assigneeAssignmentDescriptor from "../assigneeAssignmentDescriptor.js";
 import type * as cronJobs from "../cronJobs.js";
-import type * as materializedAssignments from "../materializedAssignments.js";
 
 /**
  * A utility for referencing Convex functions in your app's API.
@@ -29,10 +28,9 @@ import type * as materializedAssignments from "../materializedAssignments.js";
  */
 declare const fullApi: ApiFromModules<{
   assignee: typeof assignee;
-  assignees: typeof assignees;
-  assignments: typeof assignments;
+  assigneeAssignment: typeof assigneeAssignment;
+  assigneeAssignmentDescriptor: typeof assigneeAssignmentDescriptor;
   cronJobs: typeof cronJobs;
-  materializedAssignments: typeof materializedAssignments;
 }>;
 export declare const api: FilterApi<
   typeof fullApi,

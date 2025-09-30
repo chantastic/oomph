@@ -10,11 +10,11 @@ export default function AssigneePage() {
   const params = useParams();
   const assigneeId = params.assignee_id as Id<"assignee">;
   
-  const assignee = useQuery(api.assignments.getAssignee, { assigneeId });
-  const assigneeAssignments = useQuery(api.materializedAssignments.getByAssignee, { assigneeId });
+  const assignee = useQuery(api.assignee.getAssignee, { assigneeId });
+  const assigneeAssignments = useQuery(api.assigneeAssignment.getByAssignee, { assigneeId });
 
-  const markCompleted = useMutation(api.materializedAssignments.markCompleted);
-  const markNotCompleted = useMutation(api.materializedAssignments.markNotCompleted);
+  const markCompleted = useMutation(api.assigneeAssignment.markCompleted);
+  const markNotCompleted = useMutation(api.assigneeAssignment.markNotCompleted);
 
 
   if (!assignee) {

@@ -9,20 +9,19 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { AddAssignmentForm } from "@/components/add-assignment-form";
 import { TaskLog } from "@/components/task-log";
-import { shouldShowAssignmentOnDate } from "@/lib/utils";
 
 export default function AssigneePage() {
   const params = useParams();
   const assigneeId = params.assignee_id as Id<"assignee">;
   
-  const assignee = useQuery(api.assignments.getAssignee, { assigneeId });
-  const assignments = useQuery(api.assignments.getByAssignee, { assigneeId });
+  const assignee = useQuery(api.assignee.getAssignee, { assigneeId });
+  const assignments = useQuery(api.assigneeAssignmentDescriptor.getByAssignee, { assigneeId });
   
   // Assignee assignments
-  const assigneeAssignments = useQuery(api.materializedAssignments.getByAssignee, {
+  const assigneeAssignments = useQuery(api.assigneeAssignment.getByAssignee, {
     assigneeId,
   });
-  const materializeForToday = useMutation(api.materializedAssignments.materializeForToday);
+  const materializeForToday = useMutation(api.assigneeAssignment.materializeForToday);
 
   const [isMaterializing, setIsMaterializing] = useState(false);
 
