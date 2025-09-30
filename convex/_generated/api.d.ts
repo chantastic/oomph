@@ -15,6 +15,7 @@ import type {
 } from "convex/server";
 import type * as assignees from "../assignees.js";
 import type * as assignments from "../assignments.js";
+import type * as cronJobs from "../cronJobs.js";
 import type * as materializedAssignments from "../materializedAssignments.js";
 
 /**
@@ -28,6 +29,7 @@ import type * as materializedAssignments from "../materializedAssignments.js";
 declare const fullApi: ApiFromModules<{
   assignees: typeof assignees;
   assignments: typeof assignments;
+  cronJobs: typeof cronJobs;
   materializedAssignments: typeof materializedAssignments;
 }>;
 export declare const api: FilterApi<
