@@ -1,24 +1,11 @@
 import { query, mutation } from "./_generated/server";
 import { v } from "convex/values";
+import { api } from "./_generated/api";
 
 export const get = query({
   args: {},
   handler: async (ctx) => {
-    const identity = await ctx.auth.getUserIdentity();
-    if (!identity) {
-      return [];
-    }
-
-    const links = await ctx.db
-      .query("user_assignee")
-      .withIndex("by_user", (q) => q.eq("userId", identity.subject))
-      .collect();
-
-    const assignees = await Promise.all(
-      links.map((l) => ctx.db.get(l.assigneeId))
-    );
-
-    return assignees.filter(Boolean);
+    return await ctx.runQuery(api.userAssignee.getByAuthenticatedUser, {});
   },
 });
 
@@ -43,7 +30,7 @@ export const create = mutation({
       name: args.name,
     });
 
-    await ctx.db.insert("user_assignee", {
+    await ctx.runMutation(api.userAssignee.create, {
       userId: identity.subject,
       assigneeId,
     });

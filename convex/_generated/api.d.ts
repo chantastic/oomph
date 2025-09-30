@@ -17,6 +17,7 @@ import type * as assignee from "../assignee.js";
 import type * as assigneeAssignment from "../assigneeAssignment.js";
 import type * as assigneeAssignmentDescriptor from "../assigneeAssignmentDescriptor.js";
 import type * as cronJobs from "../cronJobs.js";
+import type * as userAssignee from "../userAssignee.js";
 
 /**
  * A utility for referencing Convex functions in your app's API.
@@ -31,6 +32,7 @@ declare const fullApi: ApiFromModules<{
   assigneeAssignment: typeof assigneeAssignment;
   assigneeAssignmentDescriptor: typeof assigneeAssignmentDescriptor;
   cronJobs: typeof cronJobs;
+  userAssignee: typeof userAssignee;
 }>;
 export declare const api: FilterApi<
   typeof fullApi,
