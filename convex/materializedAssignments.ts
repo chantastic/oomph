@@ -63,13 +63,16 @@ export const deleteById = mutation({
 
 // Test function to materialize assignments for today
 export const materializeForToday = mutation({
-  args: { assigneeId: v.id("assignees") },
+  args: { 
+    assigneeId: v.id("assignees"),
+  },
   handler: async (ctx, args) => {
-    const today = new Date();
+    // Hardcode Pacific Time (America/Los_Angeles) for Hugh and Chan
+    const today = new Date(new Date().toLocaleString("en-US", { timeZone: "America/Los_Angeles" }));
     
     // Get all assignment templates for this assignee
     const assignments = await ctx.db
-      .query("assignee_assignments")
+      .query("assignee_assignment_descriptor")
       .withIndex("by_assignee", (q) => q.eq("assigneeId", args.assigneeId))
       .collect();
     
