@@ -11,13 +11,6 @@ export const getByAssignee = query({
   },
 });
 
-export const getAssignee = query({
-  args: { assigneeId: v.id("assignee") },
-  handler: async (ctx, args) => {
-    return await ctx.db.get(args.assigneeId);
-  },
-});
-
 export const create = mutation({
   args: {
     assigneeId: v.id("assignee"),

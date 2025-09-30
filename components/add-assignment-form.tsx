@@ -28,7 +28,7 @@ export function AddAssignmentForm({ assigneeId, onSuccess }: AddAssignmentFormPr
   const [selectedDays, setSelectedDays] = useState<Set<number>>(new Set());
   const [isOpen, setIsOpen] = useState(false);
   
-  const createAssignment = useMutation(api.assignments.create);
+  const createAssignment = useMutation(api.assigneeAssignmentDescriptor.create);
 
   // Generate cron schedule from selected days
   const generateCronSchedule = (days: Set<number>): string => {

@@ -9,7 +9,7 @@ const crons = cronJobs();
 crons.daily(
   "task materialization",
   { hourUTC: 9, minuteUTC: 0 },
-  api.materializedAssignments.materializeForAllAssignees
+  api.assigneeAssignment.materializeForAllAssignees
 );
 
 export default crons;

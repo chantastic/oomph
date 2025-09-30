@@ -30,8 +30,8 @@ const statusConfig = {
 };
 
 export function TaskLog({ assigneeAssignments }: TaskLogProps) {
-  const markCompleted = useMutation(api.materializedAssignments.markCompleted);
-  const markNotCompleted = useMutation(api.materializedAssignments.markNotCompleted);
+  const markCompleted = useMutation(api.assigneeAssignment.markCompleted);
+  const markNotCompleted = useMutation(api.assigneeAssignment.markNotCompleted);
 
   const groupedByDay = useMemo(() => {
     const now = new Date();
