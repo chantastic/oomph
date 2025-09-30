@@ -17,7 +17,7 @@ import type * as assignee from "../assignee.js";
 import type * as assigneeAssignment from "../assigneeAssignment.js";
 import type * as assigneeAssignmentDescriptor from "../assigneeAssignmentDescriptor.js";
 import type * as constants from "../constants.js";
-import type * as cronJobs from "../cronJobs.js";
+import type * as crons from "../crons.js";
 import type * as userAssignee from "../userAssignee.js";
 
 /**
@@ -33,7 +33,7 @@ declare const fullApi: ApiFromModules<{
   assigneeAssignment: typeof assigneeAssignment;
   assigneeAssignmentDescriptor: typeof assigneeAssignmentDescriptor;
   constants: typeof constants;
-  cronJobs: typeof cronJobs;
+  crons: typeof crons;
   userAssignee: typeof userAssignee;
 }>;
 export declare const api: FilterApi<
