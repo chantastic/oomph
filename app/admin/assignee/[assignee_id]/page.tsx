@@ -19,33 +19,14 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
+import { useQuerySuspense } from "@/lib/useQuerySuspense";
+import { Suspense } from "react";
+import { LoadingSpinner } from "@/components/ui/loading";
 
-export default function AssigneePage() {
-  const params = useParams();
-  const assigneeId = params.assignee_id as Id<"assignee">;
-  
-  const assignee = useQuery(api.assignee.getAssignee, { assigneeId });
-  const assignments = useQuery(api.assigneeAssignmentDescriptor.getByAssignee, { assigneeId });
-  
-  // Assignee assignments
-  const assigneeAssignments = useQuery(api.assigneeAssignment.getByAssignee, {
-    assigneeId,
-  });
-
-
-
-
-  if (!assignee) {
-    return (
-      <main className="flex min-h-screen flex-col items-center p-24">
-        <div className="w-full max-w-2xl">
-          <div className="text-center">
-            <h1 className="text-2xl font-bold mb-4">Loading...</h1>
-          </div>
-        </div>
-      </main>
-    );
-  }
+function AdminAssigneeContent({ assigneeId }: { assigneeId: Id<"assignee"> }) {
+  const assignee = useQuerySuspense(api.assignee.getAssignee, { assigneeId });
+  const assignments = useQuerySuspense(api.assigneeAssignmentDescriptor.getByAssignee, { assigneeId });
+  const assigneeAssignments = useQuerySuspense(api.assigneeAssignment.getByAssignee, { assigneeId });
 
   return (
     <main className="flex min-h-screen flex-col items-center p-24">
@@ -160,4 +141,15 @@ export default function AssigneePage() {
       </div>
     </main>
   );
-} 
+}
+
+export default function AssigneePage() {
+  const params = useParams();
+  const assigneeId = params.assignee_id as Id<"assignee">;
+  
+  return (
+    <Suspense fallback={<LoadingSpinner />}>
+      <AdminAssigneeContent assigneeId={assigneeId} />
+    </Suspense>
+  );
+}

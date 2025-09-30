@@ -1,33 +1,20 @@
 "use client";
 
 import { useParams } from "next/navigation";
-import { useQuery, useMutation } from "convex/react";
+import { useMutation } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { Id } from "@/convex/_generated/dataModel";
 import { motion, AnimatePresence } from "framer-motion";
 import { ASSIGNMENT_STATUS } from "@/convex/constants";
+import { useQuerySuspense } from "@/lib/useQuerySuspense";
+import { Suspense } from "react";
+import { LoadingSpinner } from "@/components/ui/loading";
+import { toast } from "sonner";
 
-export default function AssigneePage() {
-  const params = useParams();
-  const assigneeId = params.assignee_id as Id<"assignee">;
-  
-  const assignee = useQuery(api.assignee.getAssignee, { assigneeId });
-  const assigneeAssignments = useQuery(api.assigneeAssignment.getByAssignee, { assigneeId });
-
+function AssigneeContent({ assigneeId }: { assigneeId: Id<"assignee"> }) {
+  const assignee = useQuerySuspense(api.assignee.getAssignee, { assigneeId });
+  const assigneeAssignments = useQuerySuspense(api.assigneeAssignment.getByAssignee, { assigneeId });
   const updateStatus = useMutation(api.assigneeAssignment.updateStatus);
-
-
-  if (!assignee) {
-    return (
-      <main className="flex min-h-screen flex-col items-center p-24">
-        <div className="w-full max-w-2xl">
-          <div className="text-center">
-            <h1 className="text-2xl font-bold mb-4">Loading...</h1>
-          </div>
-        </div>
-      </main>
-    );
-  }
 
   return (
     <main className="flex min-h-screen flex-col items-center p-4 sm:p-8 lg:p-24">
@@ -88,14 +75,16 @@ export default function AssigneePage() {
                                       assigneeAssignmentId: assignment._id, 
                                       status: ASSIGNMENT_STATUS.INCOMPLETE 
                                     });
+                                    toast.success("Assignment marked as incomplete");
                                   } else {
                                     await updateStatus({ 
                                       assigneeAssignmentId: assignment._id, 
                                       status: ASSIGNMENT_STATUS.COMPLETE 
                                     });
+                                    toast.success("Assignment marked as complete!");
                                   }
                                 } catch (err) {
-                                  // Handle error silently
+                                  toast.error("Failed to update assignment status. Please try again.");
                                 }
                               }}
                               whileHover={{ scale: 1.02 }}
@@ -152,5 +141,16 @@ export default function AssigneePage() {
         </div>
       </div>
     </main>
+  );
+}
+
+export default function AssigneePage() {
+  const params = useParams();
+  const assigneeId = params.assignee_id as Id<"assignee">;
+  
+  return (
+    <Suspense fallback={<LoadingSpinner />}>
+      <AssigneeContent assigneeId={assigneeId} />
+    </Suspense>
   );
 }
