@@ -11,20 +11,31 @@ export const getByAssignee = query({
   },
 });
 
-export const create = mutation({
+export const upsert = mutation({
   args: {
+    id: v.optional(v.id("assignee_assignment_descriptor")),
     assigneeId: v.id("assignee"),
     title: v.string(),
     cronSchedule: v.string(),
     description: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
-    return await ctx.db.insert("assignee_assignment_descriptor", {
-      assigneeId: args.assigneeId,
-      title: args.title,
-      cronSchedule: args.cronSchedule,
-      description: args.description,
-    });
+    if (args.id) {
+      // Update existing descriptor
+      return await ctx.db.patch(args.id, {
+        title: args.title,
+        cronSchedule: args.cronSchedule,
+        description: args.description,
+      });
+    } else {
+      // Create new descriptor
+      return await ctx.db.insert("assignee_assignment_descriptor", {
+        assigneeId: args.assigneeId,
+        title: args.title,
+        cronSchedule: args.cronSchedule,
+        description: args.description,
+      });
+    }
   },
 });
 

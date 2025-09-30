@@ -111,15 +111,34 @@ export default function AssigneePage() {
                       key={assignment._id}
                       className="p-4 border rounded-lg bg-white"
                     >
-                      <h3 className="font-medium mb-2">{assignment.title}</h3>
-                      {assignment.description && (
-                        <p className="text-sm text-gray-700 mb-2 whitespace-pre-line">
-                          {assignment.description}
-                        </p>
-                      )}
-                      <p className="text-sm text-muted-foreground">
-                        Schedule: {cronToColloquial(assignment.cronSchedule)}
-                      </p>
+                      <div className="flex items-start justify-between">
+                        <div className="flex-1">
+                          <h3 className="font-medium mb-2">{assignment.title}</h3>
+                          {assignment.description && (
+                            <p className="text-sm text-gray-700 mb-2 whitespace-pre-line">
+                              {assignment.description}
+                            </p>
+                          )}
+                          <p className="text-sm text-muted-foreground">
+                            Schedule: {cronToColloquial(assignment.cronSchedule)}
+                          </p>
+                        </div>
+                        <div className="ml-4 flex-shrink-0">
+                          <AddAssignmentForm
+                            assigneeId={assigneeId}
+                            editingDescriptor={{
+                              id: assignment._id,
+                              title: assignment.title,
+                              cronSchedule: assignment.cronSchedule,
+                              description: assignment.description,
+                            }}
+                            onSuccess={() => {
+                              // This will trigger a re-fetch of assignments
+                              // since Convex automatically updates the UI
+                            }}
+                          />
+                        </div>
+                      </div>
                     </div>
                   ))}
                 </div>
