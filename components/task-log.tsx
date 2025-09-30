@@ -5,7 +5,7 @@ import { api } from "@/convex/_generated/api";
 import { Id } from "@/convex/_generated/dataModel";
 import { Button } from "@/components/ui/button";
 import { useMemo } from "react";
-import { ASSIGNMENT_STATUS } from "@/convex/assigneeAssignment";
+import { ASSIGNMENT_STATUS } from "@/convex/constants";
 
 interface TaskLogProps {
   assigneeAssignments: Array<{

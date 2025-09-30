@@ -5,7 +5,7 @@ import { useQuery, useMutation } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { Id } from "@/convex/_generated/dataModel";
 import { motion, AnimatePresence } from "framer-motion";
-import { ASSIGNMENT_STATUS } from "@/convex/assigneeAssignment";
+import { ASSIGNMENT_STATUS } from "@/convex/constants";
 
 export default function AssigneePage() {
   const params = useParams();
@@ -46,7 +46,7 @@ export default function AssigneePage() {
               {assigneeAssignments && assigneeAssignments.length > 0 ? (
                 (() => {
                   // Sort assignments: incomplete first, then completed
-                  const sortedAssignments = assigneeAssignments.sort((a, b) => {
+                  const sortedAssignments = assigneeAssignments.sort((a: any, b: any) => {
                     const aCompleted = a.status === ASSIGNMENT_STATUS.COMPLETE;
                     const bCompleted = b.status === ASSIGNMENT_STATUS.COMPLETE;
                     
@@ -62,7 +62,7 @@ export default function AssigneePage() {
                   return (
                     <div className="space-y-3 sm:space-y-4">
                       <AnimatePresence mode="popLayout">
-                        {sortedAssignments.map((assignment) => {
+                        {sortedAssignments.map((assignment: any) => {
                           const completed = assignment.status === ASSIGNMENT_STATUS.COMPLETE;
                           return (
                             <motion.div
