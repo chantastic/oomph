@@ -37,6 +37,14 @@ export function AddAssignmentForm({ assigneeId, onSuccess }: AddAssignmentFormPr
     return `0 1 * * ${sortedDays.join(",")}`;
   };
 
+  // Generate a test cron schedule that includes today in Pacific Time
+  const generateTestCronSchedule = (): string => {
+    // Get current day in Pacific Time
+    const pacificTime = new Date(new Date().toLocaleString("en-US", { timeZone: "America/Los_Angeles" }));
+    const todayDow = pacificTime.getDay(); // 0=Sunday, 1=Monday, etc.
+    return `0 1 * * ${todayDow}`;
+  };
+
   const toggleDay = (day: number) => {
     const newSelectedDays = new Set(selectedDays);
     if (newSelectedDays.has(day)) {
@@ -155,6 +163,39 @@ export function AddAssignmentForm({ assigneeId, onSuccess }: AddAssignmentFormPr
               disabled={selectedDays.size === 0 || !title.trim()}
             >
               Create Assignment
+            </Button>
+            <Button
+              type="button"
+              variant="secondary"
+              onClick={async () => {
+                if (!title.trim()) return;
+                
+                try {
+                  await createAssignment({
+                    assigneeId,
+                    title: title.trim() + " (Test - Today)",
+                    cronSchedule: generateTestCronSchedule(),
+                    ...(description.trim() && { description: description.trim() + "\n\nThis is a test assignment that should materialize today." }),
+                  });
+                  
+                  // Reset form
+                  setTitle("");
+                  setDescription("");
+                  setSelectedDays(new Set());
+                  setIsOpen(false);
+                  
+                  // Call success callback if provided
+                  if (onSuccess) {
+                    onSuccess();
+                  }
+                } catch (error) {
+                  console.error("Failed to create test assignment:", error);
+                }
+              }}
+              disabled={!title.trim()}
+              className="h-11 px-4"
+            >
+              Test Today
             </Button>
             <Button
               type="button"

@@ -5,7 +5,7 @@ export const getByAssignee = query({
   args: { assigneeId: v.id("assignees") },
   handler: async (ctx, args) => {
     return await ctx.db
-      .query("assignee_assignments")
+      .query("assignee_assignment_descriptor")
       .withIndex("by_assignee", (q) => q.eq("assigneeId", args.assigneeId))
       .collect();
   },
@@ -26,12 +26,13 @@ export const create = mutation({
     description: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
-    return await ctx.db.insert("assignee_assignments", {
+    return await ctx.db.insert("assignee_assignment_descriptor", {
       assigneeId: args.assigneeId,
       title: args.title,
       cronSchedule: args.cronSchedule,
       description: args.description,
     });
   },
-}); 
+});
+
 

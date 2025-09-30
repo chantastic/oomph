@@ -42,6 +42,7 @@ export default function AssigneePage() {
     }
   };
 
+
   if (!assignee) {
     return (
       <main className="flex min-h-screen flex-col items-center p-24">
@@ -68,6 +69,7 @@ export default function AssigneePage() {
           <div className="flex items-center justify-between mb-4">
             <div>
               <h1 className="text-3xl font-bold mb-2">{assignee.name}</h1>
+              <p className="text-sm text-gray-600">Pacific Time (PT)</p>
             </div>
             <div className="flex gap-2">
               <Link href={`/assignee/${assigneeId}`} target="_blank" rel="noopener noreferrer">

@@ -12,7 +12,7 @@ const schema = defineSchema({
    * Assignments are the core interactive model of the app.
    * A User assigns tasks to an Assignee on a cronSchedule.
    */
-  assignee_assignments: defineTable({
+  assignee_assignment_descriptor: defineTable({
     assigneeId: v.id("assignees"),
     cronSchedule: v.string(),
     title: v.string(),
