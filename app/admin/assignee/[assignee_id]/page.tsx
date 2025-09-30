@@ -8,6 +8,7 @@ import { Id } from "@/convex/_generated/dataModel";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { AddAssignmentForm } from "@/components/add-assignment-form";
+import { TaskLog } from "@/components/task-log";
 import { shouldShowAssignmentOnDate } from "@/lib/utils";
 
 export default function AssigneePage() {
@@ -22,8 +23,6 @@ export default function AssigneePage() {
     assigneeId,
   });
   const materializeForToday = useMutation(api.materializedAssignments.materializeForToday);
-  const markCompleted = useMutation(api.materializedAssignments.markCompleted);
-  const markNotCompleted = useMutation(api.materializedAssignments.markNotCompleted);
 
   const [isMaterializing, setIsMaterializing] = useState(false);
 
@@ -41,6 +40,7 @@ export default function AssigneePage() {
       setIsMaterializing(false);
     }
   };
+
 
 
   if (!assignee) {
@@ -131,10 +131,10 @@ export default function AssigneePage() {
             </div>
           </div>
 
-          {/* Assignee Assignments Section */}
+          {/* Task Log Section */}
           <div>
             <div className="flex items-center justify-between mb-4">
-              <h2 className="text-xl font-semibold">Assignee Assignments</h2>
+              <h2 className="text-xl font-semibold">Task Log</h2>
               <div className="text-sm text-muted-foreground">
                 {assigneeAssignments ? `${assigneeAssignments.length} tasks` : 'Loading...'}
               </div>
@@ -142,48 +142,10 @@ export default function AssigneePage() {
             
             <div className="mt-4">
               {assigneeAssignments && assigneeAssignments.length > 0 ? (
-                <div className="space-y-4">
-                  {assigneeAssignments.map((assignment) => (
-                    <div
-                      key={assignment._id}
-                      className={`p-4 border rounded-lg ${
-                        assignment.status === "complete" 
-                          ? "bg-green-50 border-green-200" 
-                          : "bg-white border-gray-200"
-                      }`}
-                    >
-                      <div className="flex items-center justify-between mb-2">
-                        <h3 className="font-medium">{assignment.title}</h3>
-                        <div className="flex gap-2">
-                          <Button
-                            size="sm"
-                            variant={assignment.status === "complete" ? "default" : "outline"}
-                            onClick={() => {
-                              if (assignment.status === "complete") {
-                                markNotCompleted({ assigneeAssignmentId: assignment._id });
-                              } else {
-                                markCompleted({ assigneeAssignmentId: assignment._id });
-                              }
-                            }}
-                          >
-                            {assignment.status === "complete" ? "✓ Complete" : "Mark Complete"}
-                          </Button>
-                        </div>
-                      </div>
-                      {assignment.description && (
-                        <p className="text-sm text-gray-700 mb-2 whitespace-pre-line">
-                          {assignment.description}
-                        </p>
-                      )}
-                      <div className="flex items-center gap-4 text-xs text-muted-foreground">
-                        <span>Status: <strong>{assignment.status || "pending"}</strong></span>
-                      </div>
-                    </div>
-                  ))}
-                </div>
+                <TaskLog assigneeAssignments={assigneeAssignments} />
               ) : (
                 <div className="text-center text-muted-foreground py-8">
-                  No assignee assignments yet.
+                  No tasks yet. Use the "Test Materialize" button to create tasks for today.
                 </div>
               )}
             </div>
