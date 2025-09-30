@@ -16,6 +16,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { Edit } from "lucide-react";
 
 interface AddAssignmentFormProps {
   assigneeId: Id<"assignee">;
@@ -69,13 +70,6 @@ export function AddAssignmentForm({ assigneeId, onSuccess, editingDescriptor }: 
     return `0 1 * * ${sortedDays.join(",")}`;
   };
 
-  // Generate a test cron schedule that includes today in Pacific Time
-  const generateTestCronSchedule = (): string => {
-    // Get current day in Pacific Time
-    const pacificTime = new Date(new Date().toLocaleString("en-US", { timeZone: "America/Los_Angeles" }));
-    const todayDow = pacificTime.getDay(); // 0=Sunday, 1=Monday, etc.
-    return `0 1 * * ${todayDow}`;
-  };
 
   const toggleDay = (day: number) => {
     const newSelectedDays = new Set(selectedDays);
@@ -114,7 +108,7 @@ export function AddAssignmentForm({ assigneeId, onSuccess, editingDescriptor }: 
         onSuccess();
       }
     } catch (error) {
-      console.error("Failed to save assignment:", error);
+      // Handle error silently
     }
   };
 
@@ -127,7 +121,16 @@ export function AddAssignmentForm({ assigneeId, onSuccess, editingDescriptor }: 
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogTrigger asChild>
-        <Button className="w-full">{editingDescriptor ? "✏️ Edit" : "+ Add Assignment"}</Button>
+        <Button 
+          className={editingDescriptor ? "flex items-center justify-center" : "flex items-center"}
+          aria-label={editingDescriptor ? `Edit assignment: ${editingDescriptor.title}` : "Add new assignment"}
+        >
+          {editingDescriptor ? (
+            <Edit className="h-4 w-4" />
+          ) : (
+            "Add Assignment"
+          )}
+        </Button>
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>
@@ -198,40 +201,6 @@ export function AddAssignmentForm({ assigneeId, onSuccess, editingDescriptor }: 
               disabled={selectedDays.size === 0 || !title.trim()}
             >
               {editingDescriptor ? "Update Assignment" : "Create Assignment"}
-            </Button>
-            <Button
-              type="button"
-              variant="secondary"
-              onClick={async () => {
-                if (!title.trim()) return;
-                
-                try {
-                  await upsertAssignment({
-                    id: editingDescriptor?.id,
-                    assigneeId,
-                    title: title.trim() + " (Test - Today)",
-                    cronSchedule: generateTestCronSchedule(),
-                    ...(description.trim() && { description: description.trim() + "\n\nThis is a test assignment that should materialize today." }),
-                  });
-                  
-                  // Reset form
-                  setTitle("");
-                  setDescription("");
-                  setSelectedDays(new Set());
-                  setIsOpen(false);
-                  
-                  // Call success callback if provided
-                  if (onSuccess) {
-                    onSuccess();
-                  }
-                } catch (error) {
-                  console.error("Failed to create test assignment:", error);
-                }
-              }}
-              disabled={!title.trim()}
-              className="h-11 px-4"
-            >
-              Test Today
             </Button>
             <Button
               type="button"

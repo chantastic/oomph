@@ -8,6 +8,7 @@ import {
   Unauthenticated,
 } from "convex/react";
 import { api } from "../convex/_generated/api";
+import { Id } from "../convex/_generated/dataModel";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -37,7 +38,7 @@ function AddAssigneeDialog() {
       setName("");
       setOpen(false);
     } catch (error) {
-      console.error("Failed to create assignee:", error);
+      // Handle error silently
     }
   };
 
@@ -50,7 +51,7 @@ function AddAssigneeDialog() {
         <DialogHeader>
           <DialogTitle>Add New Assignee</DialogTitle>
           <DialogDescription>
-            Enter the name of the person you want to assign tasks to.
+            Enter the name of the person you want to assign assignments to.
           </DialogDescription>
         </DialogHeader>
         <form onSubmit={handleSubmit}>
@@ -85,7 +86,7 @@ function AddAssigneeDialog() {
 }
 
 export default function Home() {
-  const assignees = useQuery(api.assignee.get);
+  const assignees = useQuery(api.assignee.getAllAssignees);
 
   return (
     <main className="flex min-h-screen flex-col items-center p-24">
@@ -101,7 +102,7 @@ export default function Home() {
         </Unauthenticated>
         <Authenticated>
           <div className="space-y-4">
-            {assignees?.map((assignee) => {
+            {assignees?.map((assignee: { _id: Id<"assignee">; name: string }) => {
               return (
                 <Link key={assignee?._id} href={`/admin/assignee/${assignee?._id}`}>
                   <div className="p-4 border rounded-lg hover:bg-gray-50 transition-colors cursor-pointer">
