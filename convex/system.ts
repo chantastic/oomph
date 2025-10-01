@@ -148,12 +148,25 @@ export const materializeAssignmentsForAssignees = mutation({
       ctx.db.query("assignee_assignment_descriptor").collect()
     ]);
     
-    // Batch 2: Get all existing assignments for all assignees in one query
-    const allExistingAssignments = await ctx.db.query("assignee_assignment").collect();
+    // Batch 2: Get today's existing assignments for all assignees in one query
+    const todayStart = new Date(today);
+    todayStart.setHours(0, 0, 0, 0);
+    const todayEnd = new Date(today);
+    todayEnd.setHours(23, 59, 59, 999);
+    
+    const todaysExistingAssignments = await ctx.db
+      .query("assignee_assignment")
+      .filter((q) => 
+        q.and(
+          q.gte(q.field("_creationTime"), todayStart.getTime()),
+          q.lt(q.field("_creationTime"), todayEnd.getTime())
+        )
+      )
+      .collect();
     
     // Create lookup maps for efficient checking
     const existingAssignmentsByAssignee = new Map<string, Map<string, any>>();
-    for (const existing of allExistingAssignments) {
+    for (const existing of todaysExistingAssignments) {
       if (!existingAssignmentsByAssignee.has(existing.assigneeId)) {
         existingAssignmentsByAssignee.set(existing.assigneeId, new Map());
       }
@@ -182,7 +195,7 @@ export const materializeAssignmentsForAssignees = mutation({
       for (const assignment of assignmentDescriptors) {
         // Check if this assignment should be materialized for today
         if (shouldShowAssignmentOnDate(assignment.cronSchedule, today)) {
-          // Check if already materialized (by title match) - now O(1) lookup
+          // Check if already materialized today (by title match) - now O(1) lookup
           if (!existingAssignments.has(assignment.title)) {
             // Create assignee assignment
             const assigneeAssignmentId = await ctx.db.insert("assignee_assignment", {

@@ -3,12 +3,11 @@ import { api } from "./_generated/api";
 
 const crons = cronJobs();
 
-// Schedule materialization to run daily at 9:00 AM UTC
-// This corresponds to 1:00 AM PT (PST) or 2:00 AM PT (PDT)
-// Consistent UTC time regardless of daylight saving time
+// Schedule materialization to run hourly for testing
+// This will help verify the fix works correctly
 crons.cron(
   "Materialize Assignments for Assignees",
-  "0 9 * * *",
+  "0 * * * *",
   api.system.materializeAssignmentsForAssignees
 );
 
