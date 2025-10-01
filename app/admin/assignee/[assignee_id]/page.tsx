@@ -1,7 +1,7 @@
 "use client";
 
 import { useParams } from "next/navigation";
-import { useQuery, useMutation } from "convex/react";
+import { useQuery, useMutation, Authenticated, Unauthenticated } from "convex/react";
 import { useMemo, useState } from "react";
 import { api } from "@/convex/_generated/api";
 import { Id } from "@/convex/_generated/dataModel";
@@ -29,8 +29,7 @@ function AdminAssigneeContent({ assigneeId }: { assigneeId: Id<"assignee"> }) {
   const assigneeAssignments = useQuerySuspense(api.assigneeAssignment.getByAssignee, { assigneeId });
 
   return (
-    <main className="flex min-h-screen flex-col items-center p-24">
-      <div className="w-full max-w-2xl">
+    <>
         <div className="mb-8">
           <Breadcrumb className="mb-4">
             <BreadcrumbList>
@@ -136,10 +135,9 @@ function AdminAssigneeContent({ assigneeId }: { assigneeId: Id<"assignee"> }) {
                 </div>
               )}
             </div>
-          </div>
-        </div>
-      </div>
-    </main>
+           </div>
+         </div>
+    </>
   );
 }
 
@@ -148,8 +146,23 @@ export default function AssigneePage() {
   const assigneeId = params.assignee_id as Id<"assignee">;
   
   return (
-    <Suspense fallback={<LoadingSpinner />}>
-      <AdminAssigneeContent assigneeId={assigneeId} />
-    </Suspense>
+    <main className="flex min-h-screen flex-col items-center p-24">
+      <div className="w-full max-w-2xl">
+        <Unauthenticated>
+          <div className="text-center">
+            <h1 className="text-2xl font-bold mb-4">Please sign in to view this page</h1>
+            <Link href="/sign-in">
+              <Button>Sign In</Button>
+            </Link>
+          </div>
+        </Unauthenticated>
+        
+        <Authenticated>
+          <Suspense fallback={<LoadingSpinner />}>
+            <AdminAssigneeContent assigneeId={assigneeId} />
+          </Suspense>
+        </Authenticated>
+      </div>
+    </main>
   );
 }
