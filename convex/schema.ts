@@ -1,5 +1,6 @@
 import { defineSchema, defineTable } from "convex/server"
 import { v } from "convex/values"
+import { ASSIGNMENT_STATUS } from "./constants"
 
 const schema = defineSchema({
   assignee: defineTable({
@@ -24,7 +25,7 @@ const schema = defineSchema({
     assigneeId: v.id("assignee"),
     title: v.string(),
     description: v.optional(v.string()),
-    status: v.optional(v.union(v.literal("complete"))),
+    status: v.optional(v.union(v.literal(ASSIGNMENT_STATUS.COMPLETE))),
   })
     .index("by_assignee", ["assigneeId"])
 })

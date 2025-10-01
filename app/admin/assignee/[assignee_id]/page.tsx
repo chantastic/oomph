@@ -24,7 +24,7 @@ import { Suspense } from "react";
 import { LoadingSpinner } from "@/components/ui/loading";
 
 function AdminAssigneeContent({ assigneeId }: { assigneeId: Id<"assignee"> }) {
-  const assignee = useQuerySuspense(api.assignee.getAssignee, { assigneeId });
+  const assignee = useQuerySuspense(api.assignee.find, { assigneeId });
   const assignments = useQuerySuspense(api.assigneeAssignmentDescriptor.getByAssignee, { assigneeId });
   const assigneeAssignments = useQuerySuspense(api.assigneeAssignment.getByAssignee, { assigneeId });
 

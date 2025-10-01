@@ -1,6 +1,13 @@
 import { query, mutation } from "./_generated/server";
 import { v } from "convex/values";
 
+export const find = query({
+  args: { id: v.id("assignee_assignment_descriptor") },
+  handler: async (ctx, args) => {
+    return await ctx.db.get(args.id);
+  },
+});
+
 export const getByAssignee = query({
   args: { assigneeId: v.id("assignee") },
   handler: async (ctx, args) => {
@@ -39,4 +46,10 @@ export const upsert = mutation({
   },
 });
 
+export const destroy = mutation({
+  args: { id: v.id("assignee_assignment_descriptor") },
+  handler: async (ctx, args) => {
+    await ctx.db.delete(args.id);
+  },
+});
 
