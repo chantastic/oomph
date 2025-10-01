@@ -1,13 +1,13 @@
 import { useConvex } from "convex/react";
 import { useEffect, useState } from "react";
 
-export function useQuerySuspense(query: any, ...args: any[]) {
+export function useQuerySuspense(query: any, args?: any) {
   const convex = useConvex();
-  const watch = convex.watchQuery(query, ...args);
+  const watch = args ? convex.watchQuery(query, args) : convex.watchQuery(query);
   const initialValue = watch.localQueryResult();
 
   if (initialValue === undefined) {
-    throw new Promise((resolve) => {
+    throw new Promise<void>((resolve) => {
       watch.onUpdate(() => {
         resolve();
       });

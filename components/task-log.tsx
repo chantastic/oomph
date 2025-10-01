@@ -11,6 +11,7 @@ import { Circle, CheckCircle2, Calendar } from "lucide-react";
 interface AssignmentLogProps {
   assigneeAssignments: Array<{
     _id: Id<"assignee_assignment">;
+    assigneeId: Id<"assignee">;
     title: string;
     description?: string;
     status?: "complete";
@@ -32,7 +33,7 @@ const statusConfig = {
 };
 
 export function AssignmentLog({ assigneeAssignments }: AssignmentLogProps) {
-  const updateStatus = useMutation(api.assigneeAssignment.updateStatus);
+  const updateStatus = useMutation(api.assigneeAssignment.upsert);
 
   const groupedByDay = useMemo(() => {
     const now = new Date();
@@ -87,12 +88,18 @@ export function AssignmentLog({ assigneeAssignments }: AssignmentLogProps) {
     try {
       if (assignment.status === ASSIGNMENT_STATUS.COMPLETE) {
         await updateStatus({ 
-          assigneeAssignmentId: assignment._id, 
+          id: assignment._id,
+          assigneeId: assignment.assigneeId,
+          title: assignment.title,
+          description: assignment.description,
           status: ASSIGNMENT_STATUS.INCOMPLETE 
         });
       } else {
         await updateStatus({ 
-          assigneeAssignmentId: assignment._id, 
+          id: assignment._id,
+          assigneeId: assignment.assigneeId,
+          title: assignment.title,
+          description: assignment.description,
           status: ASSIGNMENT_STATUS.COMPLETE 
         });
       }

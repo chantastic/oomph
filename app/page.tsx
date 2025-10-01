@@ -29,7 +29,7 @@ import { toast } from "sonner";
 function AddAssigneeDialog() {
   const [name, setName] = useState("");
   const [open, setOpen] = useState(false);
-  const createAssignee = useMutation(api.assignee.create);
+  const createAssignee = useMutation(api.assignee.upsert);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -89,7 +89,7 @@ function AddAssigneeDialog() {
 }
 
 function DashboardContent() {
-  const assignees = useQuerySuspense(api.assignee.getAllAssignees);
+  const assignees = useQuerySuspense(api.userAssignee.getByUser);
 
   return (
     <main className="flex min-h-screen flex-col items-center p-24">

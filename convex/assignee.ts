@@ -2,22 +2,16 @@ import { query, mutation } from "./_generated/server";
 import { v } from "convex/values";
 import { api } from "./_generated/api";
 
-export const get = query({
-  args: {},
-  handler: async (ctx) => {
-    return await ctx.runQuery(api.userAssignee.getByAuthenticatedUser, {});
-  },
-});
-
-export const getAssignee = query({
+export const find = query({
   args: { assigneeId: v.id("assignee") },
   handler: async (ctx, args) => {
     return await ctx.db.get(args.assigneeId);
   },
 });
 
-export const create = mutation({
+export const upsert = mutation({
   args: {
+    id: v.optional(v.id("assignee")),
     name: v.string(),
   },
   handler: async (ctx, args) => {
@@ -26,23 +20,32 @@ export const create = mutation({
       throw new Error("Unauthenticated");
     }
 
-    const assigneeId = await ctx.db.insert("assignee", {
-      name: args.name,
-    });
+    if (args.id) {
+      // Update existing assignee
+      await ctx.db.patch(args.id, {
+        name: args.name,
+      });
+      return args.id;
+    } else {
+      // Create new assignee
+      const assigneeId = await ctx.db.insert("assignee", {
+        name: args.name,
+      });
 
-    await ctx.runMutation(api.userAssignee.create, {
-      userId: identity.subject,
-      assigneeId,
-    });
+      await ctx.runMutation(api.userAssignee.upsert, {
+        userId: identity.subject,
+        assigneeId,
+      });
 
-    return assigneeId;
+      return assigneeId;
+    }
   },
 });
 
-// Get all assignees (for testing purposes)
-export const getAllAssignees = query({
-  args: {},
-  handler: async (ctx) => {
-    return await ctx.db.query("assignee").collect();
+export const destroy = mutation({
+  args: { assigneeId: v.id("assignee") },
+  handler: async (ctx, args) => {
+    await ctx.db.delete(args.assigneeId);
   },
 });
+

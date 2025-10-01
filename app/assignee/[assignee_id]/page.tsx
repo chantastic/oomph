@@ -12,9 +12,9 @@ import { LoadingSpinner } from "@/components/ui/loading";
 import { toast } from "sonner";
 
 function AssigneeContent({ assigneeId }: { assigneeId: Id<"assignee"> }) {
-  const assignee = useQuerySuspense(api.assignee.getAssignee, { assigneeId });
+  const assignee = useQuerySuspense(api.assignee.find, { assigneeId });
   const assigneeAssignments = useQuerySuspense(api.assigneeAssignment.getByAssignee, { assigneeId });
-  const updateStatus = useMutation(api.assigneeAssignment.updateStatus);
+  const updateStatus = useMutation(api.assigneeAssignment.upsert);
 
   return (
     <main className="flex min-h-screen flex-col items-center p-4 sm:p-8 lg:p-24">
@@ -72,13 +72,19 @@ function AssigneeContent({ assigneeId }: { assigneeId: Id<"assignee"> }) {
                                 try {
                                   if (completed) {
                                     await updateStatus({ 
-                                      assigneeAssignmentId: assignment._id, 
+                                      id: assignment._id,
+                                      assigneeId: assignment.assigneeId,
+                                      title: assignment.title,
+                                      description: assignment.description,
                                       status: ASSIGNMENT_STATUS.INCOMPLETE 
                                     });
                                     toast.success("Assignment marked as incomplete");
                                   } else {
                                     await updateStatus({ 
-                                      assigneeAssignmentId: assignment._id, 
+                                      id: assignment._id,
+                                      assigneeId: assignment.assigneeId,
+                                      title: assignment.title,
+                                      description: assignment.description,
                                       status: ASSIGNMENT_STATUS.COMPLETE 
                                     });
                                     toast.success("Assignment marked as complete!");

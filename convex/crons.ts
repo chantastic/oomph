@@ -7,9 +7,9 @@ const crons = cronJobs();
 // This corresponds to 1:00 AM PT (PST) or 2:00 AM PT (PDT)
 // Consistent UTC time regardless of daylight saving time
 crons.cron(
-  "task materialization",
+  "Materialize Assignments for Assignees",
   "0 9 * * *",
-  api.assigneeAssignment.materializeForAllAssignees
+  api.system.materializeAssignmentsForAssignees
 );
 
 export default crons;
