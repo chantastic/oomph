@@ -152,17 +152,13 @@ function shouldShowAssignmentOnDate(cronSchedule: string, date: Date): boolean {
 export const materializeAssignmentsForAssignees = mutation({
   args: {},
   handler: async (ctx) => {
-    // Get current time in LA timezone by parsing the localized date components
+    // Get current time in LA timezone
     const nowUtc = new Date();
     const laFormatter = new Intl.DateTimeFormat("en-US", {
       timeZone: "America/Los_Angeles",
       year: "numeric",
       month: "2-digit",
       day: "2-digit",
-      hour: "2-digit",
-      minute: "2-digit",
-      second: "2-digit",
-      hour12: false,
     });
 
     const parts = laFormatter.formatToParts(nowUtc);
@@ -171,37 +167,26 @@ export const materializeAssignmentsForAssignees = mutation({
     const laDay = parseInt(parts.find((p) => p.type === "day")!.value);
 
     // Create a Date object representing "today" in LA for cron schedule evaluation
-    // This uses local date constructor, which is fine since we only care about the date components
     const today = new Date(laYear, laMonth - 1, laDay);
 
-    // Now calculate the UTC timestamps that correspond to midnight-to-midnight in LA
-    // Strategy: Create a Date at noon UTC on "today" and check what hour it is in LA
-    // This tells us the current UTC offset for LA (accounting for DST)
-    const noonUTC = Date.UTC(laYear, laMonth - 1, laDay, 12, 0, 0, 0);
-    const noonDate = new Date(noonUTC);
-    const noonLAHour = parseInt(
-      noonDate.toLocaleString("en-US", {
-        timeZone: "America/Los_Angeles",
-        hour: "2-digit",
-        hour12: false,
-      })
-    );
-
-    // If noon UTC shows as 4am LA, then LA is 8 hours behind (PST)
-    // If noon UTC shows as 5am LA, then LA is 7 hours behind (PDT)
-    const offsetHours = 12 - noonLAHour;
-
-    // Calculate midnight in LA as a UTC timestamp
-    // Midnight LA = 00:00 LA = offsetHours:00 UTC
-    const todayStartUTCms = Date.UTC(
-      laYear,
-      laMonth - 1,
-      laDay,
-      offsetHours,
-      0,
-      0,
-      0
-    );
+    // Calculate the UTC timestamps that correspond to midnight-to-midnight in LA
+    // Use a simple approach: create a date at midnight LA time and get its UTC equivalent
+    const midnightLA = new Date(laYear, laMonth - 1, laDay, 0, 0, 0, 0);
+    const nextMidnightLA = new Date(laYear, laMonth - 1, laDay + 1, 0, 0, 0, 0);
+    
+    // Get the timezone offset for LA on this date by comparing a known UTC time with its LA equivalent
+    const testUTC = new Date(laYear, laMonth - 1, laDay, 12, 0, 0, 0);
+    const testLAString = testUTC.toLocaleString("en-US", { 
+      timeZone: "America/Los_Angeles",
+      hour: "2-digit",
+      hour12: false 
+    });
+    const testLAHour = parseInt(testLAString);
+    const testUTCHour = testUTC.getUTCHours();
+    const offsetHours = testUTCHour - testLAHour;
+    
+    // Calculate midnight in LA as UTC timestamp
+    const todayStartUTCms = Date.UTC(laYear, laMonth - 1, laDay, offsetHours, 0, 0, 0);
     const todayEndUTCms = todayStartUTCms + 24 * 60 * 60 * 1000 - 1;
 
     // Batch 1: Get all assignees and all assignment descriptors in parallel
