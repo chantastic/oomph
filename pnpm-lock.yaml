@@ -9,8 +9,8 @@ importers:
   .:
     dependencies:
       '@convex-dev/workos-authkit':
-        specifier: ^0.1.1
-        version: 0.1.1(@types/node@20.19.25)(convex@1.29.3(react@19.2.0))(jiti@2.6.1)(lightningcss@1.30.2)(next@15.4.4(react-dom@19.2.0(react@19.2.0))(react@19.2.0))(react@19.2.0)(typescript@5.9.3)
+        specifier: ^0.1.2
+        version: 0.1.2(@types/node@20.19.25)(convex@1.29.3(react@19.2.0))(jiti@2.6.1)(lightningcss@1.30.2)(next@15.4.4(react-dom@19.2.0(react@19.2.0))(react@19.2.0))(react@19.2.0)(typescript@5.9.3)
       '@radix-ui/react-dialog':
         specifier: ^1.1.15
         version: 1.1.15(@types/react-dom@19.2.3(@types/react@19.2.7))(@types/react@19.2.7)(react-dom@19.2.0(react@19.2.0))(react@19.2.0)
@@ -109,8 +109,8 @@ packages:
     resolution: {integrity: sha512-qQ5m48eI/MFLQ5PxQj4PFaprjyCTLI37ElWMmNs0K8Lk3dVeOdNpB3ks8jc7yM5CDmVC73eMVk/trk3fgmrUpA==}
     engines: {node: '>=6.9.0'}
 
-  '@convex-dev/workos-authkit@0.1.1':
-    resolution: {integrity: sha512-Zbn4b/VPtDlsydtEFxjL8iak25FnzML/ndgGToXgcErRRX1eWN0lCnaRDG4D2Mz0g9F5lODqOxn6dFKQm9LwEw==}
+  '@convex-dev/workos-authkit@0.1.2':
+    resolution: {integrity: sha512-O2E7ICGsfB8ZyBJxaArhBIHNTqsLlMtYwKiNqiTEZKQTQ5K8wi9ucj9CWm6TF91svuumQuiY57o60Nh4p4uGTQ==}
     peerDependencies:
       convex: ^1.29.3
       react: ^18.3.1 || ^19.0.0
@@ -1293,6 +1293,10 @@ packages:
     resolution: {integrity: sha512-JhcPI9+I0MGOu7B33Gych76Xi7jKfKKfoZ4Mb6JPY9raeEqJQcnN4jMite2ynmMdmiZljIq7wkyf2WAsEU3SzQ==}
     peerDependencies:
       react: '>=17'
+
+  '@workos-inc/node@7.73.0':
+    resolution: {integrity: sha512-67qU0/GqZmkyxIiA9WI18umIo9w/nC0PNdvQkqKuXInk6y5oiznSrvkDnQjUjs9OBoZcH8O/96VLZHYaXZWkfQ==}
+    engines: {node: '>=16'}
 
   '@workos-inc/node@7.74.2':
     resolution: {integrity: sha512-uXLEUqNo7AkM8oBzVPY29uyEpU0r8Jt2SppL2KzwFWB3f0hLLzp51wrIQ4PNJgd9qI5L/+kP62SoZFc8byI+4g==}
@@ -2570,12 +2574,12 @@ snapshots:
       '@babel/helper-string-parser': 7.27.1
       '@babel/helper-validator-identifier': 7.28.5
 
-  '@convex-dev/workos-authkit@0.1.1(@types/node@20.19.25)(convex@1.29.3(react@19.2.0))(jiti@2.6.1)(lightningcss@1.30.2)(next@15.4.4(react-dom@19.2.0(react@19.2.0))(react@19.2.0))(react@19.2.0)(typescript@5.9.3)':
+  '@convex-dev/workos-authkit@0.1.2(@types/node@20.19.25)(convex@1.29.3(react@19.2.0))(jiti@2.6.1)(lightningcss@1.30.2)(next@15.4.4(react-dom@19.2.0(react@19.2.0))(react@19.2.0))(react@19.2.0)(typescript@5.9.3)':
     dependencies:
       '@convex-dev/workos': 0.0.1(@types/node@20.19.25)(convex@1.29.3(react@19.2.0))(jiti@2.6.1)(lightningcss@1.30.2)(react@19.2.0)(typescript@5.9.3)
       '@convex-dev/workpool': 0.2.19(convex-helpers@0.1.106(convex@1.29.3(react@19.2.0))(react@19.2.0)(typescript@5.9.3))(convex@1.29.3(react@19.2.0))
       '@workos-inc/authkit-react': 0.13.0(react@19.2.0)
-      '@workos-inc/node': 7.74.2(next@15.4.4(react-dom@19.2.0(react@19.2.0))(react@19.2.0))
+      '@workos-inc/node': 7.73.0(next@15.4.4(react-dom@19.2.0(react@19.2.0))(react@19.2.0))
       convex: 1.29.3(react@19.2.0)
       convex-helpers: 0.1.106(convex@1.29.3(react@19.2.0))(react@19.2.0)(typescript@5.9.3)
       react: 19.2.0
@@ -3527,6 +3531,17 @@ snapshots:
     dependencies:
       '@workos-inc/authkit-js': 0.14.0
       react: 19.2.0
+
+  '@workos-inc/node@7.73.0(next@15.4.4(react-dom@19.2.0(react@19.2.0))(react@19.2.0))':
+    dependencies:
+      iron-session: 6.3.1(next@15.4.4(react-dom@19.2.0(react@19.2.0))(react@19.2.0))
+      jose: 5.6.3
+      leb: 1.0.0
+      qs: 6.14.0
+    transitivePeerDependencies:
+      - express
+      - koa
+      - next
 
   '@workos-inc/node@7.74.2(next@15.4.4(react-dom@19.2.0(react@19.2.0))(react@19.2.0))':
     dependencies:
