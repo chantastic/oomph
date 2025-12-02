@@ -1,11 +1,20 @@
-import { defineSchema, defineTable } from "convex/server"
-import { v } from "convex/values"
-import { ASSIGNMENT_STATUS } from "./constants"
+import { defineSchema, defineTable } from "convex/server";
+import { v } from "convex/values";
+import { ASSIGNMENT_STATUS } from "./constants";
 
 const schema = defineSchema({
   assignee: defineTable({
     name: v.string(),
   }),
+
+  user: defineTable({
+    authId: v.string(),
+    email: v.string(),
+    name: v.string(),
+    status: v.union(v.literal("active"), v.literal("deleted")),
+  })
+    .index("authId", ["authId"])
+    .index("status", ["status"]),
 
   assignee_assignment_descriptor: defineTable({
     assigneeId: v.id("assignee"),
@@ -26,8 +35,7 @@ const schema = defineSchema({
     title: v.string(),
     description: v.optional(v.string()),
     status: v.optional(v.union(v.literal(ASSIGNMENT_STATUS.COMPLETE))),
-  })
-    .index("by_assignee", ["assigneeId"])
-})
+  }).index("by_assignee", ["assigneeId"]),
+});
 
-export default schema
+export default schema;

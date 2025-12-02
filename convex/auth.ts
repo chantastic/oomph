@@ -16,15 +16,24 @@ export const { authKitEvent } = authKit.events({
       authId: event.data.id,
       email: event.data.email,
       name: `${event.data.firstName} ${event.data.lastName}`,
+      status: "active",
     });
   },
   "user.updated": async (ctx, event) => {
-    const user = await ctx.db
+    let user;
+
+    user = await ctx.db
       .query("user")
       .withIndex("authId", (q) => q.eq("authId", event.data.id))
       .unique();
+
     if (!user) {
-      console.warn(`User not found: ${event.data.id}`);
+      user = await ctx.db.insert("user", {
+        authId: event.data.id,
+        email: event.data.email,
+        name: `${event.data.firstName} ${event.data.lastName}`,
+        status: "active",
+      });
       return;
     }
     await ctx.db.patch(user._id, {
@@ -41,7 +50,9 @@ export const { authKitEvent } = authKit.events({
       console.warn(`User not found: ${event.data.id}`);
       return;
     }
-    await ctx.db.delete(user._id);
+    await ctx.db.patch(user._id, {
+      status: "deleted",
+    });
   },
 
   // Handle any event type
