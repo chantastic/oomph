@@ -5,6 +5,7 @@ import { ASSIGNMENT_STATUS } from "./constants"
 const schema = defineSchema({
   assignee: defineTable({
     name: v.string(),
+    timezoneOffset: v.optional(v.number()),
   }),
 
   assignee_assignment_descriptor: defineTable({

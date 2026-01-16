@@ -148,136 +148,19 @@ function shouldShowAssignmentOnDate(cronSchedule: string, date: Date): boolean {
   return true;
 }
 
+function getAdjustedDate(date: Date, minutesOffset: number): Date {
+  return new Date(date.getTime() + minutesOffset * 60 * 1000);
+}
+
 // Materialize assignments for all assignees with optimized batching
 export const materializeAssignmentsForAssignees = mutation({
   args: {},
   handler: async (ctx) => {
-    // Get current time in LA timezone
-    const nowUtc = new Date();
-    const laFormatter = new Intl.DateTimeFormat("en-US", {
-      timeZone: "America/Los_Angeles",
-      year: "numeric",
-      month: "2-digit",
-      day: "2-digit",
-    });
+    const currentDate = new Date();
+    console.log(currentDate.toISOString());
 
-    const parts = laFormatter.formatToParts(nowUtc);
-    const laYear = parseInt(parts.find((p) => p.type === "year")!.value);
-    const laMonth = parseInt(parts.find((p) => p.type === "month")!.value);
-    const laDay = parseInt(parts.find((p) => p.type === "day")!.value);
-
-    // Create a Date object representing "today" in LA for cron schedule evaluation
-    const today = new Date(laYear, laMonth - 1, laDay);
-
-    // Calculate the UTC timestamps that correspond to midnight-to-midnight in LA
-    // Use a simple approach: create a date at midnight LA time and get its UTC equivalent
-    const midnightLA = new Date(laYear, laMonth - 1, laDay, 0, 0, 0, 0);
-    const nextMidnightLA = new Date(laYear, laMonth - 1, laDay + 1, 0, 0, 0, 0);
-    
-    // Get the timezone offset for LA on this date by comparing a known UTC time with its LA equivalent
-    const testUTC = new Date(laYear, laMonth - 1, laDay, 12, 0, 0, 0);
-    const testLAString = testUTC.toLocaleString("en-US", { 
-      timeZone: "America/Los_Angeles",
-      hour: "2-digit",
-      hour12: false 
-    });
-    const testLAHour = parseInt(testLAString);
-    const testUTCHour = testUTC.getUTCHours();
-    const offsetHours = testUTCHour - testLAHour;
-    
-    // Calculate midnight in LA as UTC timestamp
-    const todayStartUTCms = Date.UTC(laYear, laMonth - 1, laDay, offsetHours, 0, 0, 0);
-    const todayEndUTCms = todayStartUTCms + 24 * 60 * 60 * 1000 - 1;
-
-    // Batch 1: Get all assignees and all assignment descriptors in parallel
-    const [assignees, allAssignmentDescriptors] = await Promise.all([
-      ctx.db.query("assignee").collect(),
-      ctx.db.query("assignee_assignment_descriptor").collect(),
-    ]);
-
-    // Batch 2: Get today's existing assignments for all assignees in one query
-    // Query for assignments created between midnight and 11:59:59.999pm LA time (expressed as UTC timestamps)
-    const todaysExistingAssignments = await ctx.db
-      .query("assignee_assignment")
-      .filter((q) =>
-        q.and(
-          q.gte(q.field("_creationTime"), todayStartUTCms),
-          q.lte(q.field("_creationTime"), todayEndUTCms)
-        )
-      )
-      .collect();
-
-    // Create lookup maps for efficient checking
-    const existingAssignmentsByAssignee = new Map<string, Map<string, any>>();
-    for (const existing of todaysExistingAssignments) {
-      if (!existingAssignmentsByAssignee.has(existing.assigneeId)) {
-        existingAssignmentsByAssignee.set(existing.assigneeId, new Map());
-      }
-      existingAssignmentsByAssignee
-        .get(existing.assigneeId)!
-        .set(existing.title, existing);
-    }
-
-    const assignmentDescriptorsByAssignee = new Map<string, any[]>();
-    for (const descriptor of allAssignmentDescriptors) {
-      if (!assignmentDescriptorsByAssignee.has(descriptor.assigneeId)) {
-        assignmentDescriptorsByAssignee.set(descriptor.assigneeId, []);
-      }
-      assignmentDescriptorsByAssignee
-        .get(descriptor.assigneeId)!
-        .push(descriptor);
-    }
-
-    const results = [];
-    let totalMaterialized = 0;
-
-    // Process each assignee
-    for (const assignee of assignees) {
-      const assigneeId = assignee._id;
-      const assignmentDescriptors =
-        assignmentDescriptorsByAssignee.get(assigneeId) || [];
-      const existingAssignments =
-        existingAssignmentsByAssignee.get(assigneeId) || new Map();
-
-      const materialized = [];
-
-      for (const assignment of assignmentDescriptors) {
-        // Check if this assignment should be materialized for today
-        if (shouldShowAssignmentOnDate(assignment.cronSchedule, today)) {
-          // Check if already materialized today (by title match) - now O(1) lookup
-          if (!existingAssignments.has(assignment.title)) {
-            // Create assignee assignment
-            const assigneeAssignmentId = await ctx.db.insert(
-              "assignee_assignment",
-              {
-                assigneeId,
-                title: assignment.title,
-                description: assignment.description,
-              }
-            );
-
-            materialized.push({
-              id: assigneeAssignmentId,
-              title: assignment.title,
-              description: assignment.description,
-            });
-          }
-        }
-      }
-
-      totalMaterialized += materialized.length;
-
-      results.push({
-        assigneeId: assignee._id,
-        assigneeName: assignee.name,
-        materialized,
-        count: materialized.length,
-      });
-    }
-
-    return {
-      results,
-      totalMaterialized,
-    };
+    const minutesOffset = -480; // UTC-8 (PST/PDT) default
+    const adjustedDate = getAdjustedDate(currentDate, minutesOffset);
+    console.log(adjustedDate.toISOString());
   },
 });

@@ -30,6 +30,7 @@ export const upsert = mutation({
       // Create new assignee
       const assigneeId = await ctx.db.insert("assignee", {
         name: args.name,
+        timezoneOffset: -480, // UTC-8 (PST/PDT) default
       });
 
       await ctx.runMutation(api.userAssignee.upsert, {
@@ -48,4 +49,3 @@ export const destroy = mutation({
     await ctx.db.delete(args.assigneeId);
   },
 });
-
